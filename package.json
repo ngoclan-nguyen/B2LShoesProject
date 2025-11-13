@@ -1,0 +1,32 @@
+{
+  "name": "b2lshoes",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+	"build-admin:css": "node ./node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/input.css -o ../B2LShoes/src/main/resources/static/admin/css/tailwind.css --minify",
+	"watch-admin:css": "node ./node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/input.css -o ../B2LShoes/src/main/resources/static/admin/css/tailwind.css --watch",
+	"build-customer:css": "node ./node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/input.css -o ../B2LShoes/src/main/resources/static/customer/css/tailwind.css --minify",
+	"watch-customer:css": "node ./node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/input.css -o ../B2LShoes/src/main/resources/static/customer/css/tailwind.css --watch"  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "autoprefixer": "^10.4.22",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.17"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ngoclan-nguyen/B2LShoes.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ngoclan-nguyen/B2LShoes/issues"
+  },
+  "homepage": "https://github.com/ngoclan-nguyen/B2LShoes#readme"
+}
+
