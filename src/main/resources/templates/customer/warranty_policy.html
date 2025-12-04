@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chính sách đổi trả & Bảo hành - B2L Shoes</title>
+    <link rel="stylesheet" href="https://cdn.tailwindcss.com">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+    </style>
+</head>
+<body class="bg-white text-black">
+
+<header th:replace="~{customer/fragments/header}"></header>
+
+<div class="bg-gray-50">
+    <div class="container mx-auto px-4 py-3 text-sm text-gray-500">
+        <a href="/" class="hover:text-black">Trang chủ</a>
+        <span class="mx-2">>></span>
+        <span>Hỗ trợ</span>
+        <span class="mx-2">>></span>
+        <span class="text-black font-medium">Chính sách đổi trả & Bảo hành</span>
+    </div>
+</div>
+
+<section class="container mx-auto px-4 py-8 md:py-12">
+    <div class="flex flex-col md:flex-row gap-8 lg:gap-12">
+
+        <aside class="w-full md:w-1/4 lg:w-1/5">
+            <div class="border-2 border-gray-200 rounded-xl p-6 shadow-sm bg-white sticky top-24">
+                <h2 class="text-lg font-bold mb-6 border-b-2 border-black inline-block pb-1">Danh mục Hỗ trợ</h2>
+
+                <ul class="space-y-4 text-sm font-medium text-gray-600">
+                    <li>
+                        <a href="/shopping-guide" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                            Hướng dẫn mua hàng
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/size-guide" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                            Hướng dẫn chọn size giày
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block text-black font-bold border-l-4 border-black pl-3 transition-all">
+                            Chính sách đổi trả, bảo hành
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                            Hướng dẫn đổi trả hàng
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                            Điều khoản Website
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                            Chính sách bảo mật
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="w-full md:w-3/4 lg:w-4/5">
+
+            <h1 class="text-2xl md:text-3xl font-extrabold uppercase mb-8 text-center md:text-left">
+                CHÍNH SÁCH ĐỔI TRẢ & BẢO HÀNH
+            </h1>
+
+            <div class="text-sm md:text-base text-gray-700 leading-relaxed space-y-8">
+
+                <div class="bg-white rounded-lg">
+                    <h3 class="flex items-center gap-2 font-bold text-black text-lg mb-3 uppercase border-b border-gray-200 pb-2">
+                        <i class="fa-solid fa-rotate text-orange-500"></i> 1. Chính sách đổi hàng
+                    </h3>
+
+                    <div class="space-y-3 pl-2">
+                        <p><span class="font-bold text-black">Thời gian áp dụng:</span> Trong vòng <span class="font-bold text-red-500">07 ngày</span> kể từ ngày nhận hàng.</p>
+
+                        <p class="font-bold text-black mt-4">Điều kiện đổi hàng:</p>
+                        <ul class="list-disc list-inside pl-4 space-y-1 text-gray-600">
+                            <li>Sản phẩm còn nguyên tem, mác, hộp và quà tặng kèm theo (nếu có).</li>
+                            <li>Sản phẩm chưa qua sử dụng, không bị dơ bẩn, trầy xước hay có mùi lạ.</li>
+                            <li>Có hóa đơn mua hàng hoặc thông tin đơn hàng trên hệ thống.</li>
+                        </ul>
+
+                        <p class="font-bold text-black mt-4">Trường hợp chấp nhận đổi:</p>
+                        <ul class="list-disc list-inside pl-4 space-y-1 text-gray-600">
+                            <li>Giao sai mẫu, sai size, sai màu so với đơn đặt hàng.</li>
+                            <li>Sản phẩm bị lỗi do nhà sản xuất (bung keo, rách, lỗi form...).</li>
+                            <li>Khách hàng muốn đổi size (Khách hàng chịu phí ship 2 chiều).</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg">
+                    <h3 class="flex items-center gap-2 font-bold text-black text-lg mb-3 uppercase border-b border-gray-200 pb-2">
+                        <i class="fa-solid fa-shield-halved text-orange-500"></i> 2. Chính sách bảo hành
+                    </h3>
+
+                    <div class="space-y-3 pl-2">
+                        <p><span class="font-bold text-black">Thời gian bảo hành:</span> <span class="font-bold text-red-500">06 tháng</span> kể từ ngày mua hàng.</p>
+
+                        <p class="font-bold text-black mt-4">Nội dung bảo hành:</p>
+                        <ul class="list-disc list-inside pl-4 space-y-1 text-gray-600">
+                            <li>Bảo hành miễn phí các lỗi về <strong>Keo dán</strong> và <strong>Đường chỉ may</strong> trong suốt thời gian bảo hành.</li>
+                            <li>Hỗ trợ dán keo, khâu đế lại cho các sản phẩm bị hở keo trong quá trình sử dụng.</li>
+                        </ul>
+
+                        <p class="font-bold text-black mt-4">Từ chối bảo hành:</p>
+                        <ul class="list-disc list-inside pl-4 space-y-1 text-gray-600">
+                            <li>Giày bị hư hỏng do lỗi người sử dụng (bị chó cắn, bị vật sắc nhọn cắt, bị cháy, ngâm hóa chất...).</li>
+                            <li>Giày đã quá cũ (đế mòn, da bong tróc tự nhiên theo thời gian).</li>
+                            <li>Sản phẩm giảm giá trên 50% (Clearance Sale).</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <h3 class="font-bold text-black text-lg mb-3 uppercase">
+                        3. Quy trình thực hiện
+                    </h3>
+                    <p class="mb-4">Quý khách vui lòng liên hệ với bộ phận CSKH để được hướng dẫn chi tiết:</p>
+                    <ul class="space-y-2 font-medium">
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-phone text-green-600"></i> Hotline: 0123 456 789</li>
+                        <li class="flex items-center gap-2"><i class="fa-brands fa-facebook text-blue-600"></i> Fanpage: B2L Shoes</li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-red-500"></i> Gửi hàng về: Số 123, Đường ABC, Thủ Đức, TP.HCM</li>
+                    </ul>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</section>
+
+<footer th:replace="~{customer/fragments/footer}"></footer>
+
+</body>
+</html>

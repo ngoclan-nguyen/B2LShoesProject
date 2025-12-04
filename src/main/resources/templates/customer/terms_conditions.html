@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Điều khoản Website - B2L Shoes</title>
+    <link rel="stylesheet" href="https://cdn.tailwindcss.com">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+    </style>
+</head>
+<body class="bg-white text-black">
+
+<header th:replace="~{customer/fragments/header}"></header>
+
+<div class="bg-gray-50">
+    <div class="container mx-auto px-4 py-3 text-sm text-gray-500">
+        <a href="/" class="hover:text-black">Trang chủ</a>
+        <span class="mx-2">>></span>
+        <span>Hỗ trợ</span>
+        <span class="mx-2">>></span>
+        <span class="text-black font-medium">Điều khoản Website</span>
+    </div>
+</div>
+
+<section class="container mx-auto px-4 py-8 md:py-12">
+    <div class="flex flex-col md:flex-row gap-8 lg:gap-12">
+
+        <aside class="w-full md:w-1/4 lg:w-1/5">
+            <div class="border-2 border-gray-200 rounded-xl p-6 shadow-sm bg-white sticky top-24">
+                <h2 class="text-lg font-bold mb-6 border-b-2 border-black inline-block pb-1">Danh mục Hỗ trợ</h2>
+
+                <ul class="space-y-4 text-sm font-medium text-gray-600">
+                    <li>
+                        <a href="/shopping-guide" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                            Hướng dẫn mua hàng
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/size-guide" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                            Hướng dẫn chọn size giày
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/warranty-policy" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                            Chính sách đổi trả, bảo hành
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/return-guide" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                            Hướng dẫn đổi trả hàng
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block text-black font-bold border-l-4 border-black pl-3 transition-all">
+                            Điều khoản Website
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                            Chính sách bảo mật
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="w-full md:w-3/4 lg:w-4/5">
+
+            <h1 class="text-2xl md:text-3xl font-extrabold uppercase mb-8 text-center md:text-left">
+                ĐIỀU KHOẢN SỬ DỤNG WEBSITE
+            </h1>
+
+            <div class="text-sm md:text-base text-gray-700 leading-relaxed space-y-8 text-justify">
+
+                <p>
+                    Chào mừng quý khách đến với website thương mại điện tử <strong>B2L SHOES</strong>. Khi quý khách truy cập vào trang web của chúng tôi có nghĩa là quý khách đồng ý với các điều khoản này. Trang web có quyền thay đổi, chỉnh sửa, thêm hoặc lược bỏ bất kỳ phần nào trong Quy định và Điều kiện sử dụng, vào bất cứ lúc nào. Các thay đổi có hiệu lực ngay khi được đăng trên trang web mà không cần thông báo trước.
+                </p>
+
+                <div>
+                    <h3 class="font-bold text-black text-lg mb-3">1. Hướng dẫn sử dụng website</h3>
+                    <ul class="list-disc list-inside pl-2 space-y-1 text-gray-600">
+                        <li>Khi vào web của chúng tôi, khách hàng phải đảm bảo đủ 18 tuổi, hoặc truy cập dưới sự giám sát của cha mẹ hay người giám hộ hợp pháp.</li>
+                        <li>Chúng tôi cấp giấy phép sử dụng để bạn có thể mua sắm trên web trong khuôn khổ Điều khoản và Điều kiện sử dụng đã đề ra.</li>
+                        <li>Nghiêm cấm sử dụng bất kỳ phần nào của trang web này với mục đích thương mại hoặc nhân danh bất kỳ đối tác thứ ba nào nếu không được chúng tôi cho phép bằng văn bản.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-black text-lg mb-3">2. Ý kiến khách hàng</h3>
+                    <p>Tất cả nội dung trang web và ý kiến phê bình của quý khách đều là tài sản của chúng tôi. Nếu chúng tôi phát hiện bất kỳ thông tin giả mạo nào, chúng tôi sẽ khóa tài khoản của quý khách ngay lập tức hoặc áp dụng các biện pháp khác theo quy định của pháp luật Việt Nam.</p>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-black text-lg mb-3">3. Chấp nhận đơn hàng và giá cả</h3>
+                    <ul class="list-disc list-inside pl-2 space-y-1 text-gray-600">
+                        <li>Chúng tôi có quyền từ chối hoặc hủy đơn hàng của quý khách vì bất kỳ lý do gì liên quan đến lỗi kỹ thuật, hệ thống một cách khách quan vào bất kỳ lúc nào.</li>
+                        <li>Chúng tôi cam kết sẽ cung cấp thông tin giá cả chính xác nhất cho người tiêu dùng. Tuy nhiên, đôi lúc vẫn có sai sót xảy ra, ví dụ như trường hợp giá sản phẩm không hiển thị chính xác trên trang web hoặc sai giá, tùy theo từng trường hợp chúng tôi sẽ liên hệ hướng dẫn hoặc thông báo hủy đơn hàng đó cho quý khách.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-black text-lg mb-3">4. Thương hiệu và bản quyền</h3>
+                    <p>Mọi quyền sở hữu trí tuệ (đã đăng ký hoặc chưa đăng ký), nội dung thông tin và tất cả các thiết kế, văn bản, đồ họa, phần mềm, hình ảnh, video, âm nhạc, âm thanh, biên dịch phần mềm, mã nguồn và phần mềm cơ bản đều là tài sản của chúng tôi. Toàn bộ nội dung của trang web được bảo vệ bởi luật bản quyền của Việt Nam và các công ước quốc tế.</p>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-black text-lg mb-3">5. Quyền pháp lý</h3>
+                    <p>Các điều kiện, điều khoản và nội dung của trang web này được điều chỉnh bởi luật pháp Việt Nam và Tòa án có thẩm quyền tại Việt Nam sẽ giải quyết bất kỳ tranh chấp nào phát sinh từ việc sử dụng trái phép trang web này.</p>
+                </div>
+
+                <div class="border-t border-gray-200 pt-6 mt-8">
+                    <p class="italic text-gray-500 text-xs">
+                        Lần cập nhật gần nhất: 01/12/2025<br>
+                        Mọi thắc mắc xin liên hệ Hotline: <span class="font-bold text-black">0123 456 789</span>
+                    </p>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</section>
+
+<footer th:replace="~{customer/fragments/footer}"></footer>
+
+</body>
+</html>

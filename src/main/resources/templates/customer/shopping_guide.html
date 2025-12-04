@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hướng dẫn mua hàng - B2L Shoes</title>
+    <link rel="stylesheet" href="https://cdn.tailwindcss.com">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+    </style>
+</head>
+<body class="bg-white text-black">
+
+<header th:replace="~{customer/fragments/header}"></header>
+
+<div class="bg-gray-50">
+    <div class="container mx-auto px-4 py-3 text-sm text-gray-500">
+        <a href="/" class="hover:text-black">Trang chủ</a>
+        <span class="mx-2">>></span>
+        <span>Hỗ trợ</span>
+        <span class="mx-2">>></span>
+        <span class="text-black font-medium">Hướng dẫn mua hàng</span>
+    </div>
+</div>
+
+<section class="container mx-auto px-4 py-8 md:py-12">
+    <div class="flex flex-col md:flex-row gap-8 lg:gap-12">
+
+        <aside class="w-full md:w-1/4 lg:w-1/5">
+            <div class="border-2 border-gray-200 rounded-xl p-6 shadow-sm bg-white sticky top-24">
+                <h2 class="text-lg font-bold mb-6 border-b-2 border-black inline-block pb-1">Danh mục Hỗ trợ</h2>
+
+                <ul class="space-y-4 text-sm font-medium text-gray-600">
+                    <li>
+                        <a href="#" class="block text-black font-bold border-l-4 border-black pl-3 transition-all">
+                            Hướng dẫn mua hàng
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                            Hướng dẫn chọn size giày
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                            Chính sách đổi trả, bảo hành
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                            Hướng dẫn đổi trả hàng
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                            Điều khoản Website
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                            Chính sách bảo mật
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="w-full md:w-3/4 lg:w-4/5">
+
+            <h1 class="text-2xl md:text-3xl font-extrabold uppercase mb-8 text-center md:text-left">
+                HƯỚNG DẪN MUA HÀNG
+            </h1>
+
+            <div class="text-sm md:text-base text-gray-700 leading-relaxed space-y-6">
+
+                <p>
+                    Chào mừng quý khách đến với <span class="font-bold">B2L SHOES!</span> Để giúp quý khách có trải nghiệm mua sắm thuận tiện nhất, chúng tôi xin hướng dẫn các bước đặt hàng đơn giản:
+                </p>
+
+                <div>
+                    <h3 class="font-bold text-black text-lg mb-2">Bước 1: Tìm kiếm và Chọn sản phẩm</h3>
+                    <ul class="list-disc list-inside pl-2 space-y-1">
+                        <li>Sử dụng thanh tìm kiếm (Search) hoặc duyệt qua các "Thương hiệu" trên thanh điều hướng để tìm sản phẩm mong muốn.</li>
+                        <li>Nhấp vào hình ảnh sản phẩm để xem thông tin chi tiết.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-black text-lg mb-2">Bước 2: Thêm sản phẩm vào Giỏ hàng</h3>
+                    <ul class="list-disc list-inside pl-2 space-y-1">
+                        <li>Tại trang chi tiết sản phẩm, quý khách vui lòng chọn các thuộc tính như Size, Màu sắc.</li>
+                        <li>Nhấn nút <strong>"Thêm vào giỏ hàng"</strong>.</li>
+                        <li>Sau khi thêm, quý khách có thể tiếp tục mua sắm các sản phẩm khác, hoặc nhấp vào biểu tượng Giỏ hàng (ở góc trên bên phải) để tiến hành thanh toán ngay.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-black text-lg mb-2">Bước 3: Kiểm tra Giỏ hàng và Tiến hành Thanh toán</h3>
+                    <ul class="list-disc list-inside pl-2 space-y-1">
+                        <li>Khi nhấp vào biểu tượng Giỏ hàng, quý khách sẽ được chuyển đến trang Giỏ hàng.</li>
+                        <li>Tại đây, vui lòng kiểm tra lại chính xác danh sách sản phẩm: Tên sản phẩm, Size, Số lượng và Tổng tiền.</li>
+                        <li>Quý khách có thể điều chỉnh số lượng hoặc xóa sản phẩm tại bước này.</li>
+                        <li>Khi thông tin đã chính xác, nhấn nút <strong>"Thanh toán"</strong> để tiếp tục.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-black text-lg mb-2">Bước 4: Cung cấp thông tin và Đặt hàng</h3>
+                    <ul class="list-disc list-inside pl-2 space-y-1">
+                        <li>Điền đầy đủ thông tin giao hàng (Họ tên, Số điện thoại, Địa chỉ nhận hàng).</li>
+                        <li>Chọn Phương thức thanh toán (Tiền mặt khi nhận hàng - COD, hoặc Chuyển khoản Banking).</li>
+                        <li>Kiểm tra lại toàn bộ thông tin đơn hàng và tổng tiền.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-black text-lg mb-2">Bước 5: Hoàn tất Đơn hàng</h3>
+                    <ul class="list-disc list-inside pl-2 space-y-1">
+                        <li>Sau khi kiểm tra, nhấn nút <strong>"Đặt hàng"</strong> (hoặc "Hoàn tất").</li>
+                        <li>Một trang thông báo đặt hàng thành công sẽ hiển thị. Đồng thời, một email xác nhận chi tiết đơn hàng sẽ được gửi về địa chỉ email của quý khách (nếu có).</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 p-4 border-l-4 border-orange-500 italic mt-8">
+                    Cảm ơn quý khách đã tin tưởng và mua sắm tại B2L SHOES! Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua [Số điện thoại Hỗ trợ] hoặc email [Email Hỗ trợ].
+                </div>
+
+            </div>
+        </main>
+    </div>
+</section>
+
+<footer th:replace="~{customer/fragments/footer}"></footer>
+
+</body>
+</html>

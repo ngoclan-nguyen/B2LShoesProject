@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký thành viên - B2L Shoes</title>
+    <link rel="stylesheet" href="https://cdn.tailwindcss.com">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+    </style>
+</head>
+<body class="bg-white text-black">
+
+<header th:replace="~{customer/fragments/header}"></header>
+
+<section class="container mx-auto px-4 mt-8 mb-12 md:mt-12 md:mb-24">
+
+    <div class="w-full max-w-[600px] mx-auto">
+
+        <h1 class="text-2xl md:text-3xl font-extrabold uppercase mb-4 tracking-tight text-center md:text-left">
+            GET MORE AS A MEMBER
+        </h1>
+
+        <p class="text-gray-500 mb-6 md:mb-8 text-sm leading-relaxed text-center md:text-left">
+            Tham gia B2L Shoes miễn phí và khám phá trải nghiệm mua sắm độc quyền chỉ dành cho thành viên.
+        </p>
+
+        <form th:action="@{/register}" method="post" class="flex flex-col w-full">
+
+            <div class="space-y-4">
+                <input type="text" name="fullName" required placeholder="Họ và tên *"
+                       class="w-full p-3 md:p-4 border border-gray-300 rounded focus:outline-none focus:border-black focus:ring-0 transition-colors placeholder-gray-400 text-sm md:text-base font-medium">
+
+                <input type="email" name="email" required placeholder="Email *"
+                       class="w-full p-3 md:p-4 border border-gray-300 rounded focus:outline-none focus:border-black focus:ring-0 transition-colors placeholder-gray-400 text-sm md:text-base font-medium">
+
+                <input type="password" name="password" required placeholder="Mật khẩu *"
+                       class="w-full p-3 md:p-4 border border-gray-300 rounded focus:outline-none focus:border-black focus:ring-0 transition-colors placeholder-gray-400 text-sm md:text-base font-medium">
+
+                <input type="password" name="confirmPassword" required placeholder="Xác nhận mật khẩu *"
+                       class="w-full p-3 md:p-4 border border-gray-300 rounded focus:outline-none focus:border-black focus:ring-0 transition-colors placeholder-gray-400 text-sm md:text-base font-medium">
+
+                <input type="tel" name="phoneNumber" required placeholder="Số điện thoại *"
+                       class="w-full p-3 md:p-4 border border-gray-300 rounded focus:outline-none focus:border-black focus:ring-0 transition-colors placeholder-gray-400 text-sm md:text-base font-medium">
+            </div>
+
+            <p class="text-xs text-gray-500 my-6 leading-normal text-center md:text-left">
+                Bằng cách tạo một tài khoản, bạn đồng ý với chúng tôi về
+                <a href="#" class="underline hover:text-black">Điều khoản và điều kiện</a>
+                và
+                <a href="#" class="underline hover:text-black">Chính sách bảo mật</a>
+                của chúng tôi
+            </p>
+
+            <button type="submit"
+                    class="w-full py-3 md:py-4 bg-[#FF9900] text-white font-bold text-base md:text-lg uppercase rounded shadow-md hover:bg-[#e68a00] hover:shadow-lg transition-all duration-300 active:scale-95">
+                Đăng ký thành viên
+            </button>
+
+            <div class="mt-6 text-sm font-medium text-gray-600 text-center md:text-left">
+                <span>Bạn đã có tài khoản? </span>
+                <a href="/login" class="underline hover:text-black decoration-1 underline-offset-2">Đăng nhập</a>
+            </div>
+
+        </form>
+    </div>
+</section>
+
+<footer th:replace="~{customer/fragments/footer}"></footer>
+
+</body>
+</html>

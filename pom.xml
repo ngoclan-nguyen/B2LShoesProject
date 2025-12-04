@@ -6,12 +6,12 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.5.7</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>LumiTap-BE</artifactId>
+	<artifactId>B2LShoes</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>LumiTap-BE</name>
+	<name>B2LShoes</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
@@ -54,21 +54,12 @@
 			<groupId>org.thymeleaf.extras</groupId>
 			<artifactId>thymeleaf-extras-springsecurity6</artifactId>
 		</dependency>
-<!--
-	“bug bí ẩn” của Hibernate 6 + Spring Boot DevTools đó là một loại bug có tên
-	QueryTypeMismatchException: Specified result type [com.example.model.User] did not match Query selection type [com.example.model.User] - multiple selections: use Tuple or array
-	Không phải do code, mà do DevTools restart classloader — nó nạp lại entity bằng một class loader khác, 
-	làm Hibernate nghĩ rằng có hai class User khác nhau (dù cùng tên, cùng package), nên báo “did not match query selection type”.
-	==> Vấn đề đến từ Spring boot devtools ta đã thêm vào => loại bỏ dependency đó đi là oke
-	
-	<dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
--->
-		
 		<dependency>
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
@@ -84,7 +75,6 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
 
 	<build>

@@ -1,0 +1,32 @@
+package com.example.config;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import com.example.interceptor.RememberMeInterceptor;
+import com.example.service.RememberMeService;
+
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+    @Autowired
+    private RememberMeInterceptor rememberMeInterceptor;
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**") // Áp dụng quy tắc này cho tất cả các API có đường dẫn bắt đầu bằng /api/
+                .allowedOrigins("http://localhost:5173") // Cho phép các yêu cầu đến từ địa chỉ này
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Cho phép các phương thức HTTP này
+                .allowedHeaders("*") // Cho phép tất cả các header
+                .allowCredentials(true); // Cho phép gửi cookie hoặc thông tin xác thực
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(rememberMeInterceptor)
+                .addPathPatterns("/**")
+                .excludePathPatterns("/admin/login","/admin/logout","/css/**", "/js/**");
+    }
+}
