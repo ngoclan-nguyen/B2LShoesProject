@@ -1,5 +1,6 @@
 package com.example.model;
 
+import com.example.dto.UserDTO;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 

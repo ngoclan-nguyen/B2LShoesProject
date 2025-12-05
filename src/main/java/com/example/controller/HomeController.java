@@ -16,11 +16,8 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(HttpServletRequest request) {
-        // Load danh sách sản phẩm nổi bật (Slider)
         request.setAttribute("featuredProducts", homeService.getFeaturedProducts());
-
-        // Load danh sách sản phẩm bán chạy (Grid)
-        request.setAttribute("bestSellerProducts", homeService.getBestSellerProducts());
+		request.setAttribute("bestSellerProducts", homeService.getBestSellerProducts());
 
         return "customer/home.html"; 
     }

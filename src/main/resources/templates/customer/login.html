@@ -4,12 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Đăng nhập - B2L Shoes</title>
+
     <link rel="stylesheet" href="https://cdn.tailwindcss.com">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
+        * { box-sizing: border-box; }
         body { font-family: 'Montserrat', sans-serif; }
+
     </style>
 </head>
 <body class="bg-white text-black">
@@ -46,7 +51,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center mt-6 text-sm font-medium text-gray-600 gap-4 md:gap-0">
                 <div>
                     <span>Thành viên mới? </span>
-                    <a href="/register" class="underline hover:text-black decoration-1 underline-offset-2">Tạo tài khoản</a>
+                    <a href="/customer/register" class="underline hover:text-black decoration-1 underline-offset-2">Tạo tài khoản</a>
                 </div>
 
                 <a href="/forgot-password" class="underline hover:text-black decoration-1 underline-offset-2">Quên mật khẩu ?</a>
