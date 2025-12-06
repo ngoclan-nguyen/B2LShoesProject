@@ -42,6 +42,18 @@ public class HomeService {
     }
 
     public List<ProductCardDTO> getRelatedProducts(String brandName, Long currentProductId) {
-        return productDAO.findRelatedProducts(brandName, currentProductId, 5);
+        return productDAO.findRelatedProducts(brandName, currentProductId, 12);
+    }
+
+    public List<ProductCardDTO> filterProducts(
+            List<String> gender,
+            List<String> sport,
+            List<String> brand,
+            List<String> category,
+            List<String> size,
+            List<String> color,
+            String priceRange) {
+
+        return productDAO.filterProducts(gender, sport, brand, category, size, color, priceRange);
     }
 }

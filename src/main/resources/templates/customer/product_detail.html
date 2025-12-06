@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <title th:text="${product.name} + ' - B2L Shoes'">Chi tiết sản phẩm</title>
+
     <link rel="stylesheet" href="https://cdn.tailwindcss.com">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -21,155 +22,216 @@
             border-color: black;
         }
 
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
         .tab-btn {
-            border-top: 2px solid transparent;
-            color: #6b7280; /* gray-500 */
+            border-bottom: 2px solid transparent;
+            color: #6b7280;
         }
         .tab-btn.active {
-            border-top: 2px solid black;
+            border-bottom: 2px solid black;
             color: black;
             font-weight: bold;
-            background-color: white;
         }
     </style>
 </head>
-<body class="bg-gray-50 text-black">
+<body class="bg-white text-black">
 
 <div th:replace="~{customer/fragments/header :: header}"></div>
 
-<div class="container mx-auto px-4 py-4 text-sm text-gray-500">
-    <a href="/" class="hover:text-black">TRANG CHỦ</a>
-    <span class="mx-2">></span>
-    <a href="/products" class="hover:text-black">GIÀY</a>
-    <span class="mx-2">></span>
-    <span class="text-black font-medium underline decoration-1" th:text="${product.name}">Tên Giày</span>
+<div class="bg-gray-50 py-3 border-b border-gray-100">
+    <div class="container mx-auto px-4 text-xs md:text-sm text-gray-500 uppercase font-medium">
+        <a href="/" class="hover:text-black transition">TRANG CHỦ</a>
+        <span class="mx-2 text-gray-300">/</span>
+        <a href="/products" class="hover:text-black transition">GIÀY</a>
+        <span class="mx-2 text-gray-300">/</span>
+        <span class="text-black font-bold" th:text="${product.name}">Tên Giày</span>
+    </div>
 </div>
 
-<div class="container mx-auto px-4 pb-16">
+<section class="container mx-auto px-4 py-8 md:py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
 
-    <div class="bg-white p-6 rounded-sm shadow-sm grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div class="lg:col-span-7">
+            <div class="flex flex-col-reverse md:flex-row gap-4">
+                <div class="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto md:h-[500px] no-scrollbar w-full md:w-24 flex-shrink-0">
+                    <div th:each="img : ${product.images}"
+                         class="w-20 h-20 md:w-24 md:h-24 border border-transparent hover:border-black cursor-pointer bg-[#f9f9f9] flex items-center justify-center rounded-sm transition-all"
+                         onclick="changeImage(this)">
+                        <img th:src="@{${img}}" class="w-full h-full object-contain mix-blend-multiply p-1">
+                    </div>
+                </div>
 
-        <div>
-            <div class="relative bg-[#f9f9f9] mb-4 border border-gray-100 aspect-square flex items-center justify-center overflow-hidden">
-                <img id="mainImage"
-                     th:src="@{${product.images[0]}}"
-                     class="w-4/5 object-contain mix-blend-multiply transition-transform duration-500 hover:scale-110"
-                     alt="Product Image">
-            </div>
+                <div class="flex-1 bg-[#f9f9f9] relative aspect-square md:aspect-auto md:h-[600px] flex items-center justify-center rounded-sm overflow-hidden group">
+                    <img id="mainImage"
+                         th:src="@{${product.images[0]}}"
+                         class="w-full h-full object-contain mix-blend-multiply p-8 transition-transform duration-500 group-hover:scale-110"
+                         alt="Product Image">
 
-            <div class="grid grid-cols-5 gap-2">
-                <div th:each="img : ${product.images}"
-                     class="aspect-square border border-gray-200 bg-[#f9f9f9] cursor-pointer hover:border-black transition p-1 flex items-center justify-center"
-                     onclick="changeImage(this)">
-                    <img th:src="@{${img}}" class="w-full h-full object-contain mix-blend-multiply">
+                    <div class="absolute bottom-4 right-4 bg-white p-2 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="lg:pl-8">
-            <h1 class="text-2xl font-bold mb-2 text-gray-900" th:text="${product.name}">Tên Giày</h1>
-
-            <div class="text-sm mb-4">
-                <span class="text-gray-500">Thương hiệu:</span>
-                <a href="#" class="text-blue-500 font-medium hover:underline" th:text="${product.brandName}">Adidas</a>
-            </div>
-
-            <div class="text-3xl font-bold text-red-600 mb-6"
-                 th:text="${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA')} + 'đ'">2.090.000đ</div>
-
-            <div class="mb-6">
-                <div class="flex justify-between items-end mb-2">
-                    <span class="font-bold text-sm">Kích thước:</span>
-                    <a href="/size-guide" class="text-xs flex items-center gap-1 hover:text-orange-500 transition">
-                        <i class="fa-solid fa-ruler-horizontal"></i> Hướng dẫn chọn size giày
-                    </a>
+        <div class="lg:col-span-5">
+            <div class="sticky top-24"> <h1 class="text-2xl md:text-4xl font-extrabold uppercase mb-2 leading-tight tracking-tight" th:text="${product.name}">Tên Giày</h1>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                    <p>Thương hiệu: <a href="#" class="text-blue-600 font-bold hover:underline" th:text="${product.brandName}">Adidas</a></p>
+                    <span class="w-px h-4 bg-gray-300"></span>
+                    <p>Mã SP: <span class="text-black font-mono" th:text="'B2L-' + ${product.id}">B2L-001</span></p>
                 </div>
-                <div class="flex flex-wrap gap-2" id="size-container">
-                    <button th:each="size : ${product.sizes}"
-                            class="size-btn w-12 h-10 border border-gray-300 text-sm font-medium flex items-center justify-center bg-white"
-                            onclick="selectSize(this)"
-                            th:text="${size}">37</button>
-                </div>
-                <p id="size-error" class="text-red-500 text-xs mt-2 hidden animate-pulse">
-                    <i class="fa-solid fa-circle-exclamation"></i> Vui lòng chọn kích thước!
-                </p>
-            </div>
 
-            <div class="mb-8">
-                <div class="flex items-center border border-gray-300 w-fit">
-                    <button onclick="decreaseQty()" class="w-10 h-10 hover:bg-gray-100 text-gray-600 font-bold text-xl">-</button>
-                    <input type="text" id="qty" value="1" class="w-12 h-10 text-center outline-none font-bold border-x border-gray-300" readonly>
-                    <button onclick="increaseQty()" class="w-10 h-10 hover:bg-gray-100 text-gray-600 font-bold text-xl">+</button>
+                <div class="mb-6">
+                    <p class="text-3xl font-bold text-red-600"
+                       th:text="${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA')} + '₫'">2.090.000₫</p>
                 </div>
-            </div>
 
-            <div class="flex gap-3">
-                <button onclick="addToCartDetail()"
-                        class="flex-1 bg-[#FF9900] text-white font-bold py-3 px-4 rounded-sm hover:bg-orange-600 transition flex items-center justify-center gap-2 shadow-sm">
-                    <i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ hàng
-                </button>
-                <button class="flex-1 bg-[#007bff] text-white font-bold py-3 px-4 rounded-sm hover:bg-blue-600 transition shadow-sm uppercase text-sm">
-                    Mua ngay
-                </button>
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="font-bold text-sm uppercase">Kích thước:</span>
+                        <a href="/size-guide" class="text-xs text-gray-500 underline hover:text-black flex items-center gap-1">
+                            <i class="fa-solid fa-ruler"></i> Hướng dẫn chọn size
+                        </a>
+                    </div>
+                    <div class="flex flex-wrap gap-3" id="size-container">
+                        <button th:each="size : ${product.sizes}"
+                                class="size-btn w-12 h-12 border border-gray-300 rounded-sm flex items-center justify-center font-bold text-sm hover:border-black bg-white transition"
+                                onclick="selectSize(this)"
+                                th:text="${size}">39</button>
+                    </div>
+                    <p id="size-error" class="text-red-500 text-xs mt-2 hidden font-bold animate-pulse">
+                        <i class="fa-solid fa-circle-exclamation mr-1"></i> Vui lòng chọn size giày
+                    </p>
+                </div>
+
+                <div class="flex gap-4 mb-8">
+                    <div class="flex items-center border border-black rounded-sm w-32 h-12">
+                        <button onclick="decreaseQty()" class="w-10 h-full hover:bg-gray-100 text-lg">-</button>
+                        <input type="text" id="qty" value="1" class="w-12 h-full text-center outline-none font-bold border-x border-gray-200" readonly>
+                        <button onclick="increaseQty()" class="w-10 h-full hover:bg-gray-100 text-lg">+</button>
+                    </div>
+
+                    <button onclick="addToCartDetail()"
+                            class="flex-1 bg-[#FF9900] text-white font-bold uppercase rounded-sm hover:bg-orange-600 hover:shadow-lg transition-all duration-300 h-12 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-cart-plus text-lg"></i> Thêm vào giỏ hàng
+                    </button>
+
+                    <button onclick="buyNow()" class="hidden md:block px-6 border-2 border-black text-black font-bold uppercase rounded-sm hover:bg-black hover:text-white transition h-12">
+                        Mua ngay
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-8 border-t border-b border-gray-100 py-6">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-truck-fast text-2xl text-gray-400"></i>
+                        <div>
+                            <p class="font-bold text-xs uppercase">Miễn phí vận chuyển</p>
+                            <p class="text-[10px] text-gray-500">Cho đơn hàng > 2tr</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-rotate-left text-2xl text-gray-400"></i>
+                        <div>
+                            <p class="font-bold text-xs uppercase">Đổi trả dễ dàng</p>
+                            <p class="text-[10px] text-gray-500">Trong vòng 07 ngày</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-shield-halved text-2xl text-gray-400"></i>
+                        <div>
+                            <p class="font-bold text-xs uppercase">Hàng chính hãng</p>
+                            <p class="text-[10px] text-gray-500">Cam kết 100% Authentic</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-headset text-2xl text-gray-400"></i>
+                        <div>
+                            <p class="font-bold text-xs uppercase">Hỗ trợ 24/7</p>
+                            <p class="text-[10px] text-gray-500">Hotline: 0123 456 789</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
     </div>
 
-    <div class="bg-white p-6 rounded-sm shadow-sm mb-8">
-        <div class="flex border-b border-gray-200 mb-6 text-sm font-bold uppercase text-center">
-            <button class="tab-btn active px-6 py-3 bg-gray-50 w-1/3 md:w-auto" onclick="openTab(event, 'desc')">Mô tả sản phẩm</button>
-            <button class="tab-btn px-6 py-3 bg-gray-50 w-1/3 md:w-auto" onclick="openTab(event, 'care')">Hướng dẫn chăm sóc</button>
-            <button class="tab-btn px-6 py-3 bg-gray-50 w-1/3 md:w-auto" onclick="openTab(event, 'store')">Hướng dẫn bảo quản</button>
+    <div class="mt-16 border-t border-gray-200 pt-10">
+        <div class="flex justify-center gap-8 border-b border-gray-200 mb-8">
+            <button class="tab-btn active pb-4 px-2 font-bold uppercase text-sm tracking-wide hover:text-black transition" onclick="openTab(event, 'desc')">Mô tả sản phẩm</button>
+            <button class="tab-btn pb-4 px-2 font-bold uppercase text-sm tracking-wide hover:text-black transition" onclick="openTab(event, 'care')">Hướng dẫn chăm sóc</button>
+            <button class="tab-btn pb-4 px-2 font-bold uppercase text-sm tracking-wide hover:text-black transition" onclick="openTab(event, 'warranty')">Chế độ bảo hành</button>
         </div>
 
-        <div id="desc" class="tab-content block text-sm text-gray-700 leading-relaxed">
-            <h3 class="font-bold text-base mb-2 text-black" th:text="${product.name}">Tên Giày</h3>
+        <div id="desc" class="tab-content block max-w-4xl mx-auto text-gray-700 leading-relaxed space-y-4 text-justify">
+            <h3 class="font-bold text-lg text-black mb-2" th:text="${product.name}">Tên Giày</h3>
             <div th:utext="${product.description}">Nội dung mô tả...</div>
 
-            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4" th:if="${product.images.size() > 1}">
-                <img th:src="@{${product.images[0]}}" class="w-full h-64 object-cover">
-                <img th:if="${product.images.size() > 1}" th:src="@{${product.images[1]}}" class="w-full h-64 object-cover">
+            <div class="grid grid-cols-2 gap-4 mt-6" th:if="${product.images.size() > 1}">
+                <img th:src="@{${product.images[0]}}" class="w-full rounded-sm shadow-sm">
+                <img th:if="${product.images.size() > 1}" th:src="@{${product.images[1]}}" class="w-full rounded-sm shadow-sm">
             </div>
         </div>
 
-        <div id="care" class="tab-content hidden text-sm text-gray-700 leading-relaxed">
-            <ul class="list-disc list-inside space-y-2">
-                <li>Lau nhẹ bằng khăn mềm và ẩm để loại bỏ bụi bẩn.</li>
-                <li>Không giặt bằng máy giặt hoặc ngâm lâu trong nước.</li>
-                <li>Tránh phơi trực tiếp dưới ánh nắng gắt để bảo vệ màu da/vải.</li>
+        <div id="care" class="tab-content hidden max-w-4xl mx-auto text-gray-700 leading-relaxed">
+            <ul class="list-disc list-inside space-y-2 bg-gray-50 p-8 rounded-lg">
+                <li>Lau nhẹ bằng khăn mềm và ẩm để loại bỏ bụi bẩn sau mỗi lần sử dụng.</li>
+                <li>Không giặt bằng máy giặt hoặc ngâm lâu trong nước tẩy rửa mạnh.</li>
+                <li>Tránh phơi trực tiếp dưới ánh nắng gắt để bảo vệ màu da/vải và keo dán.</li>
+                <li>Sử dụng xịt nano chống thấm nước để bảo vệ giày tốt hơn.</li>
             </ul>
         </div>
 
-        <div id="store" class="tab-content hidden text-sm text-gray-700 leading-relaxed">
-            <ul class="list-disc list-inside space-y-2">
-                <li>Để giày ở nơi khô ráo, thoáng mát.</li>
-                <li>Sử dụng giấy báo hoặc cây giữ form (shoe tree) để giữ dáng giày.</li>
-            </ul>
+        <div id="warranty" class="tab-content hidden max-w-4xl mx-auto text-gray-700 leading-relaxed">
+            <p class="mb-4">B2L Shoes cam kết bảo hành sản phẩm chính hãng trọn đời. Chính sách bảo hành keo chỉ áp dụng trong 06 tháng đầu tiên.</p>
+            <a href="/warranty-policy" class="text-blue-600 underline font-bold hover:text-black">Xem chi tiết chính sách bảo hành tại đây</a>
         </div>
     </div>
 
-    <div class="bg-white p-6 rounded-sm shadow-sm">
-        <h3 class="text-center font-bold text-lg uppercase mb-6 tracking-wide">SẢN PHẨM LIÊN QUAN</h3>
+    <div class="mt-20 border-t border-gray-100 pt-10">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-extrabold uppercase tracking-tight">SẢN PHẨM LIÊN QUAN</h2>
 
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div th:each="item : ${relatedProducts}" class="group cursor-pointer border border-gray-100 hover:border-gray-300 p-2 transition">
-                <div class="relative aspect-square mb-2">
-                    <button class="absolute top-2 right-2 text-gray-400 hover:text-red-500"><i class="fa-regular fa-heart"></i></button>
+            <div class="flex gap-2">
+                <button id="related-prev" class="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-black hover:text-white transition shadow-sm active:scale-95">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button id="related-next" class="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-black hover:text-white transition shadow-sm active:scale-95">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="related-slider" class="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory no-scrollbar scroll-smooth">
+
+            <div th:each="item : ${relatedProducts}" class="min-w-[200px] md:min-w-[250px] snap-start group cursor-pointer relative">
+
+                <div class="relative aspect-square bg-[#f5f5f5] mb-4 overflow-hidden rounded-lg">
+                    <button class="absolute top-2 right-2 text-gray-400 hover:text-red-500 z-10 opacity-0 group-hover:opacity-100 transition"><i class="fa-regular fa-heart"></i></button>
+
                     <a th:href="@{'/product/' + ${item.id}}">
-                        <img th:src="@{${item.image}}" class="w-full h-full object-contain mix-blend-multiply p-2">
+                        <img th:src="@{${item.image}}" class="w-full h-full object-contain p-4 mix-blend-multiply group-hover:scale-110 transition duration-500" alt="Related Product">
                     </a>
                 </div>
+
                 <div>
-                    <h4 class="font-bold text-xs mb-1 truncate" th:text="${item.name}">Tên</h4>
-                    <p class="text-[10px] text-gray-500 mb-1" th:text="${item.categoryName}">Loại</p>
-                    <p class="text-sm font-bold text-gray-900" th:text="${#numbers.formatDecimal(item.price, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'">Giá</p>
+                    <a th:href="@{'/product/' + ${item.id}}">
+                        <h4 class="font-bold text-sm mb-1 truncate hover:text-orange-500 transition" th:text="${item.name}">Tên</h4>
+                    </a>
+                    <p class="text-xs text-gray-500 mb-2" th:text="${item.categoryName}">Loại</p>
+                    <p class="font-bold text-red-600" th:text="${#numbers.formatDecimal(item.price, 0, 'POINT', 0, 'COMMA')} + '₫'">Giá</p>
                 </div>
             </div>
-        </div>
-        <div class="h-1 w-32 bg-gray-800 mx-auto mt-8"></div>
-    </div>
 
-</div>
+            <div th:if="${relatedProducts == null || relatedProducts.isEmpty()}" class="text-center w-full text-gray-500 italic py-4">
+                Không có sản phẩm liên quan nào.
+            </div>
+        </div>
+    </div>
+</section>
 
 <div th:replace="~{customer/fragments/footer :: footer}"></div>
 
@@ -177,13 +239,16 @@
     let selectedSize = null;
     const productId = [[${product.id}]];
 
+    // Đổi ảnh
     function changeImage(element) {
         const newSrc = element.querySelector('img').src;
         document.getElementById('mainImage').src = newSrc;
-        document.querySelectorAll('.border-black').forEach(el => el.classList.remove('border-black'));
-        element.classList.add('border-black');
+
+        document.querySelectorAll('.border-black').forEach(el => el.classList.remove('border-black', 'border-2'));
+        element.classList.add('border-black', 'border-2');
     }
 
+    // Chọn Size
     function selectSize(btn) {
         document.querySelectorAll('.size-btn').forEach(el => el.classList.remove('selected'));
         btn.classList.add('selected');
@@ -191,6 +256,7 @@
         document.getElementById('size-error').classList.add('hidden');
     }
 
+    //Tăng giảm số lượng
     function increaseQty() {
         let qty = document.getElementById('qty');
         qty.value = parseInt(qty.value) + 1;
@@ -200,47 +266,45 @@
         if (parseInt(qty.value) > 1) qty.value = parseInt(qty.value) - 1;
     }
 
+    // Chuyển Tab
     function openTab(evt, tabName) {
         var i, tabcontent, tablinks;
         tabcontent = document.getElementsByClassName("tab-content");
         for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].classList.add("hidden");
-            tabcontent[i].classList.remove("block");
+            tabcontent[i].style.display = "none"; // Dùng style display để chắc chắn ẩn
         }
         tablinks = document.getElementsByClassName("tab-btn");
         for (i = 0; i < tablinks.length; i++) {
             tablinks[i].classList.remove("active");
+            tablinks[i].style.borderBottom = "2px solid transparent"; // Reset border
         }
-        document.getElementById(tabName).classList.remove("hidden");
-        document.getElementById(tabName).classList.add("block");
+        document.getElementById(tabName).style.display = "block";
         evt.currentTarget.classList.add("active");
+        evt.currentTarget.style.borderBottom = "2px solid black"; // Set active border
     }
 
+    // Thêm vào giỏ hàng
     function addToCartDetail() {
-        // 1. Validate: Bắt buộc phải chọn Size
         if (!selectedSize) {
             document.getElementById('size-error').classList.remove('hidden');
-            // Hiệu ứng rung nhẹ vùng chọn size để nhắc nhở
-            const sizeContainer = document.getElementById('size-container');
-            sizeContainer.classList.add('animate-pulse');
-            setTimeout(() => sizeContainer.classList.remove('animate-pulse'), 500);
+            // Scroll to size section if needed
             return;
         }
 
         const quantity = document.getElementById('qty').value;
-        const productId = [[${product.id}]];
 
+        // Gọi API thêm vào giỏ
         fetch(`/api/cart/add?productId=${productId}&quantity=${quantity}&size=${selectedSize}`, {
             method: 'POST'
         })
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
+                    // Update icon header
                     const cartBadge = document.getElementById('cart-qty');
                     if(cartBadge) {
                         cartBadge.innerText = data.totalItems;
-                        cartBadge.parentElement.classList.add('scale-125');
-                        setTimeout(() => cartBadge.parentElement.classList.remove('scale-125'), 200);
+                        cartBadge.classList.add('animate-bounce');
                     }
 
                     Swal.fire({
@@ -251,26 +315,42 @@
                         timer: 1500,
                         toast: true, position: 'top-end'
                     });
-
                 } else {
                     Swal.fire({
                         icon: 'warning',
                         title: 'Thông báo',
                         text: data.message,
                         confirmButtonText: data.message.includes('đăng nhập') ? 'Đăng nhập ngay' : 'OK',
-                        showCancelButton: true
-                    }).then((result) => {
-                        if (result.isConfirmed && data.message.includes('đăng nhập')) {
-                            window.location.href = '/login';
-                        }
+                    }).then((res) => {
+                        if(res.isConfirmed && data.message.includes('đăng nhập')) window.location.href = '/login';
                     });
                 }
             })
-            .catch(err => {
-                console.error(err);
-                Swal.fire('Lỗi', 'Có lỗi xảy ra, vui lòng thử lại sau.', 'error');
-            });
+            .catch(err => console.error(err));
     }
+
+    function buyNow() {
+        if (!selectedSize) {
+            document.getElementById('size-error').classList.remove('hidden');
+            return;
+        }
+        addToCartDetail();
+    }
+    // Slider Sản phẩm liên quan
+    document.addEventListener("DOMContentLoaded", function() {
+        const slider = document.getElementById('related-slider');
+        const btnPrev = document.getElementById('related-prev');
+        const btnNext = document.getElementById('related-next');
+
+        if (slider && btnPrev && btnNext) {
+            btnNext.addEventListener('click', () => {
+                slider.scrollBy({ left: 500, behavior: 'smooth' });
+            });
+            btnPrev.addEventListener('click', () => {
+                slider.scrollBy({ left: -500, behavior: 'smooth' });
+            });
+        }
+    });
 </script>
 
 </body>

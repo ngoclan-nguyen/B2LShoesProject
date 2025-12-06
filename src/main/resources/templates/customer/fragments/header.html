@@ -1,5 +1,5 @@
 <header th:fragment="header" id="main-header"
-        class="font-['Montserrat'] sticky top-0 z-50 bg-white/95 backdrop-blur-md transition-all duration-300 border-b border-transparent shadow-sm">
+        class="font-['Montserrat'] sticky top-0 z-40 bg-white/95 backdrop-blur-md transition-all duration-300 border-b border-transparent shadow-sm">
 
     <div class="container mx-auto px-4 py-3 md:py-4">
         <div class="flex flex-wrap md:flex-nowrap justify-between items-center gap-4">
@@ -10,7 +10,9 @@
                 </button>
 
                 <div class="flex items-center gap-2">
+                    <a href="/">
                     <img th:src="@{/customer/images/logo.png}" class="w-[30px] h-[30px] md:w-[40px] md:h-[40px]"/>
+                    </a>
                     <a href="/" class="flex items-center gap-3 group">
                         <div class="text-xl md:text-2xl font-black italic uppercase tracking-tight text-black">
                             B<span class="text-orange-600">2</span>L Shoes
@@ -24,39 +26,65 @@
                     <input type="text" id="search-input" name="keyword" autocomplete="off"
                            placeholder="Tìm kiếm sản phẩm..."
                            class="w-full border border-gray-300 rounded-full px-5 py-2 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-sm">
-
                     <button type="submit" class="absolute right-1 top-1 h-[calc(100%-8px)] bg-black text-white px-4 rounded-full hover:bg-orange-600 transition active:scale-95">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
                 </form>
-
-                <div id="search-suggestions" class="hidden absolute top-full left-0 w-full bg-white border border-gray-200 rounded-lg shadow-2xl mt-2 overflow-hidden max-h-[400px] overflow-y-auto">
-                </div>
+                <div id="search-suggestions" class="hidden absolute top-full left-0 w-full bg-white border border-gray-200 rounded-lg shadow-2xl mt-2 overflow-hidden max-h-[400px] overflow-y-auto"></div>
             </div>
 
             <div class="flex items-center gap-4 md:gap-6 text-xl md:text-2xl">
-
-                <a href="#" class="hover:text-red-500 transition transform hover:scale-110"><i class="fa-regular fa-heart"></i></a>
-
+                <a href="/wishlist" class="hover:text-red-500 transition transform hover:scale-110"><i class="fa-regular fa-heart"></i></a>
                 <a href="/cart" class="hover:text-orange-500 transition transform hover:scale-110 relative">
                     <i class="fa-solid fa-cart-shopping"></i>
                     <span id="cart-qty" class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-sm">0</span>
                 </a>
 
-                <a th:if="${session.currentCustomer == null}" href="/login" class="hover:text-gray-600 transition transform hover:scale-110" title="Đăng nhập">
-                    <i class="fa-regular fa-circle-user"></i>
-                </a>
+                <div th:if="${session.currentCustomer == null}" class="flex items-center gap-2 text-sm font-bold">
+                    <a href="/login" class="hover:text-orange-500 transition whitespace-nowrap hidden md:block">Đăng nhập</a>
+                    <span class="hidden md:block text-gray-300">|</span>
+                    <a href="/register" class="hover:text-orange-500 transition whitespace-nowrap hidden md:block">Đăng ký</a>
 
-                <div th:if="${session.currentCustomer != null}" class="relative group cursor-pointer">
-                    <div class="flex items-center gap-1 hover:text-orange-500 transition">
-                        <i class="fa-solid fa-user-check text-green-600"></i>
-                        <span class="text-sm font-bold hidden lg:block ml-1" th:text="${session.currentCustomer.name}">User</span>
+                    <a href="/login" class="md:hidden hover:text-gray-600 text-2xl transition transform hover:scale-110">
+                        <i class="fa-regular fa-circle-user"></i>
+                    </a>
+                </div>
+
+                <div th:if="${session.currentCustomer != null}" class="relative group cursor-pointer py-4"> <div class="flex items-center gap-2 hover:text-orange-500 transition">
+                    <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-bold text-gray-700 border border-gray-200 group-hover:border-orange-500 group-hover:text-orange-500 transition">
+                        <span th:text="${#strings.substring(session.currentCustomer.name,0,1)}">U</span>
                     </div>
 
-                    <ul class="absolute right-0 top-full mt-2 w-48 bg-white shadow-xl rounded-md hidden group-hover:block z-50 border border-gray-100 animate-[fadeIn_0.2s_ease-out]">
-                        <li><a href="#" class="block px-4 py-3 text-sm hover:bg-gray-50 hover:text-orange-500 border-b border-gray-100 transition"><i class="fa-solid fa-id-card mr-2"></i>Tài khoản</a></li>
-                        <li><a href="#" class="block px-4 py-3 text-sm hover:bg-gray-50 hover:text-orange-500 border-b border-gray-100 transition"><i class="fa-solid fa-box-open mr-2"></i>Đơn mua</a></li>
-                        <li><a href="/logout" class="block px-4 py-3 text-sm hover:bg-red-50 text-red-500 font-bold transition"><i class="fa-solid fa-right-from-bracket mr-2"></i>Đăng xuất</a></li>
+                    <div class="hidden lg:flex flex-col items-start leading-tight">
+                        <span class="text-xs text-gray-400 font-normal">Xin chào,</span>
+                        <span class="text-sm font-bold truncate max-w-[100px]" th:text="${session.currentCustomer.name}">User Name</span>
+                    </div>
+
+                    <i class="fa-solid fa-caret-down text-xs text-gray-400 group-hover:text-orange-500 transition hidden lg:block ml-1"></i>
+                </div>
+
+                    <ul class="absolute right-0 top-full pt-2 w-56 hidden group-hover:block z-50 animate-[fadeIn_0.2s_ease-out]">
+                        <div class="bg-white shadow-xl rounded-md border border-gray-100 overflow-hidden">
+                            <li class="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                                <p class="text-xs text-gray-500">Tài khoản của</p>
+                                <p class="font-bold text-black truncate" th:text="${session.currentCustomer.name}">User Name</p>
+                                <p class="text-xs text-gray-400 truncate" th:text="${session.currentCustomer.email}">email@example.com</p>
+                            </li>
+
+                            <li><a href="/profile" class="block px-4 py-3 text-sm hover:bg-orange-50 hover:text-orange-500 border-b border-gray-100 transition flex items-center gap-3">
+                                <i class="fa-regular fa-user text-gray-400"></i> Thông tin cá nhân
+                            </a></li>
+                            <li><a href="/my-orders" class="block px-4 py-3 text-sm hover:bg-orange-50 hover:text-orange-500 border-b border-gray-100 transition flex items-center gap-3">
+                                <i class="fa-solid fa-box-open text-gray-400"></i> Đơn mua
+                            </a></li>
+                            <li><a href="/change-password" class="block px-4 py-3 text-sm hover:bg-orange-50 hover:text-orange-500 border-b border-gray-100 transition flex items-center gap-3">
+                                <i class="fa-solid fa-key text-gray-400"></i> Đổi mật khẩu
+                            </a></li>
+
+                            <li><a href="/logout" class="block px-4 py-3 text-sm hover:bg-red-50 text-red-500 font-bold transition flex items-center gap-3">
+                                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                            </a></li>
+                        </div>
                     </ul>
                 </div>
             </div>
@@ -64,56 +92,68 @@
 
         <nav class="hidden md:block mt-4 border-t border-gray-100 pt-2">
             <ul class="flex flex-wrap justify-center gap-8 lg:gap-16 py-2 font-bold text-sm uppercase">
-                <li><a href="/customer/" class="hover:text-orange-500 hover:underline underline-offset-4 transition">Trang Chủ</a></li>
-                <li><a href="#" class="hover:text-orange-500 hover:underline underline-offset-4 transition">Thương Hiệu</a></li>
-                <li><a href="#" class="hover:text-orange-500 hover:underline underline-offset-4 transition">Giày</a></li>
-                <li><a href="#" class="hover:text-orange-500 hover:underline underline-offset-4 transition">Phụ Kiện</a></li>
+                <li><a href="/" class="hover:text-orange-500 hover:underline underline-offset-4 transition">Trang Chủ</a></li>
+                <li class="relative group">
+                    <a href="/products" class="hover:text-orange-500 hover:underline underline-offset-4 transition flex items-center gap-1">
+                        Sản phẩm <i class="fa-solid fa-caret-down text-xs"></i>
+                    </a>
 
-                <li class="relative group cursor-pointer">
-                    <span class="hover:text-orange-500 hover:underline underline-offset-4 transition flex items-center gap-1">
-                        Hỗ trợ <i class="fa-solid fa-caret-down text-xs"></i>
-                    </span>
-                    <ul class="absolute left-0 top-full mt-2 w-56 bg-white shadow-xl rounded-md hidden group-hover:block z-50 border border-gray-100 animate-[fadeIn_0.2s_ease-out]">
-                        <li><a href="/shopping-guide" class="block px-4 py-3 hover:bg-gray-50 hover:text-orange-500 border-b border-gray-100 transition">Hướng dẫn mua hàng</a></li>
-                        <li><a href="/size-guide" class="block px-4 py-3 hover:bg-gray-50 hover:text-orange-500 transition">Chọn size giày</a></li>
+                    <div class="absolute left-1/2 -translate-x-1/2 top-full mt-0 w-[700px] bg-white shadow-2xl rounded-lg border border-gray-100 hidden group-hover:grid grid-cols-3 gap-6 p-6 z-50 animate-[fadeIn_0.2s_ease-out]">
+
+                        <div>
+                            <h4 class="font-extrabold text-black uppercase mb-3 text-sm border-b border-gray-100 pb-2">Danh mục</h4>
+                            <ul class="space-y-2 text-sm text-gray-600 font-medium">
+                                <li><a href="/products" class="hover:text-orange-500 hover:pl-1 transition-all block">Tất cả sản phẩm</a></li>
+                                <li><a href="/products?gender=Nam" class="hover:text-orange-500 hover:pl-1 transition-all block">Giày Nam</a></li>
+                                <li><a href="/products?gender=Nu" class="hover:text-orange-500 hover:pl-1 transition-all block">Giày Nữ</a></li>
+                                <li><a href="/products?category=sock" class="hover:text-orange-500 hover:pl-1 transition-all block">Tất / Vớ & Phụ kiện</a></li>
+                                <li><a href="/search?sort=newest" class="text-orange-600 font-bold hover:pl-1 transition-all block mt-2">✨ Hàng Mới Về</a></li>
+                                <li><a href="/search?sort=best_selling" class="text-red-600 font-bold hover:pl-1 transition-all block">🔥 Bán Chạy Nhất</a></li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 class="font-extrabold text-black uppercase mb-3 text-sm border-b border-gray-100 pb-2">Môn Thể Thao</h4>
+                            <ul class="space-y-2 text-sm text-gray-600 font-medium">
+                                <li><a href="/products?sport=Football" class="hover:text-orange-500 hover:pl-1 transition-all block">Bóng Đá</a></li>
+                                <li><a href="/products?sport=Running" class="hover:text-orange-500 hover:pl-1 transition-all block">Chạy Bộ</a></li>
+                                <li><a href="/products?sport=Basketball" class="hover:text-orange-500 hover:pl-1 transition-all block">Bóng Rổ</a></li>
+                                <li><a href="/products?sport=Gym" class="hover:text-orange-500 hover:pl-1 transition-all block">Tập Gym / Training</a></li>
+                                <li><a href="/products?sport=Badminton" class="hover:text-orange-500 hover:pl-1 transition-all block">Cầu Lông</a></li>
+                                <li><a href="/products?sport=Volleyball" class="hover:text-orange-500 hover:pl-1 transition-all block">Bóng Chuyền</a></li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 class="font-extrabold text-black uppercase mb-3 text-sm border-b border-gray-100 pb-2">Thương Hiệu</h4>
+                            <ul class="space-y-2 text-sm text-gray-600 font-medium">
+                                <li><a href="/products?brand=Adidas" class="hover:text-orange-500 hover:pl-1 transition-all block">Adidas</a></li>
+                                <li><a href="/products?brand=Nike" class="hover:text-orange-500 hover:pl-1 transition-all block">Nike</a></li>
+                                <li><a href="/products?brand=Puma" class="hover:text-orange-500 hover:pl-1 transition-all block">Puma</a></li>
+                                <li><a href="/products?brand=Mizuno" class="hover:text-orange-500 hover:pl-1 transition-all block">Mizuno</a></li>
+                                <li><a href="/products?brand=Li-Ning" class="hover:text-orange-500 hover:pl-1 transition-all block">Li-Ning</a></li>
+                                <li><a href="/products?brand=Yonex" class="hover:text-orange-500 hover:pl-1 transition-all block">Yonex</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+                <li class="relative group cursor-pointer h-full flex items-center"> <span class="hover:text-orange-500 hover:underline underline-offset-4 transition flex items-center gap-1">
+        Hỗ trợ <i class="fa-solid fa-caret-down text-xs"></i>
+    </span>
+
+                    <ul class="absolute left-0 top-full w-56 pt-2 hidden group-hover:block z-50 animate-[fadeIn_0.2s_ease-out]">
+                        <div class="bg-white shadow-xl rounded-md border border-gray-100 overflow-hidden">
+                            <li><a href="/shopping-guide" class="block px-4 py-3 hover:bg-gray-50 hover:text-orange-500 border-b border-gray-100 transition">Hướng dẫn mua hàng</a></li>
+                            <li><a href="/size-guide" class="block px-4 py-3 hover:bg-gray-50 hover:text-orange-500 border-b border-gray-100 transition">Chọn size giày</a></li>
+                            <li><a href="/warranty-policy" class="block px-4 py-3 hover:bg-gray-50 hover:text-orange-500 border-b border-gray-100 transition">Chính sách đổi trả</a></li>
+                            <li><a href="/terms-conditions" class="block px-4 py-3 hover:bg-gray-50 hover:text-orange-500 border-b border-gray-100 transition">Điều khoản</a></li>
+                            <li><a href="/privacy-policy" class="block px-4 py-3 hover:bg-gray-50 hover:text-orange-500 transition">Chính sách bảo mật</a></li>
+                        </div>
                     </ul>
                 </li>
-                <li><a href="/customer/about-us" class="hover:text-orange-500 hover:underline underline-offset-4 transition">Về chúng tôi</a></li>
+                <li><a href="/about-us" class="hover:text-orange-500 hover:underline underline-offset-4 transition">Về chúng tôi</a></li>
             </ul>
         </nav>
     </div>
-
-    <div id="mobile-menu" class="hidden fixed inset-0 bg-white z-[60] flex-col p-6 overflow-y-auto transition-transform duration-300 shadow-2xl">
-        <div class="flex justify-between items-center mb-8 border-b pb-4">
-            <span class="font-extrabold text-2xl uppercase tracking-tighter">MENU</span>
-            <button id="close-menu-btn" class="text-3xl hover:text-red-500 hover:rotate-90 transition duration-300"><i class="fa-solid fa-times"></i></button>
-        </div>
-
-        <form action="/search" method="get" class="relative w-full mb-6">
-            <input type="text" name="keyword" placeholder="Tìm kiếm sản phẩm..." class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 transition-colors">
-            <button type="submit" class="absolute right-3 top-3 text-gray-400 hover:text-orange-500">
-                <i class="fa-solid fa-magnifying-glass text-xl"></i>
-            </button>
-        </form>
-
-        <ul class="flex flex-col gap-6 font-bold text-lg uppercase text-gray-800">
-            <li><a href="/customer/" class="block hover:text-orange-500 hover:pl-2 transition-all">Trang Chủ</a></li>
-            <li><a href="#" class="block hover:text-orange-500 hover:pl-2 transition-all">Thương Hiệu</a></li>
-            <li><a href="#" class="block hover:text-orange-500 hover:pl-2 transition-all">Giày</a></li>
-            <li><a href="#" class="block hover:text-orange-500 hover:pl-2 transition-all">Phụ Kiện</a></li>
-
-            <li class="border-t pt-4 mt-2">
-                <p class="text-gray-400 text-sm mb-3">Hỗ trợ khách hàng</p>
-                <ul class="pl-4 space-y-4 text-base">
-                    <li><a href="/shopping-guide" class="block hover:text-orange-500 font-medium">Hướng dẫn mua hàng</a></li>
-                    <li><a href="/size-guide" class="block hover:text-orange-500 font-medium">Chọn size giày</a></li>
-                </ul>
-            </li>
-            <li><a href="#" class="block hover:text-orange-500 hover:pl-2 transition-all">Phụ Kiện</a></li>
-
-            <li th:if="${session.currentCustomer != null}" class="border-t pt-4 mt-2">
-                <a href="/logout" class="block text-red-500 hover:text-red-700 font-bold"><i class="fa-solid fa-power-off mr-2"></i> Đăng xuất</a>
-            </li>
-        </ul>
-    </div>
 </header>
+

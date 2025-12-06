@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chính sách bảo mật - B2L Shoes</title>
+
+    <link rel="stylesheet" href="https://cdn.tailwindcss.com">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+    </style>
+</head>
+<body class="bg-white text-black">
+
+<header th:replace="~{customer/fragments/header :: header}"></header>
+
+<div class="bg-gray-50 border-b border-gray-100">
+    <div class="container mx-auto px-4 py-3 text-sm text-gray-500">
+        <a href="/" class="hover:text-black transition">Trang chủ</a>
+        <span class="mx-2">>></span>
+        <span class="cursor-default">Hỗ trợ</span>
+        <span class="mx-2">>></span>
+        <span class="text-black font-bold border-b border-black">Chính sách bảo mật</span>
+    </div>
+</div>
+
+<section class="container mx-auto px-4 py-8 md:py-12">
+    <div class="flex flex-col md:flex-row gap-8 lg:gap-12">
+
+        <aside class="w-full md:w-1/4 lg:w-1/5 flex-shrink-0">
+            <div class="border-2 border-gray-200 rounded-xl p-6 shadow-sm bg-white sticky top-24">
+                <h2 class="text-lg font-bold mb-6 border-b-2 border-black inline-block pb-1">Danh mục Hỗ trợ</h2>
+
+                <ul class="space-y-4 text-sm font-medium text-gray-600">
+                    <li>
+                        <a href="/shopping-guide" class="block hover:text-black hover:pl-2 hover:border-l-4 hover:border-gray-300 transition-all duration-200 pl-0 border-l-0 border-transparent">
+                            Hướng dẫn mua hàng
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/size-guide" class="block hover:text-black hover:pl-2 hover:border-l-4 hover:border-gray-300 transition-all duration-200 pl-0 border-l-0 border-transparent">
+                            Hướng dẫn chọn size giày
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/warranty-policy" class="block hover:text-black hover:pl-2 hover:border-l-4 hover:border-gray-300 transition-all duration-200 pl-0 border-l-0 border-transparent">
+                            Chính sách đổi trả, bảo hành
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/return-guide" class="block hover:text-black hover:pl-2 hover:border-l-4 hover:border-gray-300 transition-all duration-200 pl-0 border-l-0 border-transparent">
+                            Hướng dẫn đổi trả hàng
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/terms-conditions" class="block hover:text-black hover:pl-2 hover:border-l-4 hover:border-gray-300 transition-all duration-200 pl-0 border-l-0 border-transparent">
+                            Điều khoản Website
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/privacy-policy" class="block text-black font-bold border-l-4 border-black pl-3 transition-all">
+                            Chính sách bảo mật
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="w-full md:w-3/4 lg:w-4/5">
+
+            <h1 class="text-2xl md:text-3xl font-extrabold uppercase mb-8 text-center md:text-left tracking-tight">
+                CHÍNH SÁCH BẢO MẬT
+            </h1>
+
+            <div class="text-sm md:text-base text-gray-800 leading-relaxed space-y-6 text-justify">
+
+                <p class="font-medium">
+                    B2L SHOES cam kết tôn trọng và bảo vệ thông tin cá nhân của khách hàng. Chính sách này mô tả cách chúng tôi thu thập, sử dụng và bảo vệ thông tin của bạn.
+                </p>
+
+                <div>
+                    <h3 class="font-bold text-black text-base mb-2">1. Thông tin chúng tôi thu thập</h3>
+                    <p class="mb-2 text-gray-600">Chúng tôi thu thập các thông tin sau khi bạn tương tác với website:</p>
+                    <ul class="list-disc list-inside pl-2 space-y-1 text-gray-600">
+                        <li><span class="font-semibold text-gray-800">Thông tin cá nhân:</span> Họ tên, địa chỉ email, số điện thoại, địa chỉ giao hàng (khi bạn đăng ký tài khoản hoặc đặt hàng).</li>
+                        <li><span class="font-semibold text-gray-800">Thông tin giao dịch:</span> Chi tiết đơn hàng, lịch sử mua hàng, phương thức thanh toán.</li>
+                        <li><span class="font-semibold text-gray-800">Thông tin tự động:</span> Địa chỉ IP, loại trình duyệt, cookie, và các trang bạn đã xem.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-black text-base mb-2">2. Mục đích sử dụng thông tin</h3>
+                    <p class="mb-2 text-gray-600">Chúng tôi sử dụng thông tin của bạn cho các mục đích:</p>
+                    <ul class="list-disc list-inside pl-2 space-y-1 text-gray-600">
+                        <li><span class="font-semibold text-gray-800">Xử lý đơn hàng:</span> Xác nhận, đóng gói, giao hàng và hỗ trợ sau bán hàng.</li>
+                        <li><span class="font-semibold text-gray-800">Chăm sóc khách hàng:</span> Liên lạc, giải đáp thắc mắc, xử lý khiếu nại (ví dụ: đổi trả, bảo hành).</li>
+                        <li><span class="font-semibold text-gray-800">Cải thiện dịch vụ:</span> Phân tích dữ liệu để hiểu rõ hơn về hành vi người dùng và cải thiện website.</li>
+                        <li><span class="font-semibold text-gray-800">Marketing (nếu được đồng ý):</span> Gửi thông tin về các chương trình khuyến mãi, sản phẩm mới (New Arrivals) qua email (bạn có quyền từ chối bất kỳ lúc nào).</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-black text-base mb-2">3. Chia sẻ thông tin</h3>
+                    <p class="mb-2 text-gray-600">B2L SHOES cam kết không bán hoặc chia sẻ thông tin cá nhân của bạn cho bên thứ ba không liên quan, ngoại trừ các trường hợp:</p>
+                    <ul class="list-disc list-inside pl-2 space-y-1 text-gray-600">
+                        <li><span class="font-semibold text-gray-800">Các đối tác dịch vụ:</span> Chúng tôi chỉ chia sẻ thông tin cần thiết (SĐT, Địa chỉ) cho các đối tác vận chuyển và cổng thanh toán để hoàn thành đơn hàng.</li>
+                        <li><span class="font-semibold text-gray-800">Yêu cầu pháp lý:</span> Khi được cơ quan nhà nước có thẩm quyền yêu cầu.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-black text-base mb-2">4. Bảo mật thông tin</h3>
+                    <p class="text-gray-600">Chúng tôi áp dụng các biện pháp kỹ thuật và vật lý (như mã hóa SSL) để bảo vệ dữ liệu của bạn khỏi bị truy cập, mất mát, hoặc sử dụng trái phép.</p>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-black text-base mb-2">5. Quyền của khách hàng</h3>
+                    <p class="text-gray-600">Bạn có quyền truy cập vào thông tin cá nhân của mình (trong trang Tài khoản), yêu cầu chúng tôi sửa đổi, hoặc xóa bỏ thông tin đó bằng cách liên hệ với chúng tôi.</p>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded border-l-4 border-black mt-8">
+                    <p class="text-sm text-gray-700 italic">
+                        Mọi thắc mắc về Chính sách bảo mật, vui lòng liên hệ: <span class="font-bold">[Email hỗ trợ]</span>.
+                    </p>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</section>
+
+<footer th:replace="~{customer/fragments/footer :: footer}"></footer>
+
+</body>
+</html>

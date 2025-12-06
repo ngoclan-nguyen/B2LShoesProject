@@ -9,7 +9,7 @@ import com.example.service.HomeService;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
-@RequestMapping("/customer")
+@RequestMapping("")
 public class HomeController {
 	@Autowired
     private HomeService homeService;
@@ -55,5 +55,10 @@ public class HomeController {
 	@GetMapping("/terms-conditions")
 	public String termsConditions() {
 		return "customer/terms_conditions";
+	}
+
+	@GetMapping("/privacy-policy")
+	public String privacyPolicy() {
+		return "customer/privacy_policy";
 	}
 }

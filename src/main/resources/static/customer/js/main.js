@@ -1,6 +1,8 @@
 document.addEventListener("DOMContentLoaded", function() {
 
-    // Gợi ý tìm kiếm
+    // ==================================================
+    // 1. XỬ LÝ GỢI Ý TÌM KIẾM (LIVE SEARCH)
+    // ==================================================
     const searchInput = document.getElementById('search-input');
     const suggestionBox = document.getElementById('search-suggestions');
     let timeoutId;
@@ -9,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
         return new Intl.NumberFormat('vi-VN').format(amount) + '₫';
     };
 
-    if (searchInput && suggestionBox) { // Kiểm tra tồn tại để tránh lỗi ở trang không có search
+    if (searchInput && suggestionBox) {
         searchInput.addEventListener('input', function() {
             const keyword = this.value.trim();
             clearTimeout(timeoutId);
@@ -69,38 +71,65 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-// MOBILE MENU
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const closeMenuBtn = document.getElementById('close-menu-btn');
-    const mobileMenu = document.getElementById('mobile-menu');
+    // ==================================================
+    // 2. XỬ LÝ MENU MOBILE
+    // ==================================================
+    const menuContainer = document.getElementById("mobile-menu-container");
+    const drawer = document.getElementById("mobile-menu-drawer");
+    const overlay = document.getElementById("mobile-menu-overlay");
 
+    const openBtn = document.getElementById("mobile-menu-btn");
+    const closeBtn = document.getElementById("close-menu-btn");
 
-    if (mobileMenuBtn && mobileMenu && closeMenuBtn) {
-        mobileMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.remove('hidden');
-            mobileMenu.classList.add('flex');
-            document.body.style.overflow = 'hidden';
-        });
-        closeMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.add('hidden');
-            mobileMenu.classList.remove('flex');
-            document.body.style.overflow = 'auto';
+    if (openBtn && closeBtn && menuContainer) {
+
+        openBtn.addEventListener("click", () => {
+            menuContainer.classList.remove("hidden");
+            // Timeout nhỏ để CSS transition hoạt động
+            setTimeout(() => {
+                overlay.classList.remove("opacity-0");
+                drawer.classList.remove("-translate-x-full");
+            }, 10);
+            document.body.style.overflow = 'hidden'; // Khóa cuộn trang
         });
 
-        mobileMenu.addEventListener('click', (e) => {
-            if (e.target === mobileMenu) {
-                mobileMenu.classList.add('hidden');
-                mobileMenu.classList.remove('flex');
-                document.body.style.overflow = 'auto';
-            }
-        });
-    } else {
-        console.error("Không tìm thấy nút Mobile Menu trong HTML!");
+        // Hàm đóng menu nội bộ
+        const closeMenu = () => {
+            overlay.classList.add("opacity-0");
+            drawer.classList.add("-translate-x-full");
+            setTimeout(() => {
+                menuContainer.classList.add("hidden");
+                document.body.style.overflow = 'auto'; // Mở khóa cuộn
+            }, 300);
+        };
+
+        closeBtn.addEventListener("click", closeMenu);
+        overlay.addEventListener("click", closeMenu);
     }
-    updateCartCount();
-});
 
-// Hàm gọi API cập nhật số lượng
+    // ==================================================
+    // 3. GỌI CẬP NHẬT GIỎ HÀNG KHI LOAD TRANG
+    // ==================================================
+    updateCartCount();
+
+}); // <--- ĐÓNG SỰ KIỆN DOMContentLoaded TẠI ĐÂY LÀ CHUẨN NHẤT
+
+
+// ==================================================
+// 4. CÁC HÀM GLOBAL (Định nghĩa bên ngoài để HTML gọi được nếu cần)
+// ==================================================
+
+// Hàm mở submenu (Hỗ trợ) - Dùng cho onclick trong HTML
+function toggleMobileSubmenu() {
+    const submenu = document.getElementById('mobile-submenu');
+    const arrow = document.getElementById('mobile-arrow'); // Nếu có icon mũi tên
+    if (submenu) {
+        submenu.classList.toggle('hidden');
+        if(arrow) arrow.classList.toggle('rotate-180');
+    }
+}
+
+// Hàm gọi API cập nhật số lượng giỏ hàng
 function updateCartCount() {
     const cartBadge = document.getElementById('cart-qty');
     if (cartBadge) {
@@ -108,9 +137,8 @@ function updateCartCount() {
             .then(res => res.json())
             .then(count => {
                 cartBadge.innerText = count;
-                if (count > 0) {
-                    cartBadge.classList.remove('hidden');
-                }
+                // Tùy chọn: Nếu > 0 mới hiện, còn không thì ẩn
+                // if (count > 0) cartBadge.classList.remove('hidden');
             })
             .catch(err => console.log("Chưa đăng nhập hoặc lỗi giỏ hàng"));
     }

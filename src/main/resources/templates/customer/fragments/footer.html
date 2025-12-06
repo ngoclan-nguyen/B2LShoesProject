@@ -63,5 +63,88 @@
             <p>Copyright ©2025 B2L Shoes.</p>
         </div>
     </div>
+    <div id="mobile-menu-container" class="fixed inset-0 z-[100] hidden pointer-events-none">
+
+        <div id="mobile-menu-overlay"
+             class="absolute inset-0 bg-black/70 opacity-0 transition-opacity duration-300 pointer-events-auto"></div>
+
+        <div id="mobile-menu-drawer" class="absolute top-0 left-0 bottom-0 w-[85%] max-w-xs bg-white shadow-2xl transform -translate-x-full transition-transform duration-300 flex flex-col pointer-events-auto h-full">
+
+            <div class="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50">
+                <div class="flex items-center gap-2">
+                    <img th:src="@{/customer/images/logo.png}" class="w-8 h-8"/>
+                    <span class="text-xl font-black italic uppercase tracking-tighter">B2L Shoes</span>
+                </div>
+                <button id="close-menu-btn" class="text-gray-400 hover:text-red-500 transition active:scale-90 p-2">
+                    <i class="fa-solid fa-xmark text-3xl"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 flex flex-col p-6 overflow-y-auto">
+
+                <form action="/search" method="get" class="relative mb-8">
+                    <input type="text" name="keyword" placeholder="Tìm kiếm..."
+                           class="w-full bg-gray-50 border border-gray-200 rounded-full pl-5 pr-10 py-3 text-base focus:outline-none focus:border-black transition shadow-sm">
+                    <button type="submit" class="absolute right-4 top-3 text-gray-400">
+                        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                    </button>
+                </form>
+
+                <ul class="flex-1 flex flex-col gap-6 text-lg font-bold text-gray-800 uppercase tracking-wide">
+                    <li>
+                        <a href="/" class="flex items-center gap-4 hover:text-orange-600 transition">
+                            <i class="fa-solid fa-house w-6 text-center text-gray-400"></i> Trang Chủ
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/products" class="flex items-center gap-4 hover:text-orange-600 transition">
+                            <i class="fa-solid fa-shoe-prints w-6 text-center text-gray-400"></i> Cửa Hàng
+                        </a>
+                    </li>
+                    <li>
+                        <div onclick="document.getElementById('mobile-submenu').classList.toggle('hidden')" class="cursor-pointer group">
+                            <div class="flex items-center justify-between hover:text-orange-600 transition">
+                                <div class="flex items-center gap-4">
+                                    <i class="fa-solid fa-headset w-6 text-center text-gray-400"></i> Hỗ trợ
+                                </div>
+                                <i class="fa-solid fa-chevron-down text-sm text-gray-300 transition-transform duration-300"></i>
+                            </div>
+                            <ul id="mobile-submenu" class="hidden mt-3 ml-10 space-y-3 text-sm text-gray-500 font-medium normal-case border-l-2 border-gray-100 pl-4 animate-fade-in-down">
+                                <li><a href="/shopping-guide" class="block py-1 hover:text-orange-500">Hướng dẫn mua hàng</a></li>
+                                <li><a href="/size-guide" class="block py-1 hover:text-orange-500">Chọn size giày</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li>
+                        <a href="/about-us" class="flex items-center gap-4 hover:text-orange-600 transition">
+                            <i class="fa-solid fa-users w-6 text-center text-gray-400"></i> Về chúng tôi
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="p-6 bg-gray-50 border-t border-gray-100">
+                <a th:if="${session.currentCustomer == null}" href="/login" class="flex items-center gap-4 group">
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-gray-400 border border-gray-200 group-hover:border-orange-500 group-hover:text-orange-500 transition">
+                        <i class="fa-regular fa-user text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-gray-900 group-hover:text-orange-600 transition">Đăng nhập</p>
+                        <p class="text-xs text-gray-500">Để nhận ưu đãi thành viên</p>
+                    </div>
+                </a>
+
+                <div th:if="${session.currentCustomer != null}" class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-lg shadow-sm">
+                            <span th:text="${#strings.substring(session.currentCustomer.name,0,1)}">U</span>
+                        </div>
+                        <span class="font-bold text-sm truncate max-w-[120px]" th:text="${session.currentCustomer.name}">User</span>
+                    </div>
+                    <a href="/logout" class="text-red-500 text-xs font-bold hover:underline bg-red-50 px-3 py-2 rounded-lg border border-red-100">Đăng xuất</a>
+                </div>
+            </div>
+        </div>
+    </div>
     <script th:src="@{/customer/js/main.js}"></script>
 </footer>

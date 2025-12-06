@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${pageTitle} + ' - B2L Shoes'">Cửa hàng</title>
+
+    <link rel="stylesheet" href="https://cdn.tailwindcss.com">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; }
+        input[type="checkbox"] {
+            accent-color: black; /* Màu khi check */
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-white text-black">
+
+<div th:replace="~{customer/fragments/header :: header}"></div>
+
+<div class="container mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8">
+
+    <aside class="w-full lg:w-1/4 flex-shrink-0">
+        <div class="bg-[#f9f9f9] p-5 rounded-sm sticky top-24 max-h-[calc(100vh-100px)] overflow-y-auto custom-scrollbar">
+
+            <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
+                <h3 class="font-bold text-sm uppercase">LỌC THEO</h3>
+                <a href="/products" class="text-xs text-gray-500 hover:text-black"><i class="fa-solid fa-rotate-right"></i> Xóa lọc</a>
+            </div>
+
+            <form id="filterForm" action="/products" method="get">
+
+                <div class="mb-6">
+                    <h4 class="font-bold text-xs uppercase mb-3 tracking-wide">GIỚI TÍNH</h4>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600 hover:text-black">
+                            <input type="checkbox" name="gender" value="Nam" onchange="submitFilter()"
+                                   th:checked="${selectedGender != null && #lists.contains(selectedGender, 'Nam')}"> Nam
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600 hover:text-black">
+                            <input type="checkbox" name="gender" value="Nu" onchange="submitFilter()"
+                                   th:checked="${selectedGender != null && #lists.contains(selectedGender, 'Nu')}"> Nữ
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="font-bold text-xs uppercase mb-3 tracking-wide bg-gray-100 p-1">GIÀY THỂ THAO</h4>
+
+                    <div class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
+
+                        <th:block th:if="${allSports != null}">
+                            <div th:each="s : ${allSports}">
+                                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600 hover:text-black">
+
+                                    <input type="checkbox" name="sport"
+                                           th:value="${s.name}"
+                                           onchange="submitFilter()"
+                                           th:checked="${selectedSport != null && #lists.contains(selectedSport, s.name)}">
+
+                                    <span th:text="${s.name}">Tên môn</span>
+                                </label>
+                            </div>
+                        </th:block>
+
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="font-bold text-xs uppercase mb-3 tracking-wide bg-gray-100 p-1">THƯƠNG HIỆU</h4>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600 hover:text-black">
+                            <input type="checkbox" name="brand" value="Adidas" onchange="submitFilter()"
+                                   th:checked="${selectedBrand != null && #lists.contains(selectedBrand, 'Adidas')}"> ADIDAS
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600 hover:text-black">
+                            <input type="checkbox" name="brand" value="Nike" onchange="submitFilter()"
+                                   th:checked="${selectedBrand != null && #lists.contains(selectedBrand, 'Nike')}"> NIKE
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600 hover:text-black">
+                            <input type="checkbox" name="brand" value="Puma" onchange="submitFilter()"
+                                   th:checked="${selectedBrand != null && #lists.contains(selectedBrand, 'Puma')}"> PUMA
+                        </label>
+                            <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600 hover:text-black">
+                                <input type="checkbox" name="brand" value="Mizuno" onchange="submitFilter()"
+                                       th:checked="${selectedBrand != null && #lists.contains(selectedBrand, 'Mizuno')}"> MIZUNO
+                            </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600 hover:text-black">
+                            <input type="checkbox" name="brand" value="Li-Ning" onchange="submitFilter()"
+                                   th:checked="${selectedBrand != null && #lists.contains(selectedBrand, 'Li-Ning')}"> LI-NING
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="font-bold text-xs uppercase mb-3 tracking-wide bg-gray-100 p-1">MÀU SẮC</h4>
+                    <div class="flex flex-wrap gap-2">
+                        <label class="cursor-pointer" title="Đen">
+                            <input type="checkbox" name="color" value="Đen" class="peer sr-only" onchange="submitFilter()"
+                                   th:checked="${selectedColor != null && #lists.contains(selectedColor, 'Đen')}">
+                            <span class="block w-6 h-6 rounded-full bg-black border border-gray-300 peer-checked:ring-2 peer-checked:ring-offset-1 peer-checked:ring-black"></span>
+                        </label>
+                        <label class="cursor-pointer" title="Trắng">
+                            <input type="checkbox" name="color" value="Trắng" class="peer sr-only" onchange="submitFilter()"
+                                   th:checked="${selectedColor != null && #lists.contains(selectedColor, 'Trắng')}">
+                            <span class="block w-6 h-6 rounded-full bg-white border border-gray-300 peer-checked:ring-2 peer-checked:ring-offset-1 peer-checked:ring-gray-400"></span>
+                        </label>
+                        <label class="cursor-pointer" title="Đỏ">
+                            <input type="checkbox" name="color" value="Đỏ" class="peer sr-only" onchange="submitFilter()"
+                                   th:checked="${selectedColor != null && #lists.contains(selectedColor, 'Đỏ')}">
+                            <span class="block w-6 h-6 rounded-full bg-red-600 border border-gray-300 peer-checked:ring-2 peer-checked:ring-offset-1 peer-checked:ring-red-600"></span>
+                        </label>
+                        <label class="cursor-pointer" title="Xanh Dương">
+                            <input type="checkbox" name="color" value="Xanh Dương" class="peer sr-only" onchange="submitFilter()"
+                                   th:checked="${selectedColor != null && #lists.contains(selectedColor, 'Xanh Dương')}">
+                            <span class="block w-6 h-6 rounded-full bg-blue-600 border border-gray-300 peer-checked:ring-2 peer-checked:ring-offset-1 peer-checked:ring-blue-600"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="font-bold text-xs uppercase mb-3 tracking-wide bg-gray-100 p-1">KÍCH THƯỚC</h4>
+                    <div class="grid grid-cols-4 gap-2">
+                        <th:block th:each="s : ${#numbers.sequence(36, 45)}">
+                            <label class="cursor-pointer">
+                                <input type="checkbox" name="size" th:value="${s}" class="peer sr-only" onchange="submitFilter()"
+                                       th:checked="${selectedSize != null && #lists.contains(selectedSize, #strings.toString(s))}">
+                                <span class="block w-full py-1 text-center text-xs border border-gray-300 rounded hover:border-black peer-checked:bg-black peer-checked:text-white transition"
+                                      th:text="${s}">36</span>
+                            </label>
+                        </th:block>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2 pt-2 border-t border-dashed border-gray-200">
+                        <th:block th:each="s : ${ {'XS', 'S', 'M', 'L', 'XL', 'XXL'} }">
+                            <label class="cursor-pointer">
+                                <input type="checkbox" name="size" th:value="${s}" class="peer sr-only" onchange="submitFilter()"
+                                       th:checked="${selectedSize != null && #lists.contains(selectedSize, s)}">
+                                <span class="block w-full py-1 text-center text-xs border border-gray-300 rounded hover:border-black peer-checked:bg-black peer-checked:text-white transition"
+                                      th:text="${s}">S</span>
+                            </label>
+                        </th:block>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="font-bold text-xs uppercase mb-3 tracking-wide bg-gray-100 p-1">GIÁ</h4>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600 hover:text-black">
+                            <input type="radio" name="priceRange" value="lt1m" onchange="submitFilter()"
+                                   th:checked="${selectedPrice == 'lt1m'}"> < 1.000.000 đ
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600 hover:text-black">
+                            <input type="radio" name="priceRange" value="1m-2m" onchange="submitFilter()"
+                                   th:checked="${selectedPrice == '1m-2m'}"> 1tr - 2tr
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600 hover:text-black">
+                            <input type="radio" name="priceRange" value="gt2m" onchange="submitFilter()"
+                                   th:checked="${selectedPrice == 'gt2m'}"> > 2.000.000 đ
+                        </label>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </aside>
+
+    <main class="flex-1">
+
+        <div class="mb-6 relative">
+            <input type="text" placeholder="Tìm kiếm sản phẩm trong trang này"
+                   class="w-full border border-gray-200 rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-black">
+            <i class="fa-solid fa-magnifying-glass absolute right-4 top-3.5 text-gray-400"></i>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+
+            <div th:each="product : ${products}" class="group cursor-pointer">
+                <div class="relative aspect-square bg-[#f9f9f9] mb-3 overflow-hidden rounded-sm">
+                    <button class="absolute top-2 right-2 text-gray-400 hover:text-red-500 z-10">
+                        <i class="fa-regular fa-heart text-sm"></i>
+                    </button>
+
+                    <a th:href="@{'/product/' + ${product.id}}">
+                        <img th:src="@{${product.image}}" class="w-full h-full object-contain p-4 mix-blend-multiply group-hover:scale-110 transition duration-500">
+                    </a>
+                </div>
+
+                <div class="text-left">
+                    <a th:href="@{'/product/' + ${product.id}}">
+                        <h3 class="font-bold text-xs md:text-sm mb-1 truncate text-gray-900 hover:text-orange-600" th:text="${product.name}">
+                            Giày Adidas Ultraboost Light
+                        </h3>
+                    </a>
+                    <p class="text-[10px] text-gray-500 mb-1 line-clamp-2">Êm ái, linh hoạt và đáng tin cậy cho mọi cự ly chạy.</p>
+                    <p class="font-bold text-sm text-gray-900"
+                       th:text="'Giá: ' + ${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'">
+                        Giá: 2.090.000 VNĐ
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <div th:if="${products == null || products.isEmpty()}" class="text-center py-16 bg-gray-50 mt-4 rounded-lg">
+            <p class="text-gray-500">Không tìm thấy sản phẩm nào phù hợp.</p>
+            <a href="/products" class="text-blue-600 underline text-sm">Xóa bộ lọc</a>
+        </div>
+
+        <div class="flex justify-center mt-10 gap-2" th:if="${products != null && !products.isEmpty()}">
+            <button class="px-4 py-1 bg-gray-200 text-gray-700 text-xs font-bold rounded-sm">Trang 1</button>
+            <button class="px-4 py-1 border border-gray-300 text-gray-600 text-xs font-bold rounded-sm hover:bg-gray-50">2</button>
+            <button class="px-4 py-1 border border-gray-300 text-gray-600 text-xs font-bold rounded-sm hover:bg-gray-50">3</button>
+        </div>
+
+    </main>
+</div>
+
+<div th:replace="~{customer/fragments/footer :: footer}"></div>
+
+<script>
+    // Hàm tự động submit khi check vào ô lọc
+    function submitFilter() {
+        // Logic đơn giản: Submit form khi thay đổi
+        // (Nâng cao: Dùng AJAX để không load lại trang)
+        document.getElementById('filterForm').submit();
+    }
+</script>
+</body>
+</html>
