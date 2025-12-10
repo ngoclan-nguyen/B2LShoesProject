@@ -1,10 +1,14 @@
 package com.example.controller;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.example.model.MasterSize;
 import com.example.service.HomeService;
+import com.example.service.MasterSizeService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -13,6 +17,9 @@ import jakarta.servlet.http.HttpServletRequest;
 public class HomeController {
 	@Autowired
     private HomeService homeService;
+	
+	@Autowired 
+	private MasterSizeService masterSizeService;
 
     @GetMapping("/")
     public String home(HttpServletRequest request) {
@@ -39,6 +46,7 @@ public class HomeController {
 
 	@GetMapping("/size-guide")
 	public String shoeSizeGuide(HttpServletRequest request) {
+		request.setAttribute("allSize", masterSizeService.getAllSize());
 		return "customer/shoesize_guide.html";
 	}
 

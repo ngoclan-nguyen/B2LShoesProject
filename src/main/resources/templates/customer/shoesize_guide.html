@@ -39,32 +39,32 @@
 
                 <ul class="space-y-4 text-sm font-medium text-gray-600">
                     <li>
-                        <a href="/support/buying-guide" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                        <a href="/shopping-guide" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
                             Hướng dẫn mua hàng
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="block text-black font-bold border-l-4 border-black pl-3 transition-all">
+                        <a href="/size-guide" class="block text-black font-bold border-l-4 border-black pl-3 transition-all">
                             Hướng dẫn chọn size giày
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                        <a href="/warranty-policy" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
                             Chính sách đổi trả, bảo hành
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                        <a href="/return-guide" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
                             Hướng dẫn đổi trả hàng
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                        <a href="/terms-conditions" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
                             Điều khoản Website
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
+                        <a href="/privacy-policy" class="block hover:text-black hover:pl-3 hover:border-l-4 hover:border-gray-300 transition-all duration-200">
                             Chính sách bảo mật
                         </a>
                     </li>
@@ -96,110 +96,48 @@
                     <h3 class="font-bold text-black text-lg mb-4">Hãy tìm cỡ giày của bạn trong bảng bên dưới:</h3>
 
                     <div class="overflow-x-auto border border-gray-300 rounded-lg shadow-sm">
-                        <table class="w-full text-center text-sm border-collapse">
-                            <thead class="bg-gray-100 font-bold text-black">
-                            <tr>
-                                <th class="p-3 border-b border-r border-gray-300 min-w-[120px]">Mỹ - Nam</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">2</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">2.5</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">3</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">3.5</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">4</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">4.5</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">5</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">5.5</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">6</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">6.5</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">7</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">7.5</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">8</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">8.5</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">9</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">9.5</th>
-                                <th class="p-3 border-b border-gray-300 min-w-[50px]">10</th>
-                            </tr>
+                        <table class="w-full text-center text-sm border-separate border-spacing-0">
+                            <thead class="bg-[black] font-bold text-[white]">
+								<tr>
+	                                <td class="p-3 min-w-[150px] sticky left-0 z-50 bg-black">Heel-toe (cm)</td>
+	                                <td th:each="size : ${allSize}" 
+										th:text="${size.getHeelToeCm()}"
+										class="p-3 min-w-[120px]"></td>
+	                            </tr>
                             </thead>
                             <tbody>
-                            <tr class="bg-white hover:bg-gray-50">
-                                <td class="p-3 border-b border-r border-gray-300 font-bold bg-gray-50">Anh</td>
-                                <td class="p-3 border-b border-gray-300">1.5</td>
-                                <td class="p-3 border-b border-gray-300">1.5</td>
-                                <td class="p-3 border-b border-gray-300">2</td>
-                                <td class="p-3 border-b border-gray-300">2.5</td>
-                                <td class="p-3 border-b border-gray-300">3</td>
-                                <td class="p-3 border-b border-gray-300">3.5</td>
-                                <td class="p-3 border-b border-gray-300">4</td>
-                                <td class="p-3 border-b border-gray-300">4.5</td>
-                                <td class="p-3 border-b border-gray-300">5</td>
-                                <td class="p-3 border-b border-gray-300">5.5</td>
-                                <td class="p-3 border-b border-gray-300">6</td>
-                                <td class="p-3 border-b border-gray-300">6.5</td>
-                                <td class="p-3 border-b border-gray-300">7</td>
-                                <td class="p-3 border-b border-gray-300">7.5</td>
-                                <td class="p-3 border-b border-gray-300">8</td>
-                                <td class="p-3 border-b border-gray-300">8.5</td>
-                                <td class="p-3 border-b border-gray-300">9</td>
-                            </tr>
-                            <tr class="bg-white hover:bg-gray-50">
-                                <td class="p-3 border-b border-r border-gray-300 font-bold bg-gray-50">CM/JP</td>
-                                <td class="p-3 border-b border-gray-300">21</td>
-                                <td class="p-3 border-b border-gray-300">21</td>
-                                <td class="p-3 border-b border-gray-300">21.5</td>
-                                <td class="p-3 border-b border-gray-300">22</td>
-                                <td class="p-3 border-b border-gray-300">22.5</td>
-                                <td class="p-3 border-b border-gray-300">23</td>
-                                <td class="p-3 border-b border-gray-300">23.5</td>
-                                <td class="p-3 border-b border-gray-300">24</td>
-                                <td class="p-3 border-b border-gray-300">24.5</td>
-                                <td class="p-3 border-b border-gray-300">25</td>
-                                <td class="p-3 border-b border-gray-300">25.5</td>
-                                <td class="p-3 border-b border-gray-300">26</td>
-                                <td class="p-3 border-b border-gray-300">26.5</td>
-                                <td class="p-3 border-b border-gray-300">27</td>
-                                <td class="p-3 border-b border-gray-300">27.5</td>
-                                <td class="p-3 border-b border-gray-300">28</td>
-                                <td class="p-3 border-b border-gray-300">28.5</td>
-                            </tr>
-                            <tr class="bg-white hover:bg-gray-50">
-                                <td class="p-3 border-b border-r border-gray-300 font-bold bg-gray-50">Liên minh châu Âu</td>
-                                <td class="p-3 border-b border-gray-300">33.5</td>
-                                <td class="p-3 border-b border-gray-300">34.5</td>
-                                <td class="p-3 border-b border-gray-300">35</td>
-                                <td class="p-3 border-b border-gray-300">35.5</td>
-                                <td class="p-3 border-b border-gray-300">36</td>
-                                <td class="p-3 border-b border-gray-300">36.5</td>
-                                <td class="p-3 border-b border-gray-300">37.5</td>
-                                <td class="p-3 border-b border-gray-300">38</td>
-                                <td class="p-3 border-b border-gray-300">38.5</td>
-                                <td class="p-3 border-b border-gray-300">39</td>
-                                <td class="p-3 border-b border-gray-300">40</td>
-                                <td class="p-3 border-b border-gray-300">40.5</td>
-                                <td class="p-3 border-b border-gray-300">41</td>
-                                <td class="p-3 border-b border-gray-300">42</td>
-                                <td class="p-3 border-b border-gray-300">42.5</td>
-                                <td class="p-3 border-b border-gray-300">43</td>
-                                <td class="p-3 border-b border-gray-300">44</td>
-                            </tr>
-                            <tr class="bg-white hover:bg-gray-50">
-                                <td class="p-3 border-r border-gray-300 font-bold bg-gray-50">Chiều dài bàn chân (cm)</td>
-                                <td class="p-3">20.8</td>
-                                <td class="p-3">21.2</td>
-                                <td class="p-3">21.6</td>
-                                <td class="p-3">22</td>
-                                <td class="p-3">22.4</td>
-                                <td class="p-3">22.9</td>
-                                <td class="p-3">23.3</td>
-                                <td class="p-3">23.7</td>
-                                <td class="p-3">24.1</td>
-                                <td class="p-3">24.5</td>
-                                <td class="p-3">25</td>
-                                <td class="p-3">25.4</td>
-                                <td class="p-3">25.8</td>
-                                <td class="p-3">26.2</td>
-                                <td class="p-3">26.7</td>
-                                <td class="p-3">27.1</td>
-                                <td class="p-3">27.5</td>
-                            </tr>
+								<tr>
+	                                <td class="p-3 min-w-[150px] font-bold sticky left-0 z-50 bg-white border-r-2 border-black">EU</td>
+	                                <td th:each="size : ${allSize}" 
+										th:text="${size.getEuSize()}"
+										class="p-3 min-w-[120px] font-medium"
+										th:classappend="${size.getId() % 2 != 0} ? 'bg-gray-200' : ''">
+									</td>
+	                            </tr>
+								<tr>
+	                                <td class="p-3 min-w-[150px] font-bold sticky left-0 zz-50 bg-white border-r-2 border-black">UK</td>
+	                                <td th:each="size : ${allSize}" 
+										th:text="${size.getUkSize()}"
+										class="p-3 min-w-[120px] font-medium"
+										th:classappend="${size.getId() % 2 != 0} ? 'bg-gray-200' : ''">
+									</td>
+	                            </tr>
+								<tr>
+	                                <td class="p-3 min-w-[150px] font-bold sticky left-0 z-50 bg-white border-r-2 border-black">US - Men</td>
+	                                <td th:each="size : ${allSize}" 
+										th:text="${size.getUsMenSize()}"
+										class="p-3 min-w-[120px] font-medium"
+										th:classappend="${size.getId() % 2 != 0} ? 'bg-gray-200' : ''">
+									</td>
+	                            </tr>
+								<tr>
+	                                <td class="p-3 min-w-[150px] font-bold sticky left-0 z-50 bg-white border-r-2 border-black">US - Women</td>
+	                                <td th:each="size : ${allSize}" 
+										th:text="${size.getUsWomenSize()}"
+										class="p-3 min-w-[120px] font-medium"
+										th:classappend="${size.getId() % 2 != 0} ? 'bg-gray-200' : ''">
+									</td>
+	                            </tr>
                             </tbody>
                         </table>
                     </div>

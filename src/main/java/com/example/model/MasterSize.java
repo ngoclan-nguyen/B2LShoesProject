@@ -19,6 +19,18 @@ public class MasterSize {
 
     @Column(name = "eu_size")
     private BigDecimal euSize;
+    
+    @Column(name = "uk_size")
+    private BigDecimal ukSize;
+    
+    @Column(name = "us_men_size")
+    private BigDecimal usMenSize;
+    
+    @Column(name = "us_women_size")
+    private BigDecimal usWomenSize;
+    
+    @Column(name = "heel_toe_cm")
+    private BigDecimal heelToeCm;
 
     public MasterSize() {}
 
@@ -33,4 +45,17 @@ public class MasterSize {
 
     public BigDecimal getEuSize() { return euSize; }
     public void setEuSize(BigDecimal euSize) { this.euSize = euSize; }
+    
+    public BigDecimal getUkSize() { return ukSize; }
+    public void setUkSize(BigDecimal ukSize) { this.ukSize = ukSize; }
+    
+    public BigDecimal getUsMenSize() { return usMenSize; }
+    public void setUsMenSize(BigDecimal usMenSize) { this.usMenSize = usMenSize; }
+    
+    public BigDecimal getUsWomenSize() { return usWomenSize; }
+    public void setusWomenSize(BigDecimal usWomenSize) { this.usWomenSize = usWomenSize; }
+    
+    public BigDecimal getHeelToeCm() { return heelToeCm; };
+    public void setHeelToeCm(BigDecimal heelToeCm) { this.heelToeCm = heelToeCm; }
+    
 }
