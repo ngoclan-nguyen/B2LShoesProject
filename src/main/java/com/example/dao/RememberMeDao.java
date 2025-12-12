@@ -18,15 +18,15 @@ public class RememberMeDao {
 		RememberMeToken rememberMeToken = null;
 		Session session = null;
 		Transaction transaction = null;
-		
+
 		try {
 			session = HibernateUtil.getSession();
 			transaction = session.beginTransaction();
-			
+
 			Query<RememberMeToken> query = session.createQuery("From RememberMeToken Where token = :token",RememberMeToken.class);
 			query.setParameter("token", token);
 			rememberMeToken = query.getSingleResult();
-			
+
 			transaction.commit();
 		}catch(Exception e) {
 			if(transaction != null) {
@@ -38,20 +38,21 @@ public class RememberMeDao {
 				session.close();
 			}
 		}
-		
+
 		return rememberMeToken;
 	}
 
-	public void save(RememberMeToken rmt) {
+	public void save(RememberMeToken rmt,Long userId) {
 		Session session = null;
 		Transaction transaction = null;
-		
+
 		try {
 			session = HibernateUtil.getSession();
 			transaction = session.beginTransaction();
-			
+			User user = session.getReference(User.class, userId);
+			rmt.setUser(user);
 			session.persist(rmt);
-			
+
 			transaction.commit();
 		}catch(Exception e) {
 			if(transaction != null) {
@@ -63,23 +64,23 @@ public class RememberMeDao {
 				session.close();
 			}
 		}
-	
-		
+
+
 	}
 
 	public void removeToken(String token) {
 		Session session = null;
 		Transaction transaction = null;
-		
+
 		try {
 			session = HibernateUtil.getSession();
 			transaction = session.beginTransaction();
-			
+
 			MutationQuery query= session.createMutationQuery("Delete From RememberMeToken r Where r.token = :token");
 			query.setParameter("token", token);
 			query.executeUpdate();
-			
-			
+
+
 			transaction.commit();
 		}catch(Exception e) {
 			if(transaction != null) {
@@ -90,6 +91,6 @@ public class RememberMeDao {
 			if(session != null && session.isOpen()) {
 				session.close();
 			}
-		}		
+		}
 	}
 }

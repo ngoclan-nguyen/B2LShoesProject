@@ -1,10 +1,14 @@
 package com.example.controller;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.example.model.MasterSize;
 import com.example.service.HomeService;
+import com.example.service.MasterSizeService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -13,6 +17,9 @@ import jakarta.servlet.http.HttpServletRequest;
 public class HomeController {
 	@Autowired
     private HomeService homeService;
+	
+	@Autowired 
+	private MasterSizeService masterSizeService;
 
     @GetMapping("/")
     public String home(HttpServletRequest request) {
@@ -22,16 +29,6 @@ public class HomeController {
         return "customer/home.html"; 
     }
 
-	@GetMapping("/login")
-	public String login(HttpServletRequest request) {
-		return "customer/login.html";
-	}
-
-	@GetMapping("/register")
-	public String register(HttpServletRequest request) {
-		return "customer/register.html";
-	}
-
 	@GetMapping("/shopping-guide")
 	public String shoppingGuide(HttpServletRequest request) {
 		return "customer/shopping_guide.html";
@@ -39,6 +36,7 @@ public class HomeController {
 
 	@GetMapping("/size-guide")
 	public String shoeSizeGuide(HttpServletRequest request) {
+		request.setAttribute("allSize", masterSizeService.getAllSize());
 		return "customer/shoesize_guide.html";
 	}
 
@@ -61,4 +59,7 @@ public class HomeController {
 	public String privacyPolicy() {
 		return "customer/privacy_policy";
 	}
+
+	@GetMapping("/profile")
+	public String profile(HttpServletRequest request) {return "customer/profile.html";}
 }

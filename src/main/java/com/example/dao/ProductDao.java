@@ -3,6 +3,7 @@ package com.example.dao;
 import com.example.config.HibernateUtil;
 import com.example.dto.ProductCardDTO;
 import com.example.dto.ProductDetailDTO;
+import com.example.model.Product;
 import com.example.model.ProductVariant;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -398,7 +399,8 @@ public class ProductDao {
             List<String> category,
             List<String> size,
             List<String> color,
-            String priceRange) {
+            String priceRange,
+            String keyword) {
 
         List<ProductCardDTO> list = null;
         Session session = null;
@@ -429,12 +431,12 @@ public class ProductDao {
                 for (int i = 0; i < sport.size(); i++) {
                     if (i > 0) hql += " OR ";
                     String sVal = sport.get(i);
-                    if(sVal.equalsIgnoreCase("Running")) hql += "s.name LIKE '%Chạy bộ%'";
-                    else if(sVal.equalsIgnoreCase("Football")) hql += "s.name LIKE '%Bóng đá%'";
-                    else if(sVal.equalsIgnoreCase("Basketball")) hql += "s.name LIKE '%Bóng rổ%'";
-                    else if(sVal.equalsIgnoreCase("Gym")) hql += "s.name LIKE '%GYM%'";
-                    else if(sVal.equalsIgnoreCase("Volleyball")) hql += "s.name LIKE '%Bóng chuyền%'";
-                    else if(sVal.equalsIgnoreCase("Badminton")) hql += "s.name LIKE '%Cầu lông%'";
+                    if (sVal.equalsIgnoreCase("Running")) hql += "s.name LIKE '%Chạy bộ%'";
+                    else if (sVal.equalsIgnoreCase("Football")) hql += "s.name LIKE '%Bóng đá%'";
+                    else if (sVal.equalsIgnoreCase("Basketball")) hql += "s.name LIKE '%Bóng rổ%'";
+                    else if (sVal.equalsIgnoreCase("Gym")) hql += "s.name LIKE '%GYM%'";
+                    else if (sVal.equalsIgnoreCase("Volleyball")) hql += "s.name LIKE '%Bóng chuyền%'";
+                    else if (sVal.equalsIgnoreCase("Badminton")) hql += "s.name LIKE '%Cầu lông%'";
                     else hql += "s.name LIKE '%" + sVal + "%'";
                 }
                 hql += ") ";
@@ -470,6 +472,9 @@ public class ProductDao {
                     hql += " AND p.price > 2000000 ";
                 }
             }
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                hql += " AND lower(p.name) LIKE :keyword ";
+            }
 
             hql += " GROUP BY p.id, p.name, p.price, img.path, s.name, p.createdAt ";
 
@@ -477,12 +482,14 @@ public class ProductDao {
 
             org.hibernate.query.Query<ProductCardDTO> query = session.createQuery(hql);
 
-            // Set tham số (Giữ nguyên)
             if (gender != null && !gender.isEmpty()) query.setParameterList("gender", gender);
             if (brand != null && !brand.isEmpty()) query.setParameterList("brand", brand);
             if (category != null && !category.isEmpty()) query.setParameterList("category", category);
             if (color != null && !color.isEmpty()) query.setParameterList("color", color);
 
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                query.setParameter("keyword", "%" + keyword.trim().toLowerCase() + "%");
+            }
             list = query.list();
 
         } catch (Exception e) {
@@ -491,5 +498,23 @@ public class ProductDao {
             if (session != null) session.close();
         }
         return list;
+    }
+
+    public Product findById(Long id) {
+        Product product = null;
+        Session session = null;
+        Transaction transaction = null;
+        try {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+            product = session.get(Product.class, id);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        } finally {
+            if (session != null) session.close();
+        }
+        return product;
     }
 }

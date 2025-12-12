@@ -38,7 +38,7 @@ public class User {
     private String email;
 
     @Column(name = "gender")
-    private Boolean gender; // True: Nam, False: Nữ
+    private String gender; // True: Nam, False: Nữ
 
     @Column(name = "phone", length = 20)
     private String phone;
@@ -50,9 +50,10 @@ public class User {
     private String password;
 
     @Column(name = "title", length = 45)
-    private String title; // Thay thế cho role, dùng để lưu Rank (Kim Cương, Vàng...)
+    private String title;
 
-    // --- CÁC MỐI QUAN HỆ (RELATIONSHIPS) ---
+    @Column(name = "role", length = 45)
+    private String role;
 
     // 1. Đơn hàng (Mapped by 'customer' trong OrderWeb)
     @OneToMany(fetch = FetchType.LAZY,
@@ -93,7 +94,7 @@ public class User {
     public User() {
     }
 
-    public User(Long id, LocalDateTime createdAt, LocalDateTime updatedAt, String address, String name, String email, Boolean gender, String phone, Boolean isDeleted, String password, String title) {
+    public User(Long id, LocalDateTime createdAt, LocalDateTime updatedAt, String address, String name, String email, String gender, String phone, Boolean isDeleted, String password, String title) {
         this.id = id;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -156,11 +157,11 @@ public class User {
         this.email = email;
     }
 
-    public Boolean getGender() {
+    public String getGender() {
         return gender;
     }
 
-    public void setGender(Boolean gender) {
+    public void setGender(String gender) {
         this.gender = gender;
     }
 
@@ -195,6 +196,10 @@ public class User {
     public void setTitle(String title) {
         this.title = title;
     }
+
+    public String getRole() {return role;}
+
+    public void setRole(String role) {this.role = role;}
 
     public List<OrderWeb> getOrderWebs() {
         return orderWebs;

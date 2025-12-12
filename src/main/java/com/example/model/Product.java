@@ -21,7 +21,7 @@ public class Product {
     @Column(name = "price")
     private Long price;
 
-    @Column(name = "gender", length = 5)
+    @Column(name = "gender", length = 20)
     private String gender;
 
     @Column(name = "quantity")
