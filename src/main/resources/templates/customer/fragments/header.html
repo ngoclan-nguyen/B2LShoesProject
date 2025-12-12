@@ -11,7 +11,7 @@
 
                 <div class="flex items-center gap-2">
                     <a href="/">
-                    <img th:src="@{/customer/images/logo.png}" class="w-[30px] h-[30px] md:w-[40px] md:h-[40px]"/>
+                        <img th:src="@{/customer/images/logo.png}" class="w-[30px] h-[30px] md:w-[40px] md:h-[40px]"/>
                     </a>
                     <a href="/" class="flex items-center gap-3 group">
                         <div class="text-xl md:text-2xl font-black italic uppercase tracking-tight text-black">
@@ -40,12 +40,11 @@
                     <span id="cart-qty" class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-sm">0</span>
                 </a>
 
-                <div th:if="${session.currentCustomer == null}" class="flex items-center gap-2 text-sm font-bold">
-                    <a href="/login" class="hover:text-orange-500 transition whitespace-nowrap hidden md:block">Đăng nhập</a>
-                    <span class="hidden md:block text-gray-300">|</span>
-                    <a href="/register" class="hover:text-orange-500 transition whitespace-nowrap hidden md:block">Đăng ký</a>
+                <div th:if="${session.currentCustomer == null}" class="flex items-center gap-3 text-sm font-bold">
+                    <a href="/login" class="px-4 py-2 rounded-full hover:bg-gray-100 transition hidden md:block text-gray-700">Đăng nhập</a>
+                    <a href="/register" class="px-4 py-2 bg-black text-white rounded-full hover:bg-orange-600 shadow-md transition hidden md:block transform hover:-translate-y-0.5">Đăng ký</a>
 
-                    <a href="/login" class="md:hidden hover:text-gray-600 text-2xl transition transform hover:scale-110">
+                    <a href="/login" class="md:hidden hover:text-orange-600 text-2xl transition transform hover:scale-110">
                         <i class="fa-regular fa-circle-user"></i>
                     </a>
                 </div>
@@ -66,24 +65,38 @@
                     <ul class="absolute right-0 top-full pt-2 w-56 hidden group-hover:block z-50 animate-[fadeIn_0.2s_ease-out]">
                         <div class="bg-white shadow-xl rounded-md border border-gray-100 overflow-hidden">
                             <li class="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                                <p class="text-xs text-gray-500">Tài khoản của</p>
-                                <p class="font-bold text-black truncate" th:text="${session.currentCustomer.name}">User Name</p>
-                                <p class="text-xs text-gray-400 truncate" th:text="${session.currentCustomer.email}">email@example.com</p>
+                                <p class="text-xs text-gray-500">Xin chào,</p>
+                                <p class="text-sm font-bold text-black truncate" th:text="${session.currentCustomer.name}">User Name</p>
+                                <p class="text-xs text-gray-400 truncate mt-0.5" th:text="${session.currentCustomer.email}">email@example.com</p>
                             </li>
 
-                            <li><a href="/profile" class="block px-4 py-3 text-sm hover:bg-orange-50 hover:text-orange-500 border-b border-gray-100 transition flex items-center gap-3">
-                                <i class="fa-regular fa-user text-gray-400"></i> Thông tin cá nhân
-                            </a></li>
-                            <li><a href="/my-orders" class="block px-4 py-3 text-sm hover:bg-orange-50 hover:text-orange-500 border-b border-gray-100 transition flex items-center gap-3">
-                                <i class="fa-solid fa-box-open text-gray-400"></i> Đơn mua
-                            </a></li>
-                            <li><a href="/change-password" class="block px-4 py-3 text-sm hover:bg-orange-50 hover:text-orange-500 border-b border-gray-100 transition flex items-center gap-3">
-                                <i class="fa-solid fa-key text-gray-400"></i> Đổi mật khẩu
-                            </a></li>
+                            <li>
+                                <a th:href="@{/profile}" class="block px-4 py-3 text-sm hover:bg-orange-50 hover:text-orange-500 border-b border-gray-100 transition flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover/item:bg-orange-100 transition"><i class="fa-regular fa-id-card"></i></span>
+                                    Hồ sơ cá nhân
+                                </a>
+                            </li>
 
-                            <li><a href="/logout" class="block px-4 py-3 text-sm hover:bg-red-50 text-red-500 font-bold transition flex items-center gap-3">
-                                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
-                            </a></li>
+                            <li>
+                                <a th:href="@{/my-orders}" class="block px-4 py-3 text-sm hover:bg-orange-50 hover:text-orange-500 border-b border-gray-100 transition flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover/item:bg-orange-100 transition"><i class="fa-solid fa-box-open"></i></span>
+                                    Đơn hàng của tôi
+                                </a>
+                            </li>
+
+                            <li>
+                                <a th:href="@{/my-addresses}" class="block px-4 py-3 text-sm hover:bg-orange-50 hover:text-orange-500 border-b border-gray-100 transition flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover/item:bg-orange-100 transition"><i class="fa-solid fa-map-location-dot"></i></span>
+                                    Danh sách địa chỉ
+                                </a>
+                            </li>
+
+                            <li>
+                                <a th:href="@{/logout}" class="block px-5 py-3 text-sm text-red-500 font-bold hover:bg-red-50 transition flex items-center gap-3 group/item">
+                                    <span class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center group-hover/item:bg-red-100 transition"><i class="fa-solid fa-right-from-bracket"></i></span>
+                                    Đăng xuất
+                                </a>
+                            </li>
                         </div>
                     </ul>
                 </div>
@@ -156,4 +169,3 @@
         </nav>
     </div>
 </header>
-

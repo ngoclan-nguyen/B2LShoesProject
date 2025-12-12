@@ -15,8 +15,8 @@ public class RememberMeService {
 		return rememberMeDao.findByToken(token);
 	}
 
-	public void save(RememberMeToken rmt) {
-		rememberMeDao.save(rmt);
+	public void save(RememberMeToken rmt,Long userId) {
+		rememberMeDao.save(rmt, userId);
 	}
 
 	public void removeToken(String token) {

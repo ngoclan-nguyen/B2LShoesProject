@@ -14,66 +14,98 @@
         body { font-family: 'Montserrat', sans-serif; }
     </style>
 </head>
-<body class="bg-white text-black">
+<body class="bg-white text-black flex flex-col min-h-screen">
 
 <div th:replace="~{customer/fragments/header :: header}"></div>
 
-<div class="container mx-auto px-4 py-8 min-h-screen">
-
-    <div class="text-sm text-gray-500 mb-6 uppercase">
-        <a href="/">Trang chủ</a> <span class="mx-2">></span> <span class="text-black font-bold border-b border-black">Tìm kiếm</span>
+<div class="bg-gray-50">
+    <div class="container mx-auto px-4 py-3 text-sm text-gray-500">
+        <a href="/" class="text-gray-900 hover:underline hover:text-black transition">Trang chủ</a>
+        <span class="mx-3 text-gray-400">/</span>
+        <span class="text-black font-bold border-b border-black">Tìm kiếm</span>
     </div>
+</div>
 
+<div class="container mx-auto px-4 py-8 flex-grow">
     <div class="mb-6">
         <p class="text-lg">Kết quả tìm kiếm cho: <strong class="text-2xl">"[[${keyword}]]"</strong></p>
     </div>
 
-    <div class="bg-gray-100 p-3 mb-8 flex flex-wrap items-center gap-4 rounded-sm text-sm">
-        <span class="font-bold text-gray-700">Sắp xếp theo</span>
+    <div class="bg-[#f9f9f9] p-3 mb-8 flex flex-wrap items-center justify-between gap-4 rounded-sm border border-gray-100">
+            <span class="font-bold text-sm text-gray-700">
+                Tìm thấy <span class="text-[#FF9900]" th:text="${products != null ? products.size() : 0}">0</span> sản phẩm
+            </span>
 
-        <a th:href="@{/search(keyword=${keyword}, sort='relevant')}"
-           th:class="${sort == 'relevant' ? 'bg-[#FF9900] text-white px-4 py-2 rounded' : 'bg-white text-black px-4 py-2 rounded hover:bg-gray-200'}">Liên quan</a>
+        <div class="flex items-center gap-2 text-sm">
+            <span class="text-gray-500 hidden sm:inline">Sắp xếp theo:</span>
 
-        <a th:href="@{/search(keyword=${keyword}, sort='newest')}"
-           th:class="${sort == 'newest' ? 'bg-[#FF9900] text-white px-4 py-2 rounded' : 'bg-white text-black px-4 py-2 rounded hover:bg-gray-200'}">Mới nhất</a>
+            <a th:href="@{/search(keyword=${keyword}, sort='relevant')}"
+               th:class="${sort == 'relevant' ? 'bg-black text-white px-3 py-1.5 rounded-sm font-bold' : 'bg-white border border-gray-200 px-3 py-1.5 rounded-sm hover:border-black transition'}">
+                Liên quan
+            </a>
 
-        <select class="bg-white px-4 py-2 rounded border border-gray-300 outline-none cursor-pointer"
-                onchange="location = this.value;">
-            <option value="" disabled selected>Giá</option>
-            <option th:value="@{/search(keyword=${keyword}, sort='price_asc')}" th:selected="${sort == 'price_asc'}">Giá: Thấp đến Cao</option>
-            <option th:value="@{/search(keyword=${keyword}, sort='price_desc')}" th:selected="${sort == 'price_desc'}">Giá: Cao đến Thấp</option>
-        </select>
-    </div>
+            <a th:href="@{/search(keyword=${keyword}, sort='newest')}"
+               th:class="${sort == 'newest' ? 'bg-black text-white px-3 py-1.5 rounded-sm font-bold' : 'bg-white border border-gray-200 px-3 py-1.5 rounded-sm hover:border-black transition'}">
+                Mới nhất
+            </a>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-6" th:if="${products != null && !products.isEmpty()}">
-        <div th:each="product : ${products}" class="group cursor-pointer border border-transparent hover:border-gray-200 p-2 rounded transition">
-            <div class="relative aspect-square bg-[#f5f5f5] mb-4 overflow-hidden rounded">
-                <a th:href="@{'/product/' + ${product.id}}">
-                    <img th:src="@{${product.image}}" class="w-full h-full object-contain p-4 group-hover:scale-110 transition duration-500 mix-blend-multiply">
-                </a>
-            </div>
-            <div>
-                <a th:href="@{'/product/' + ${product.id}}">
-                    <h3 class="font-bold text-sm mb-1 line-clamp-2 hover:text-[#FF9900] transition" th:text="${product.name}">Tên Giày</h3>
-                </a>
-                <p class="text-xs text-gray-500 mb-2" th:text="${product.categoryName}">Category</p>
-                <p class="font-bold text-red-600 text-base"
-                   th:text="${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA')} + '₫'">Giá</p>
-            </div>
+            <select class="bg-white px-3 py-1.5 rounded-sm border border-gray-200 outline-none cursor-pointer focus:border-black text-sm"
+                    onchange="location = this.value;">
+                <option value="" disabled selected>Giá</option>
+                <option th:value="@{/search(keyword=${keyword}, sort='price_asc')}" th:selected="${sort == 'price_asc'}">Giá: Thấp đến Cao</option>
+                <option th:value="@{/search(keyword=${keyword}, sort='price_desc')}" th:selected="${sort == 'price_desc'}">Giá: Cao đến Thấp</option>
+            </select>
         </div>
     </div>
 
-    <div th:if="${products == null || products.isEmpty()}" class="text-center py-16">
-        <i class="fa-solid fa-magnifying-glass text-6xl text-gray-300 mb-4"></i>
-        <p class="text-gray-500 text-lg">Không tìm thấy sản phẩm nào phù hợp.</p>
-        <a href="/" class="text-[#FF9900] font-bold hover:underline mt-2 block">Xem tất cả sản phẩm</a>
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6" th:if="${products != null && !products.isEmpty()}">
+
+        <div th:each="product : ${products}" class="group relative">
+
+            <div class="relative aspect-square bg-[#f9f9f9] mb-3 overflow-hidden rounded-sm border border-transparent hover:border-gray-200 transition-all">
+
+                <button class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 shadow-sm z-10 transition opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0">
+                    <i class="fa-regular fa-heart"></i>
+                </button>
+
+                <a th:href="@{'/product/' + ${product.id}}">
+                    <img th:src="@{${product.image}}" class="w-full h-full object-contain p-4 mix-blend-multiply group-hover:scale-110 transition duration-500 ease-in-out">
+                </a>
+
+                <button class="absolute bottom-0 left-0 w-full bg-[#FF9900] text-white py-2 text-xs font-bold uppercase translate-y-full group-hover:translate-y-0 transition duration-300 flex items-center justify-center gap-2 hover:bg-[#e68a00]">
+                    <i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ
+                </button>
+            </div>
+
+            <div class="text-left">
+                <p class="text-[10px] text-gray-400 uppercase font-bold mb-1"
+                   th:text="${product.brand != null ? product.brand : 'B2L SHOES'}">BRAND</p>
+
+                <a th:href="@{'/product/' + ${product.id}}">
+                    <h3 class="font-bold text-xs md:text-sm mb-1 truncate text-gray-900 hover:text-[#FF9900] transition" th:text="${product.name}">Tên Giày</h3>
+                </a>
+
+                <p class="font-bold text-sm text-[#FF9900]"
+                   th:text="${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA')} + ' đ'">Giá</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div th:if="${products == null || products.isEmpty()}" class="text-center py-20 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+        <i class="fa-solid fa-magnifying-glass text-5xl text-gray-300 mb-4"></i>
+        <p class="text-gray-600 font-medium text-lg">Rất tiếc, không tìm thấy sản phẩm nào.</p>
+        <p class="text-gray-400 text-sm mb-6">Hãy thử tìm kiếm với từ khóa khác hoặc danh mục chung chung hơn.</p>
+        <a href="/products" class="inline-block px-8 py-3 bg-black text-white font-bold uppercase rounded shadow hover:bg-[#FF9900] transition transform hover:-translate-y-1">
+            Xem tất cả sản phẩm
+        </a>
     </div>
 
     <div class="flex justify-center mt-12 gap-2" th:if="${totalPages > 1}">
         <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
             <a th:href="@{/search(keyword=${keyword}, sort=${sort}, page=${i})}"
                th:text="${i + 1}"
-               th:class="${currentPage == i ? 'px-4 py-2 bg-[#FF9900] text-white font-bold rounded' : 'px-4 py-2 border rounded hover:bg-gray-100'}">
+               th:class="${currentPage == i ? 'w-9 h-9 flex items-center justify-center bg-black text-white font-bold rounded-sm' : 'w-9 h-9 flex items-center justify-center border border-gray-300 text-gray-600 font-bold rounded-sm hover:bg-gray-100 transition'}">
             </a>
         </th:block>
     </div>

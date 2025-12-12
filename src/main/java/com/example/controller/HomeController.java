@@ -22,16 +22,6 @@ public class HomeController {
         return "customer/home.html"; 
     }
 
-	@GetMapping("/login")
-	public String login(HttpServletRequest request) {
-		return "customer/login.html";
-	}
-
-	@GetMapping("/register")
-	public String register(HttpServletRequest request) {
-		return "customer/register.html";
-	}
-
 	@GetMapping("/shopping-guide")
 	public String shoppingGuide(HttpServletRequest request) {
 		return "customer/shopping_guide.html";
@@ -61,4 +51,7 @@ public class HomeController {
 	public String privacyPolicy() {
 		return "customer/privacy_policy";
 	}
+
+	@GetMapping("/profile")
+	public String profile(HttpServletRequest request) {return "customer/profile.html";}
 }

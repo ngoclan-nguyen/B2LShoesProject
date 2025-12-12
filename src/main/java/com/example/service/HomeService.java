@@ -52,8 +52,9 @@ public class HomeService {
             List<String> category,
             List<String> size,
             List<String> color,
-            String priceRange) {
+            String priceRange,
+            String keyword ) {
 
-        return productDAO.filterProducts(gender, sport, brand, category, size, color, priceRange);
+        return productDAO.filterProducts(gender, sport, brand, category, size, color, priceRange, keyword);
     }
 }

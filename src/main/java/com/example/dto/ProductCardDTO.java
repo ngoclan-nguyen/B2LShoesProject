@@ -6,7 +6,8 @@ public class ProductCardDTO {
     private Long price;
     private String image;   
     private String categoryName;
-    private String label;     
+    private String label;
+    private String brand;
 
     public ProductCardDTO(Long id, String name, Long price, String image, String categoryName, String label) {
         this.id = id;
@@ -36,4 +37,7 @@ public class ProductCardDTO {
 
     public String getLabel() { return label; }
     public void setLabel(String label) { this.label = label; }
+
+    public String getBrand() { return brand; }
+    public void setBrand(String brand) { this.brand = brand; }
 }
