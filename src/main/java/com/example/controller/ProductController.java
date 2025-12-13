@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.example.dao.BrandDao;
 import com.example.dao.ProductReviewDao;
+import com.example.dao.SizeDao;
 import com.example.dao.SportDao;
 import com.example.model.ProductReview;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,8 @@ public class ProductController {
     private SportDao sportDao;
     @Autowired
     private ProductReviewDao productReviewDao;
+    @Autowired
+    private SizeDao sizeDao;
 
     @GetMapping("/search")
     public String search(
@@ -62,6 +65,7 @@ public class ProductController {
 
         request.setAttribute("product", product);
         request.setAttribute("relatedProducts", relatedProducts);
+        request.setAttribute("currentProduct", product);
 
         return "customer/product_detail";
     }
@@ -94,6 +98,9 @@ public class ProductController {
         request.setAttribute("allSports", sportDao.findAll());
         request.setAttribute("allBrands", brandDao.findAll());
         request.setAttribute("pageTitle", "Sản phẩm");
+
+        List<String> allSizes = sizeDao.getAllSizeNames();
+        request.setAttribute("allSizes", allSizes);
 
         return "customer/products";
     }

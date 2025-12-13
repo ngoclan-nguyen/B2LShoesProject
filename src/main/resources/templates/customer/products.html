@@ -109,14 +109,24 @@
 
                 <div class="mb-6">
                     <h4 class="font-bold text-xs uppercase mb-3 tracking-wide bg-gray-100 p-1">KÍCH THƯỚC</h4>
-                    <div class="grid grid-cols-4 gap-2">
-                        <th:block th:each="s : ${#numbers.sequence(36, 45)}">
-                            <label class="cursor-pointer">
-                                <input type="checkbox" name="size" th:value="${s}" class="peer sr-only" onchange="submitFilter()"
-                                       th:checked="${selectedSize != null && #lists.contains(selectedSize, #strings.toString(s))}">
-                                <span class="block w-full py-1 text-center text-xs border border-gray-300 rounded hover:border-black peer-checked:bg-black peer-checked:text-white transition"
-                                      th:text="${s}">36</span>
-                            </label>
+
+                    <div class="flex flex-wrap gap-2">
+                        <th:block th:if="${allSizes != null && !allSizes.isEmpty()}">
+                            <div th:each="size : ${allSizes}">
+                                <input type="checkbox"
+                                       name="size"
+                                       th:value="${size}"
+                                       th:id="'filter-size-' + ${size}"
+                                       class="peer hidden"
+                                       onchange="submitFilter()"
+                                       th:checked="${selectedSize != null && #lists.contains(selectedSize, size)}">
+
+                                <label th:for="'filter-size-' + ${size}"
+                                       th:text="${size}"
+                                       class="w-10 h-8 flex items-center justify-center border border-gray-300 rounded cursor-pointer text-xs font-bold bg-white text-gray-600 hover:border-black peer-checked:bg-black peer-checked:text-white transition-all">
+                                    39
+                                </label>
+                            </div>
                         </th:block>
                     </div>
                 </div>

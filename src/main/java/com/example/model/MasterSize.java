@@ -32,6 +32,9 @@ public class MasterSize {
     @Column(name = "heel_toe_cm")
     private BigDecimal heelToeCm;
 
+    @Column(name = "eu_shoes_size_range")
+    private String euShoesSizeRange;
+
     public MasterSize() {}
 
     public Integer getId() { return id; }
@@ -57,5 +60,7 @@ public class MasterSize {
     
     public BigDecimal getHeelToeCm() { return heelToeCm; };
     public void setHeelToeCm(BigDecimal heelToeCm) { this.heelToeCm = heelToeCm; }
-    
+
+    public String getEuShoesSizeRange() { return euShoesSizeRange; }
+    public void setEuShoesSizeRange(String euShoesSizeRange) {this.euShoesSizeRange = euShoesSizeRange; }
 }

@@ -69,37 +69,66 @@
                 </div>
 
                 <div class="mb-8">
-                    <p class="text-3xl font-bold text-[#FF9900]"
-                       th:text="${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA')} + '₫'">2.090.000₫</p>
-                </div>
-
-                <div class="mb-8">
                     <div class="flex justify-between items-center mb-3">
                         <span class="font-bold text-sm uppercase tracking-wide">Kích thước:</span>
                         <a href="/size-guide" class="text-xs text-gray-500 underline hover:text-black flex items-center gap-1">
                             <i class="fa-solid fa-ruler"></i> Hướng dẫn chọn size
                         </a>
                     </div>
-                    <div class="flex flex-wrap gap-3" id="size-container">
-                        <button th:each="size : ${product.sizes}"
-                                class="size-btn w-12 h-12 border border-gray-300 rounded-sm flex items-center justify-center font-bold text-sm bg-white transition"
-                                onclick="selectSize(this)"
-                                th:text="${size}">39</button>
+
+                    <div th:if="${product.sizes != null && !product.sizes.isEmpty()}" class="flex flex-wrap gap-3" id="size-container">
+                        <th:block th:each="s : ${product.sizes}">
+
+                            <button th:if="${s.quantity > 0}"
+                                    class="size-btn min-w-[48px] h-12 px-2 border border-gray-200 rounded-sm flex items-center justify-center font-bold text-sm bg-white hover:border-black hover:shadow-sm transition-all cursor-pointer"
+                                    onclick="selectSize(this)"
+                                    th:text="${s.name}"
+                                    th:attr="data-size=${s.name}">
+                                39
+                            </button>
+
+                            <button th:if="${s.quantity <= 0}"
+                                    disabled
+                                    class="min-w-[48px] h-12 px-2 border border-gray-100 rounded-sm flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 opacity-50 cursor-not-allowed relative"
+                                    title="Hết hàng">
+                                <span th:text="${s.name}">39</span>
+                            </button>
+
+                        </th:block>
                     </div>
-                    <p id="size-error" class="text-red-500 text-xs mt-2 hidden font-bold animate-pulse">
-                        <i class="fa-solid fa-circle-exclamation mr-1"></i> Vui lòng chọn size giày!
+
+                    <div th:if="${product.sizes == null || product.sizes.isEmpty()}"
+                         class="p-4 bg-gray-50 rounded border border-gray-200 text-sm text-gray-500 italic flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                            <i class="fa-solid fa-box-open text-gray-400"></i>
+                        </div>
+                        <span>Sản phẩm này đang tạm hết hàng. Vui lòng quay lại sau!</span>
+                    </div>
+
+                    <p id="size-error" class="text-red-500 text-xs mt-3 hidden font-bold animate-pulse flex items-center">
+                        <i class="fa-solid fa-circle-exclamation mr-1.5"></i> Vui lòng chọn kích thước trước khi thêm vào giỏ!
                     </p>
                 </div>
 
                 <div class="flex gap-4 mb-8">
                     <div class="flex items-center border border-gray-300 rounded-sm w-32 h-12">
-                        <button onclick="decreaseQty()" class="w-10 h-full hover:bg-gray-100 text-lg">-</button>
+                        <button onclick="decreaseQty()" class="w-10 h-full hover:bg-gray-100 text-lg"
+                                th:disabled="${product.sizes == null || product.sizes.isEmpty()}">-</button>
                         <input type="text" id="qty" value="1" class="w-12 h-full text-center outline-none font-bold border-x border-gray-200" readonly>
-                        <button onclick="increaseQty()" class="w-10 h-full hover:bg-gray-100 text-lg">+</button>
+                        <button onclick="increaseQty()" class="w-10 h-full hover:bg-gray-100 text-lg"
+                                th:disabled="${product.sizes == null || product.sizes.isEmpty()}">+</button>
                     </div>
-                    <button onclick="addToCartDetail()"
+
+                    <button th:if="${product.sizes != null && !product.sizes.isEmpty()}"
+                            onclick="addToCartDetail()"
                             class="flex-1 bg-[#FF9900] text-white font-bold uppercase rounded-sm hover:bg-orange-600 hover:shadow-lg transition-all duration-300 h-12 flex items-center justify-center gap-2">
                         <i class="fa-solid fa-cart-plus text-lg"></i> Thêm vào giỏ
+                    </button>
+
+                    <button th:if="${product.sizes == null || product.sizes.isEmpty()}"
+                            disabled
+                            class="flex-1 bg-gray-300 text-gray-500 font-bold uppercase rounded-sm cursor-not-allowed h-12 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-ban text-lg"></i> Hết hàng
                     </button>
                 </div>
 
@@ -268,23 +297,36 @@
 
 <script>
     function selectSize(btn) {
-        document.querySelectorAll('.size-btn').forEach(el => el.classList.remove('selected'));
-        btn.classList.add('selected');
-        selectedSize = btn.innerText;
+
+        document.querySelectorAll('.size-btn').forEach(el => {
+            el.classList.remove('bg-black', 'text-white', 'border-black');
+            el.classList.add('bg-white', 'text-black', 'border-gray-200');
+        });
+
+        btn.classList.remove('bg-white', 'text-black', 'border-gray-200');
+        btn.classList.add('bg-black', 'text-white', 'border-black');
+
+        selectedSize = btn.getAttribute('data-size');
+
         document.getElementById('size-error').classList.add('hidden');
     }
 
     function addToCartDetail() {
+        // Kiểm tra đã chọn size chưa
         if (!selectedSize) {
             document.getElementById('size-error').classList.remove('hidden');
             document.getElementById('size-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
+
         const quantity = document.getElementById('qty').value;
 
+        // Gọi API thêm vào giỏ
         fetch(`${PageConfig.cartApi}?productId=${PageConfig.productId}&quantity=${quantity}&size=${selectedSize}`, { method: 'POST' })
             .then(res => res.json())
             .then(data => {
+
+                // THÀNH CÔNG
                 if (data.status === 'success') {
                     const cartBadge = document.getElementById('cart-qty');
                     if(cartBadge) {
@@ -294,9 +336,38 @@
                         setTimeout(() => cartBadge.classList.remove('animate-bounce'), 1000);
                     }
                     Swal.fire({ icon: 'success', title: 'Đã thêm vào giỏ!', showConfirmButton: false, timer: 1500, position: 'top-end', toast: true });
-                } else {
+                }
+
+                // CHƯA ĐĂNG NHẬP
+                else if (data.message === 'auth_required') {
+                    Swal.fire({
+                        title: 'Yêu cầu đăng nhập',
+                        text: "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!",
+                        icon: 'info',
+                        showCancelButton: true,
+                        confirmButtonColor: '#FF9900',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Đăng nhập ngay',
+                        cancelButtonText: 'Để sau'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Logic chuyển hướng thần thánh:
+                            // Lấy đường dẫn hiện tại  gán vào biến redirect
+                            const currentUrl = encodeURIComponent(window.location.pathname);
+
+                            // Chuyển sang trang login kèm tham số redirect
+                            window.location.href = `${PageConfig.loginUrl}?redirect=${currentUrl}`;
+                        }
+                    });
+                }
+
+                else {
                     Swal.fire({ icon: 'warning', title: 'Thông báo', text: data.message, confirmButtonColor: '#FF9900' });
                 }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Có lỗi xảy ra, vui lòng thử lại sau.' });
             });
     }
 
