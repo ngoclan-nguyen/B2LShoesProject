@@ -27,9 +27,7 @@ public class CartRestController {
         Map<String, Object> response = new HashMap<>();
         UserDTO userDto = (UserDTO) request.getSession().getAttribute("currentCustomer");
         if (userDto == null) {
-            response.put("status", "error");
-            response.put("message", "Bạn cần đăng nhập để mua hàng!");
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(Map.of("status", "error", "message", "auth_required"));
         }
 
         int result = cartService.addToCart(productId, quantity, size, userDto.getId());

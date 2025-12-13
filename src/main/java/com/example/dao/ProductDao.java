@@ -3,6 +3,7 @@ package com.example.dao;
 import com.example.config.HibernateUtil;
 import com.example.dto.ProductCardDTO;
 import com.example.dto.ProductDetailDTO;
+import com.example.dto.ProductDetailDTO.SizeOption;
 import com.example.model.Product;
 import com.example.model.ProductVariant;
 import jakarta.persistence.EntityManager;
@@ -12,6 +13,7 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -244,10 +246,11 @@ public class ProductDao {
 
     public ProductDetailDTO findProductDetailById(Long id) {
         ProductDetailDTO product = null;
+        Session session = null;
+        Transaction transaction = null;
         try {
-            // Lấy Session từ EntityManager do Spring quản lý
-            // Cách này tránh được lỗi ClassCastException do DevTools gây ra
-            Session session = entityManager.unwrap(Session.class);
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
 
             String hql = "SELECT new com.example.dto.ProductDetailDTO(" +
                     "p.id, p.name, p.price, p.description, c.name, b.name) " +
@@ -267,17 +270,31 @@ public class ProductDao {
                 imgQuery.setParameter("id", id);
                 product.setImages(imgQuery.list());
 
-                String sizeHql = "SELECT ms.sizeName FROM ProductVariant v " +
+                String sizeHql = "SELECT ms.sizeName, v.quantity FROM ProductVariant v " +
                         "JOIN v.size ms " +
-                        "WHERE v.product.id = :id AND v.quantity > 0 " +
+                        "WHERE v.product.id = :id " +
                         "ORDER BY ms.id ASC";
-                org.hibernate.query.Query<String> sizeQuery = session.createQuery(sizeHql);
-                sizeQuery.setParameter("id", id);
-                product.setSizes(sizeQuery.list());
-            }
 
+                org.hibernate.query.Query<Object[]> sizeQuery = session.createQuery(sizeHql, Object[].class);
+                sizeQuery.setParameter("id", id);
+                List<Object[]> rows = sizeQuery.list();
+
+                // 3. Map dữ liệu vào List<SizeOption>
+                List<ProductDetailDTO.SizeOption> sizeList = new java.util.ArrayList<>();
+                for (Object[] row : rows) {
+                    sizeList.add(new ProductDetailDTO.SizeOption(
+                            (String) row[0], // Tên size
+                            (Integer) row[1] // Số lượng
+                    ));
+                }
+                product.setSizes(sizeList);
+            }
+            transaction.commit();
         } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
             e.printStackTrace();
+        } finally {
+            if (session != null) session.close();
         }
         return product;
     }
@@ -335,31 +352,23 @@ public class ProductDao {
 
     // Tìm variant theo size (Dùng cho Add To Cart)
     public ProductVariant findVariantByProductAndSize(Long productId, String sizeName) {
-        ProductVariant variant = null;
-        Session session = null;
-        Transaction transaction = null;
         try {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
             String hql = "SELECT v FROM ProductVariant v " +
                     "JOIN v.size s " +
                     "WHERE v.product.id = :pid AND s.sizeName = :sname";
 
-            Query<ProductVariant> query = session.createQuery(hql, ProductVariant.class);
-            query.setParameter("pid", productId);
-            query.setParameter("sname", sizeName);
+            // Sử dụng getResultStream().findFirst() để an toàn hơn, tránh lỗi NoResultException
+            return entityManager.createQuery(hql, ProductVariant.class)
+                    .setParameter("pid", productId)
+                    .setParameter("sname", sizeName)
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
 
-            variant = query.uniqueResult();
-
-            transaction.commit();
         } catch (Exception e) {
-            if (transaction != null) transaction.rollback();
             e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
+            return null;
         }
-        return variant;
     }
 
     // Tìm variant đầu tiên (Dùng cho Add To Cart nhanh)

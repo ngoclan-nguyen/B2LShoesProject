@@ -25,7 +25,7 @@ public class RememberMeDao {
 
 			Query<RememberMeToken> query = session.createQuery("From RememberMeToken Where token = :token",RememberMeToken.class);
 			query.setParameter("token", token);
-			rememberMeToken = query.getSingleResult();
+			rememberMeToken = query.uniqueResult();
 
 			transaction.commit();
 		}catch(Exception e) {
