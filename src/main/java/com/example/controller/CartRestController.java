@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -65,4 +67,53 @@ public class CartRestController {
 
         return ResponseEntity.ok(count);
     }
+    
+    @PostMapping("/remove")
+	public ResponseEntity<?> removeCartItem(HttpServletRequest request, @RequestParam Integer productVariantId) {
+		//UserDTO user = (UserDTO)request.getSession().getAttribute("currentCustomer");
+		//Long userId = null;
+		//if (user == null) {
+		//	return ResponseEntity.badRequest().body("Please Login!");
+		//} else {
+		//	userId = user.getId();
+		//}
+		boolean deleteStatus = cartService.removeCartItem(10L, productVariantId);
+		return (deleteStatus) ? ResponseEntity.ok("Delete Succes!") : ResponseEntity.badRequest().body("Delete Fail!");
+	}
+    
+    @PostMapping("/updateSelection")
+    @ResponseBody 
+    public Map<String, Object> updateCartSelection(HttpServletRequest request, 
+    			@RequestBody(required = false) List<Long> productVariantIds) {
+    	//UserDTO user = (UserDTO)request.getSession().getAttribute("currentCustomer");
+		//Long userId = null;
+		//if (user != null)
+		//	userId = user.getId(); 
+    	request.getSession().setAttribute("productVariantIds", productVariantIds);
+    	
+    	Long totalAmount = cartService.getTotalAmountBySelectedItem(6L, productVariantIds);
+    	
+    	return Map.of("totalAmount", totalAmount != null ? totalAmount : 0L);
+    }
+    
+    @SuppressWarnings("unchecked")
+	@PostMapping("/updateQuantity")
+    @ResponseBody
+    public Map<String, Object> updateQuantity(@RequestParam Long productVariantId,
+                                              @RequestParam Integer quantity,
+                                              HttpServletRequest request) {
+    	//UserDTO user = (UserDTO)request.getSession().getAttribute("currentCustomer");
+    			//Long userId = null;
+    			//if (user != null)
+    			//	userId = user.getId(); 
+        Long userId = 6L;
+        cartService.updateQuantity(userId, productVariantId, quantity);
+
+		List<Long> selectedIds = (List<Long>) request.getSession().getAttribute("productVariantIds");
+
+        Long totalAmount = cartService.getTotalAmountBySelectedItem(userId, selectedIds);
+
+        return Map.of("totalAmount", totalAmount != null ? totalAmount : 0L);
+    }
+    
 }

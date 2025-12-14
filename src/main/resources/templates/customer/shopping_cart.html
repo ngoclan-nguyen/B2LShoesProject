@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <title>Giỏ hàng</title>
+
+    <link rel="stylesheet" href="https://cdn.tailwindcss.com">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; }
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-white text-black">
+    <div th:replace="~{customer/fragments/header :: header}"></div>
+
+    <h1 class="font-bold text-3xl text-left px-20 pt-10">GIỎ HÀNG CỦA BẠN</h1>
+
+    <div class="w-[95%] flex gap-20 mx-auto">
+        <div class="w-[70%]">
+            <div th:if="${cartItem == null || cartItem.isEmpty()}">
+                <p>Giỏ hàng của bạn đang trống. Hãy quay lại trang mua hàng nhé!</p>
+            </div>
+            <div th:unless="${cartItem == null || cartItem.isEmpty()}" class="flex flex-col gap-10 mb-20">
+                <!-- Select All Checkbox -->
+                <div class="flex items-center gap-2 mb-2 ml-auto">
+                    <input type="checkbox" id="selectAll" class="w-6 h-6 border border-gray-400">
+                    <label for="selectAll" class="font-bold">Tất cả</label>
+                </div>
+
+				<div th:each="item : ${cartItem}" 
+					th:id="'cartItem-' + ${item.productId}"
+					class="cartItem flex gap-5 rounded-lg border border-gray-300 p-5 cursor-pointer transition-transform hover:scale-[1.01] hover:shadow-[0_4px_4px_0_rgba(0,0,0,0.5)]">
+				    <img th:src="${item.productImagePath}" class="w-[20%] border border-gray-300">
+
+				    <div class="flex flex-col gap-8 w-[60%]">
+				        <h1 class="font-bold text-2xl" th:text="${item.productName}">Tên sản phẩm</h1>
+				        <p class="text-gray-500">
+				            Giá: <span th:text="${#numbers.formatInteger(item.productPrice, 0, 'POINT') + 'đ'}" class="text-black font-bold"></span>
+				        </p>
+				        <div class="flex mt-auto items-end">
+				            <p class="text-gray-500">
+				                Kích thước: <span th:text="${item.productSizeName}" class="text-black font-bold"></span>
+				            </p>
+							<div class="adjustQuantity flex items-center ml-auto">
+							    <button class="quantityMinus flex items-center justify-center border border-gray-300 border-r-0 font-bold text-2xl w-8 h-8 hover:bg-black hover:text-white"
+							            th:attr="data-id=${item.productVariantId}">-</button>
+							    <p class="quantityDisplay flex items-center justify-center border border-gray-300 font-bold w-8 h-8 text-center"
+							       th:text="${item.quantity}">1</p>
+							    <button class="quantityPlus flex items-center justify-center border border-gray-300 border-l-0 font-bold text-2xl w-8 h-8 hover:bg-black hover:text-white"
+							            th:attr="data-id=${item.productVariantId}">+</button>
+							</div>
+				        </div>
+				    </div>
+
+				    <div class="w-[20%] flex flex-col items-end">
+				        <input type="checkbox"
+				               class="selectedItem itemCheckbox w-6 h-6 border border-gray-400 transition-transform hover:scale-[1.1]"
+				               th:attr="data-id=${item.productVariantId}"
+				               th:checked="${productVariantIds != null and #lists.contains(productVariantIds, item.productVariantId)}"/>
+
+				        <button class="removeCartBtn w-32 h-12 flex items-center justify-center bg-black mt-auto transition-transform hover:scale-[1.1]"
+				                th:attr="data-id=${item.productVariantId}">
+				            <img th:src="@{/customer/images/white_bin.png}" alt="Bin image">
+				        </button>
+				    </div>
+				</div>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-5 divide-y divide-black w-[30%] h-fit pb-20 mb-20 bg-[#D9D9D9] rounded-lg">
+            <div class="w-[90%] mx-auto">
+                <h2 class="font-bold text-2xl pt-5">ĐƠN HÀNG</h2>
+            </div>
+            <div class="flex flex-col w-[90%] mx-auto gap-5 divide-y divide-dashed divide-gray-500">
+                <div class="flex flex-col gap-4 w-full mx-auto pt-5">
+                    <h3 class="font-bold text-xl">NHẬP MÃ KHUYẾN MÃI</h3>
+                    <form id="voucherForm" class="flex">
+                        <input id="voucher" name="voucher" placeholder="Nhập mã khuyến mãi"
+                               class="bg-white w-[70%] h-16 px-4 placeholder:text-gray-500">
+                        <button class="w-[30%] h-16 bg-[#FF9900] text-white font-bold hover:bg-orange-600 hover:shadow-lg transition-all duration-300" type="button">
+                            ÁP DỤNG
+                        </button>
+                    </form>
+                </div>
+                <div class="flex flex-col gap-4 w-full mx-auto pt-5">
+                    <div class="flex">
+                        <p class="mr-auto">Đơn hàng</p>
+                        <p class="ml-auto" id="totalAmountDisplay">0đ</p>
+                    </div>
+                    <div class="flex">
+                        <p class="mr-auto">Giảm giá</p>
+                        <p class="ml-auto">0đ</p>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-4 w-full mx-auto pt-5">
+                    <div class="flex">
+                        <p class="mr-auto font-bold text-lg">THÀNH TIỀN</p>
+                        <p class="ml-auto font-bold text-lg" id="finalAmountDisplay">0đ</p>
+                    </div>
+                    <button class="w-[90%] h-16 block mx-auto bg-[#FF9900] text-white font-bold text-xl hover:bg-orange-600 hover:shadow-lg transition-all duration-300">
+                        ĐẶT HÀNG NGAY
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{customer/fragments/footer :: footer}"></div>
+
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script>
+		$(function() {
+		    const token = $("meta[name='_csrf']").attr("content");
+		    const header = $("meta[name='_csrf_header']").attr("content");
+			
+			$(document).on('click', '.cartItem', function(e) {
+			    // Nếu click vào nút xóa thì bỏ qua
+			    if ($(e.target).closest('.selectedItem').length) return;
+				if ($(e.target).closest('.adjustQuantity').length) return;
+				if ($(e.target).closest('.removeCartBtn').length) return;
+				
+				console.log($(this).attr('id'));
+
+			    const productId = $(this).attr('id').replace('cartItem-', '');
+			    window.location.href = `/product/${productId}`;
+			});
+	
+		    function updateCartSelection() {
+		        const selectedIds = $('.itemCheckbox:checked').map(function() {
+		            return Number($(this).data('id'));
+		        }).get();
+	
+		        $.ajax({
+		            url: '/api/cart/updateSelection',
+		            type: 'POST',
+		            contentType: 'application/json',
+		            headers: { [header]: token },
+		            data: JSON.stringify(selectedIds),
+		            success: function(data) {
+		                $('#totalAmountDisplay').text(new Intl.NumberFormat('vi-VN').format(data.totalAmount) + 'đ');
+		                $('#finalAmountDisplay').text(new Intl.NumberFormat('vi-VN').format(data.totalAmount) + 'đ');
+		            },
+		            error: function(xhr, status, error) {
+		                console.error("Cập nhật thất bại:", error);
+		            }
+		        });
+		    }
+	
+		    // Tick/un-tick từng item
+		    $(document).on('change', '.itemCheckbox', updateCartSelection);
+	
+		    // Select All
+		    $(document).on('change', '#selectAll', function() {
+		        $('.itemCheckbox').prop('checked', this.checked);
+		        updateCartSelection();
+		    });
+	
+		    // Xóa sản phẩm
+		    $(document).on('click', '.removeCartBtn', function() {
+		        const productVariantId = $(this).data('id');
+		        const cartItemDiv = $(this).closest('.cartItem');
+	
+		        $.ajax({
+		            url: '/api/cart/remove',
+		            type: 'POST',
+		            headers: { [header]: token },
+		            data: { productVariantId: productVariantId },
+		            success: function(res) {
+		                cartItemDiv.remove();
+		                updateCartSelection(); // Cập nhật lại tổng tiền
+		            },
+		            error: function(xhr, status, error) {
+		                alert("Xoá thất bại!");
+		                console.error("Xoá thất bại:", error);
+		            }
+		        });
+		    });
+	
+		    // Giảm số lượng
+		    $(document).on('click', '.quantityMinus', function() {
+		        const btn = $(this);
+		        const productVariantId = btn.data('id');
+		        const qtyEl = btn.siblings('.quantityDisplay');
+		        let quantity = parseInt(qtyEl.text());
+	
+		        if (quantity > 1) {
+		            quantity--;
+		            qtyEl.text(quantity);
+		            updateQuantityOnServer(productVariantId, quantity);
+		        }
+		    });
+	
+		    // Tăng số lượng
+		    $(document).on('click', '.quantityPlus', function() {
+		        const btn = $(this);
+		        const productVariantId = btn.data('id');
+		        const qtyEl = btn.siblings('.quantityDisplay');
+		        let quantity = parseInt(qtyEl.text());
+	
+		        quantity++;
+		        qtyEl.text(quantity);
+		        updateQuantityOnServer(productVariantId, quantity);
+		    });
+	
+		    // Hàm gửi số lượng mới lên server
+		    function updateQuantityOnServer(productVariantId, quantity) {
+		        $.ajax({
+		            url: '/api/cart/updateQuantity',
+		            type: 'POST',
+		            headers: { [header]: token },
+		            data: { productVariantId: productVariantId, quantity: quantity },
+		            success: function(res) {
+		                updateCartSelection(); // Cập nhật lại tổng tiền
+		            },
+		            error: function(xhr, status, error) {
+		                console.error("Cập nhật số lượng thất bại:", error);
+		            }
+		        });
+		    }
+		});
+	</script>
+</body>
+</html>
