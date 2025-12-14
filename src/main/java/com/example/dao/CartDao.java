@@ -1,11 +1,11 @@
 package com.example.dao;
 
 import com.example.model.CartItem;
+
 import com.example.config.HibernateUtil;
-<<<<<<< Updated upstream
+
 import com.example.model.ProductVariant;
 import com.example.model.User;
-=======
 import com.example.dto.UserCartItemDTO;
 import com.example.dto.UserWishlistDTO;
 import com.example.model.ProductVariant;
@@ -15,157 +15,80 @@ import com.example.model.UserWishlist;
 import java.math.BigDecimal;
 import java.util.List;
 
->>>>>>> Stashed changes
+
+import com.example.model.ProductVariant;
+import com.example.model.User;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Repository
 public class CartDao {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @Autowired
     private ProductDao productDao;
-    @Autowired
-    private UserDao userDao;
 
-    // Tìm cart item theo sản phẩm và user
-    public CartItem findByProductAndUser(Long productVariantId, Long userId) {
-        CartItem item = null;
-        Session session = null;
-        Transaction transaction = null;
-        try {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
-            String hql = "FROM CartItem c WHERE c.productVariant.id = :vid AND c.user.id = :uid";
-
-            Query<CartItem> query = session.createQuery(hql, CartItem.class);
-            query.setParameter("vid", productVariantId);
-            query.setParameter("uid", userId);
-
-            item = query.uniqueResult();
-
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) transaction.rollback();
-            e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
-        }
-        return item;
+    // Hàm tiện ích để lấy Hibernate Session từ Spring
+    private Session getCurrentSession() {
+        return entityManager.unwrap(Session.class);
     }
 
-    // Lưu và cập nhật giỏ hàng
-    public void save(CartItem cartItem) {
-        Session session = null;
-        Transaction transaction = null;
-        try {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
+    public CartItem findByProductAndUser(Integer productVariantId, Long userId) {
+        Session session = getCurrentSession();
+        String hql = "FROM CartItem c WHERE c.productVariant.id = :vid AND c.user.id = :uid";
+        Query<CartItem> query = session.createQuery(hql, CartItem.class);
 
-            session.saveOrUpdate(cartItem);
+        query.setParameter("vid", productVariantId);
+        query.setParameter("uid", userId);
 
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) transaction.rollback();
-            e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
-        }
+        return query.uniqueResult();
     }
 
-    // Đếm số lượng sản phẩm của user
-    public int countItemsByUser(Long userId) {
-        int totalCount = 0;
-        Session session = null;
-        Transaction transaction = null;
-        try {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
-            // Tính tổng số lượng (quantity)
-            String hql = "SELECT SUM(c.quantity) FROM CartItem c WHERE c.user.id = :uid";
-
-            Query<Long> query = session.createQuery(hql, Long.class);
-            query.setParameter("uid", userId);
-
-            Long result = query.uniqueResult();
-
-            // Nếu kết quả không null (tức là có sản phẩm), lấy giá trị int
-            if (result != null) {
-                totalCount = result.intValue();
-            }
-
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) transaction.rollback();
-            e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
-        }
-        return totalCount;
-    }
-
+    @Transactional // Spring sẽ tự begin transaction và commit khi hàm chạy xong
     public int addToCart(Long productId, int quantity, String sizeName, Long userId) {
-        Session session = null;
-        Transaction transaction = null;
-        int totalItems = 0;
+        Session session = getCurrentSession();
 
-        try {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
-            // 2. Tìm Variant (Gọi ProductDao, truyền session vào)
-            ProductVariant variant = null;
-            if (sizeName != null && !sizeName.isEmpty()) {
-                variant = productDao.findVariantByProductAndSize(productId, sizeName);
-            } else {
-                variant = productDao.findFirstVariantByProductId(productId);
-            }
-
-            if (variant == null) return -2; // Hết hàng/Không tìm thấy
-            if (variant.getQuantity() < quantity) return -3; // Không đủ số lượng
-
-            // 3. Lấy tham chiếu User (Gọi UserDao, truyền session vào)
-            // Hàm này trả về Proxy chỉ chứa ID, không tốn query SELECT
-            User userRef = userDao.getReference(session, userId);
-
-            // 4. Xử lý Giỏ hàng (Gọi CartDao, truyền session vào)
-            CartItem existingItem = findByProductAndUser((long) variant.getId(), userId);
-
-            if (existingItem != null) {
-                // Đã có -> Cộng dồn số lượng
-                existingItem.setQuantity(existingItem.getQuantity() + quantity);
-                save(existingItem);
-            } else {
-                // Chưa có -> Tạo mới
-                CartItem newItem = new CartItem();
-                newItem.setUser(userRef);         // Gán User Proxy
-                newItem.setProductVariant(variant); // Gán Sản phẩm
-                newItem.setQuantity(quantity);
-                save(newItem);
-            }
-
-            // 5. Đếm lại tổng số lượng để cập nhật icon
-            totalItems = countItemsByUser(userId);
-
-            // 6. Lưu tất cả thay đổi xuống DB
-            transaction.commit();
-
-        } catch (Exception e) {
-            if (transaction != null) transaction.rollback();
-            e.printStackTrace();
-            return -4; // Lỗi hệ thống
-        } finally {
-            if (session != null) session.close();
+        ProductVariant variant;
+        if (sizeName != null && !sizeName.isEmpty()) {
+            variant = productDao.findVariantByProductAndSize(productId, sizeName);
+        } else {
+            variant = productDao.findFirstVariantByProductId(productId);
         }
 
-        return totalItems;
+        if (variant == null) return -2;
+        if (variant.getQuantity() < quantity) return -3;
+
+        User userRef = session.load(User.class, userId); // Hibernate dùng load thay vì getReference
+
+        CartItem existingItem = findByProductAndUser(variant.getId(), userId);
+
+        if (existingItem != null) {
+            existingItem.setQuantity(existingItem.getQuantity() + quantity);
+            existingItem.setUpdatedAt(LocalDateTime.now());
+            session.update(existingItem);
+        } else {
+            CartItem newItem = new CartItem();
+            newItem.setUser(userRef);
+            newItem.setProductVariant(variant);
+            newItem.setQuantity(quantity);
+
+            newItem.setCreatedAt(LocalDateTime.now());
+            newItem.setUpdatedAt(LocalDateTime.now());
+
+            session.save(newItem);
+        }
+
+        return countItemsByUser(userId);
     }
-<<<<<<< Updated upstream
-=======
     
     public List<UserCartItemDTO> getCartItemByUserId(Long userId) {
 		List<UserCartItemDTO> userCartItem = null;
@@ -299,5 +222,14 @@ public class CartDao {
 	        }
 	    }
     }
->>>>>>> Stashed changes
+
+	public int countItemsByUser(Long userId) {
+        Session session = getCurrentSession();
+        String hql = "SELECT SUM(c.quantity) FROM CartItem c WHERE c.user.id = :uid";
+        Query<Long> query = session.createQuery(hql, Long.class);
+        query.setParameter("uid", userId);
+        Long result = query.uniqueResult();
+        return result != null ? result.intValue() : 0;
+    }
 }
+

@@ -1,79 +1,195 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng ký thành viên - B2L Shoes</title>
-    <link rel="stylesheet" href="https://cdn.tailwindcss.com">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        * { box-sizing: border-box; }
         body { font-family: 'Montserrat', sans-serif; }
-
+        .input-error { border-color: #ef4444 !important; box-shadow: 0 0 0 1px #ea2c2c !important; }
     </style>
 </head>
-<body class="bg-white text-black">
+<body class="bg-white text-gray-800 flex flex-col min-h-screen">
 
 <header th:replace="~{customer/fragments/header}"></header>
 
-<section class="container mx-auto px-4 mt-8 mb-12 md:mt-12 md:mb-24">
+<main class="flex-grow flex items-center justify-center py-12 px-4">
+    <div class="w-full max-w-[550px]">
 
-    <div class="w-full max-w-[600px] mx-auto">
-
-        <h1 class="text-2xl md:text-3xl font-extrabold uppercase mb-4 tracking-tight text-center md:text-left">
-            GET MORE AS A MEMBER
+        <h1 class="text-3xl font-extrabold uppercase mb-3 text-center md:text-left tracking-wide">
+            ĐĂNG KÝ THÀNH VIÊN
         </h1>
-
-        <p class="text-gray-500 mb-6 md:mb-8 text-sm leading-relaxed text-center md:text-left">
-            Tham gia B2L Shoes miễn phí và khám phá trải nghiệm mua sắm độc quyền chỉ dành cho thành viên.
+        <p class="text-gray-500 mb-8 text-sm text-center md:text-left">
+            Tham gia B2L Shoes miễn phí và khám phá trải nghiệm mua sắm độc quyền.
         </p>
 
-        <form th:action="@{/register}" method="post" class="flex flex-col w-full">
+        <form id="regForm" th:action="@{/registerProcess}" method="post" class="flex flex-col gap-5" onsubmit="return validateForm(event)">
 
-            <div class="space-y-4">
-                <input type="text" name="fullName" required placeholder="Họ và tên *"
-                       class="w-full p-3 md:p-4 border border-gray-300 rounded focus:outline-none focus:border-black focus:ring-0 transition-colors placeholder-gray-400 text-sm md:text-base font-medium">
+            <input type="text" id="name" name="name" placeholder="Họ và tên *" th:value="${name}"
+                   class="w-full p-4 border border-gray-300 rounded-md focus:outline-none focus:border-[#FF9900] placeholder-gray-400 text-sm font-medium transition-colors">
 
-                <input type="email" name="email" required placeholder="Email *"
-                       class="w-full p-3 md:p-4 border border-gray-300 rounded focus:outline-none focus:border-black focus:ring-0 transition-colors placeholder-gray-400 text-sm md:text-base font-medium">
+            <input type="email" id="email" name="email" placeholder="Email *" th:value="${email}"
+                   class="w-full p-4 border border-gray-300 rounded-md focus:outline-none focus:border-[#FF9900] placeholder-gray-400 text-sm font-medium transition-colors">
 
-                <input type="password" name="password" required placeholder="Mật khẩu *"
-                       class="w-full p-3 md:p-4 border border-gray-300 rounded focus:outline-none focus:border-black focus:ring-0 transition-colors placeholder-gray-400 text-sm md:text-base font-medium">
+            <div class="relative group">
+                <input type="password" id="regPassword" name="password" placeholder="Mật khẩu *"
+                       class="w-full p-4 border border-gray-300 rounded-md focus:outline-none focus:border-[#FF9900] placeholder-gray-400 text-sm font-medium pr-10 transition-colors"
+                       oninput="checkStrength()">
 
-                <input type="password" name="confirmPassword" required placeholder="Xác nhận mật khẩu *"
-                       class="w-full p-3 md:p-4 border border-gray-300 rounded focus:outline-none focus:border-black focus:ring-0 transition-colors placeholder-gray-400 text-sm md:text-base font-medium">
+                <span onclick="togglePass('regPassword', this)" class="absolute right-4 top-4 cursor-pointer text-gray-400 hover:text-gray-600">
+                        <i class="fa-regular fa-eye"></i>
+                    </span>
 
-                <input type="tel" name="phoneNumber" required placeholder="Số điện thoại *"
-                       class="w-full p-3 md:p-4 border border-gray-300 rounded focus:outline-none focus:border-black focus:ring-0 transition-colors placeholder-gray-400 text-sm md:text-base font-medium">
+                <div id="strengthContainer" class="hidden mt-2 transition-all duration-300">
+                    <div class="w-full bg-gray-100 rounded-full h-1">
+                        <div id="strengthBar" class="h-full w-0 transition-all duration-500 rounded-full bg-red-500"></div>
+                    </div>
+                </div>
+                <p class="text-[11px] text-gray-400 mt-1 italic pl-1">
+                    * Tối thiểu 8 ký tự, bao gồm chữ và số.
+                </p>
             </div>
 
-            <p class="text-xs text-gray-500 my-6 leading-normal text-center md:text-left">
+            <div class="relative">
+                <input type="password" id="confirmPass" name="confirmPassword" placeholder="Xác nhận mật khẩu *"
+                       class="w-full p-4 border border-gray-300 rounded-md focus:outline-none focus:border-[#FF9900] placeholder-gray-400 text-sm font-medium pr-10 transition-colors">
+
+                <span onclick="togglePass('confirmPass', this)" class="absolute right-4 top-4 cursor-pointer text-gray-400 hover:text-gray-600">
+                        <i class="fa-regular fa-eye"></i>
+                    </span>
+            </div>
+
+            <input type="tel" id="phone" name="phone" placeholder="Số điện thoại *" th:value="${phone}"
+                   class="w-full p-4 border border-gray-300 rounded-md focus:outline-none focus:border-[#FF9900] placeholder-gray-400 text-sm font-medium transition-colors">
+
+            <p class="text-xs text-gray-500 my-2 leading-relaxed text-center md:text-left">
                 Bằng cách tạo một tài khoản, bạn đồng ý với chúng tôi về
-                <a href="#" class="underline hover:text-black">Điều khoản và điều kiện</a>
-                và
-                <a href="#" class="underline hover:text-black">Chính sách bảo mật</a>
-                của chúng tôi
+                <a href="#" class="underline hover:text-black font-semibold">Chính sách bảo mật</a>.
             </p>
 
-            <button type="submit"
-                    class="w-full py-3 md:py-4 bg-[#FF9900] text-white font-bold text-base md:text-lg uppercase rounded shadow-md hover:bg-[#e68a00] hover:shadow-lg transition-all duration-300 active:scale-95">
+            <button type="submit" id="btnRegister"
+                    class="w-full py-4 bg-[#FF9900] text-white font-bold text-lg uppercase rounded shadow-md hover:bg-[#e68a00] hover:shadow-lg transition-all duration-300 transform active:scale-95">
                 Đăng ký thành viên
             </button>
 
-            <div class="mt-6 text-sm font-medium text-gray-600 text-center md:text-left">
-                <span>Bạn đã có tài khoản? </span>
-                <a href="/login" class="underline hover:text-black decoration-1 underline-offset-2">Đăng nhập</a>
+            <div class="text-center mt-2">
+                <a href="/login" class="text-sm text-gray-500 hover:text-black hover:underline transition-colors">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Quay lại đăng nhập
+                </a>
             </div>
 
         </form>
     </div>
-</section>
+</main>
 
 <footer th:replace="~{customer/fragments/footer}"></footer>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var alertMsg = /*[[${alert}]]*/ null;
+    var successMsg = /*[[${success}]]*/ null;
+
+    if(alertMsg) {
+        Swal.fire({
+            title: 'Thông báo',
+            text: alertMsg,
+            icon: 'warning',
+            confirmButtonColor: '#FF9900'
+        });
+    } else if(successMsg) {
+        Swal.fire({
+            title: 'Thành công!',
+            text: successMsg,
+            icon: 'success',
+            confirmButtonColor: '#FF9900',
+            confirmButtonText: 'Đăng nhập ngay'
+        }).then((result) => {
+            if (result.isConfirmed) window.location.href = '/login';
+        });
+    }
+
+    function validateForm(event) {
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const pass = document.getElementById('regPassword').value;
+        const confirm = document.getElementById('confirmPass').value;
+        const phone = document.getElementById('phone').value.trim();
+
+        let errorMsg = '';
+
+        if (!name) errorMsg = "Vui lòng nhập họ và tên!";
+        else if (!email) errorMsg = "Vui lòng nhập email!";
+        else if (!pass) errorMsg = "Vui lòng nhập mật khẩu!";
+        else if (pass.length < 8) errorMsg = "Mật khẩu phải có ít nhất 8 ký tự!";
+        else if (!/[A-Za-z]/.test(pass) || !/[0-9]/.test(pass)) errorMsg = "Mật khẩu phải chứa cả chữ và số!";
+        else if (pass !== confirm) errorMsg = "Mật khẩu xác nhận không khớp!";
+        else if (!phone) errorMsg = "Vui lòng nhập số điện thoại!";
+        else if (!/^(0[3|5|7|8|9])+([0-9]{8})$/.test(phone)) errorMsg = "Số điện thoại không hợp lệ!";
+
+        if (errorMsg) {
+            event.preventDefault();
+            Swal.fire({
+                title: 'Thiếu thông tin',
+                text: errorMsg,
+                icon: 'error',
+                confirmButtonColor: '#FF9900',
+                confirmButtonText: 'Đã hiểu'
+            });
+            return false;
+        }
+        return true;
+    }
+
+    function checkStrength() {
+        const password = document.getElementById('regPassword').value;
+        const container = document.getElementById('strengthContainer');
+        const bar = document.getElementById('strengthBar');
+
+        if (password.length === 0) {
+            container.classList.add('hidden');
+            return;
+        } else {
+            container.classList.remove('hidden');
+        }
+
+        // Logic check: >= 8 ký tự + Chữ + Số
+        let score = 0;
+        if (password.length >= 8) score++;
+        if (/[A-Za-z]/.test(password)) score++;
+        if (/[0-9]/.test(password)) score++;
+
+        if (password.length < 8) {
+            bar.style.width = '30%';
+            bar.className = 'h-full rounded-full bg-red-500 transition-all duration-500';
+        } else if (score < 3) {
+            bar.style.width = '60%';
+            bar.className = 'h-full rounded-full bg-yellow-400 transition-all duration-500';
+        } else {
+            bar.style.width = '100%';
+            bar.className = 'h-full rounded-full bg-green-500 transition-all duration-500';
+        }
+    }
+
+    function togglePass(id, iconSpan) {
+        const input = document.getElementById(id);
+        const icon = iconSpan.querySelector('i');
+        if (input.type === "password") {
+            input.type = "text";
+            icon.className = "fa-regular fa-eye-slash";
+        } else {
+            input.type = "password";
+            icon.className = "fa-regular fa-eye";
+        }
+    }
+    /*]]>*/
+</script>
 
 </body>
 </html>

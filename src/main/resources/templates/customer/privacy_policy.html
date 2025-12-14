@@ -4,13 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chính sách bảo mật - B2L Shoes</title>
-
     <link rel="stylesheet" href="https://cdn.tailwindcss.com">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        * { box-sizing: border-box; }
         body { font-family: 'Montserrat', sans-serif; }
     </style>
 </head>
@@ -18,14 +17,14 @@
 
 <header th:replace="~{customer/fragments/header :: header}"></header>
 
-<div class="bg-gray-50 border-b border-gray-100">
-    <div class="container mx-auto px-4 py-3 text-sm text-gray-500">
-        <a href="/" class="hover:text-black transition">Trang chủ</a>
-        <span class="mx-2">>></span>
-        <span class="cursor-default">Hỗ trợ</span>
-        <span class="mx-2">>></span>
-        <span class="text-black font-bold border-b border-black">Chính sách bảo mật</span>
-    </div>
+<div class="bg-gray-50">
+<div class="container mx-auto px-4 py-3 text-sm text-gray-500">
+    <a href="/" class="text-gray-900 hover:underline hover:text-black transition">Trang chủ</a>
+    <span class="mx-3 text-gray-400">/</span>
+    <span class="text-gray-900 hover:underline hover:text-black transition">Hỗ trợ</span>
+    <span class="mx-3 text-gray-400">/</span>
+    <span class="text-black font-bold border-b border-black">Chính sách bảo mật</span>
+</div>
 </div>
 
 <section class="container mx-auto px-4 py-8 md:py-12">
@@ -43,17 +42,12 @@
                     </li>
                     <li>
                         <a href="/size-guide" class="block hover:text-black hover:pl-2 hover:border-l-4 hover:border-gray-300 transition-all duration-200 pl-0 border-l-0 border-transparent">
-                            Hướng dẫn chọn size giày
+                            Hướng dẫn chọn size
                         </a>
                     </li>
                     <li>
                         <a href="/warranty-policy" class="block hover:text-black hover:pl-2 hover:border-l-4 hover:border-gray-300 transition-all duration-200 pl-0 border-l-0 border-transparent">
                             Chính sách đổi trả, bảo hành
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/return-guide" class="block hover:text-black hover:pl-2 hover:border-l-4 hover:border-gray-300 transition-all duration-200 pl-0 border-l-0 border-transparent">
-                            Hướng dẫn đổi trả hàng
                         </a>
                     </li>
                     <li>

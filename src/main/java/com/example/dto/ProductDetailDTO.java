@@ -11,7 +11,7 @@ public class ProductDetailDTO {
     private String brandName;
 
     private List<String> images;
-    private List<String> sizes;
+    private List<SizeOption> sizes;
 
     public ProductDetailDTO(Long id, String name, Long price, String description, String categoryName, String brandName) {
         this.id = id;
@@ -20,6 +20,19 @@ public class ProductDetailDTO {
         this.description = description;
         this.categoryName = categoryName;
         this.brandName = brandName;
+    }
+
+    public static class SizeOption {
+        private String name;
+        private int quantity;
+
+        public SizeOption(String name, int quantity) {
+            this.name = name;
+            this.quantity = quantity;
+        }
+
+        public String getName() { return name; }
+        public int getQuantity() { return quantity; }
     }
 
     public Long getId() { return id; }
@@ -36,6 +49,6 @@ public class ProductDetailDTO {
     public void setBrandName(String brandName) { this.brandName = brandName; }
     public List<String> getImages() { return images; }
     public void setImages(List<String> images) { this.images = images; }
-    public List<String> getSizes() { return sizes; }
-    public void setSizes(List<String> sizes) { this.sizes = sizes; }
+    public List<SizeOption> getSizes() { return sizes; }
+    public void setSizes(List<SizeOption> sizes) { this.sizes = sizes; }
 }

@@ -37,38 +37,28 @@ public class HomeController {
         request.setAttribute("featuredProducts", homeService.getFeaturedProducts());
 		request.setAttribute("bestSellerProducts", homeService.getBestSellerProducts());
 
-        return "customer/home.html"; 
+        return "customer/home";
     }
-
-	@GetMapping("/login")
-	public String login(HttpServletRequest request) {
-		return "customer/login.html";
-	}
-
-	@GetMapping("/register")
-	public String register(HttpServletRequest request) {
-		return "customer/register.html";
-	}
 
 	@GetMapping("/shopping-guide")
 	public String shoppingGuide(HttpServletRequest request) {
-		return "customer/shopping_guide.html";
+		return "customer/shopping_guide";
 	}
 
 	@GetMapping("/size-guide")
 	public String shoeSizeGuide(HttpServletRequest request) {
 		request.setAttribute("allSize", masterSizeService.getAllSize());
-		return "customer/shoesize_guide.html";
+		return "customer/shoesize_guide";
 	}
 
 	@GetMapping("/warranty-policy")
 	public String warrantyPolicy(HttpServletRequest request) {
-		return "customer/warranty_policy.html";
+		return "customer/warranty_policy";
 	}
 
 	@GetMapping("/about-us")
 	public String aboutUs(HttpServletRequest request) {
-		return "customer/about_us.html";
+		return "customer/about_us";
 	}
 
 	@GetMapping("/terms-conditions")
@@ -100,4 +90,7 @@ public class HomeController {
 		request.setAttribute("cartItem", cartService.getCartItemByUserId(6L));
 		return "customer/shopping_cart";
 	}
+
+	@GetMapping("/profile")
+	public String profile(HttpServletRequest request) {return "customer/profile";}
 }

@@ -3,6 +3,8 @@ package com.example.dao;
 import com.example.config.HibernateUtil;
 import com.example.dto.ProductCardDTO;
 import com.example.dto.ProductDetailDTO;
+import com.example.dto.ProductDetailDTO.SizeOption;
+import com.example.model.Product;
 import com.example.model.ProductVariant;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -11,6 +13,7 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -243,10 +246,11 @@ public class ProductDao {
 
     public ProductDetailDTO findProductDetailById(Long id) {
         ProductDetailDTO product = null;
+        Session session = null;
+        Transaction transaction = null;
         try {
-            // Lấy Session từ EntityManager do Spring quản lý
-            // Cách này tránh được lỗi ClassCastException do DevTools gây ra
-            Session session = entityManager.unwrap(Session.class);
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
 
             String hql = "SELECT new com.example.dto.ProductDetailDTO(" +
                     "p.id, p.name, p.price, p.description, c.name, b.name) " +
@@ -266,17 +270,31 @@ public class ProductDao {
                 imgQuery.setParameter("id", id);
                 product.setImages(imgQuery.list());
 
-                String sizeHql = "SELECT ms.sizeName FROM ProductVariant v " +
+                String sizeHql = "SELECT ms.sizeName, v.quantity FROM ProductVariant v " +
                         "JOIN v.size ms " +
-                        "WHERE v.product.id = :id AND v.quantity > 0 " +
+                        "WHERE v.product.id = :id " +
                         "ORDER BY ms.id ASC";
-                org.hibernate.query.Query<String> sizeQuery = session.createQuery(sizeHql);
-                sizeQuery.setParameter("id", id);
-                product.setSizes(sizeQuery.list());
-            }
 
+                org.hibernate.query.Query<Object[]> sizeQuery = session.createQuery(sizeHql, Object[].class);
+                sizeQuery.setParameter("id", id);
+                List<Object[]> rows = sizeQuery.list();
+
+                // 3. Map dữ liệu vào List<SizeOption>
+                List<ProductDetailDTO.SizeOption> sizeList = new java.util.ArrayList<>();
+                for (Object[] row : rows) {
+                    sizeList.add(new ProductDetailDTO.SizeOption(
+                            (String) row[0], // Tên size
+                            (Integer) row[1] // Số lượng
+                    ));
+                }
+                product.setSizes(sizeList);
+            }
+            transaction.commit();
         } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
             e.printStackTrace();
+        } finally {
+            if (session != null) session.close();
         }
         return product;
     }
@@ -334,31 +352,23 @@ public class ProductDao {
 
     // Tìm variant theo size (Dùng cho Add To Cart)
     public ProductVariant findVariantByProductAndSize(Long productId, String sizeName) {
-        ProductVariant variant = null;
-        Session session = null;
-        Transaction transaction = null;
         try {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
             String hql = "SELECT v FROM ProductVariant v " +
                     "JOIN v.size s " +
                     "WHERE v.product.id = :pid AND s.sizeName = :sname";
 
-            Query<ProductVariant> query = session.createQuery(hql, ProductVariant.class);
-            query.setParameter("pid", productId);
-            query.setParameter("sname", sizeName);
+            // Sử dụng getResultStream().findFirst() để an toàn hơn, tránh lỗi NoResultException
+            return entityManager.createQuery(hql, ProductVariant.class)
+                    .setParameter("pid", productId)
+                    .setParameter("sname", sizeName)
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
 
-            variant = query.uniqueResult();
-
-            transaction.commit();
         } catch (Exception e) {
-            if (transaction != null) transaction.rollback();
             e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
+            return null;
         }
-        return variant;
     }
 
     // Tìm variant đầu tiên (Dùng cho Add To Cart nhanh)
@@ -398,7 +408,8 @@ public class ProductDao {
             List<String> category,
             List<String> size,
             List<String> color,
-            String priceRange) {
+            String priceRange,
+            String keyword) {
 
         List<ProductCardDTO> list = null;
         Session session = null;
@@ -429,12 +440,12 @@ public class ProductDao {
                 for (int i = 0; i < sport.size(); i++) {
                     if (i > 0) hql += " OR ";
                     String sVal = sport.get(i);
-                    if(sVal.equalsIgnoreCase("Running")) hql += "s.name LIKE '%Chạy bộ%'";
-                    else if(sVal.equalsIgnoreCase("Football")) hql += "s.name LIKE '%Bóng đá%'";
-                    else if(sVal.equalsIgnoreCase("Basketball")) hql += "s.name LIKE '%Bóng rổ%'";
-                    else if(sVal.equalsIgnoreCase("Gym")) hql += "s.name LIKE '%GYM%'";
-                    else if(sVal.equalsIgnoreCase("Volleyball")) hql += "s.name LIKE '%Bóng chuyền%'";
-                    else if(sVal.equalsIgnoreCase("Badminton")) hql += "s.name LIKE '%Cầu lông%'";
+                    if (sVal.equalsIgnoreCase("Running")) hql += "s.name LIKE '%Chạy bộ%'";
+                    else if (sVal.equalsIgnoreCase("Football")) hql += "s.name LIKE '%Bóng đá%'";
+                    else if (sVal.equalsIgnoreCase("Basketball")) hql += "s.name LIKE '%Bóng rổ%'";
+                    else if (sVal.equalsIgnoreCase("Gym")) hql += "s.name LIKE '%GYM%'";
+                    else if (sVal.equalsIgnoreCase("Volleyball")) hql += "s.name LIKE '%Bóng chuyền%'";
+                    else if (sVal.equalsIgnoreCase("Badminton")) hql += "s.name LIKE '%Cầu lông%'";
                     else hql += "s.name LIKE '%" + sVal + "%'";
                 }
                 hql += ") ";
@@ -470,6 +481,9 @@ public class ProductDao {
                     hql += " AND p.price > 2000000 ";
                 }
             }
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                hql += " AND lower(p.name) LIKE :keyword ";
+            }
 
             hql += " GROUP BY p.id, p.name, p.price, img.path, s.name, p.createdAt ";
 
@@ -477,12 +491,14 @@ public class ProductDao {
 
             org.hibernate.query.Query<ProductCardDTO> query = session.createQuery(hql);
 
-            // Set tham số (Giữ nguyên)
             if (gender != null && !gender.isEmpty()) query.setParameterList("gender", gender);
             if (brand != null && !brand.isEmpty()) query.setParameterList("brand", brand);
             if (category != null && !category.isEmpty()) query.setParameterList("category", category);
             if (color != null && !color.isEmpty()) query.setParameterList("color", color);
 
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                query.setParameter("keyword", "%" + keyword.trim().toLowerCase() + "%");
+            }
             list = query.list();
 
         } catch (Exception e) {
@@ -491,10 +507,7 @@ public class ProductDao {
             if (session != null) session.close();
         }
         return list;
-    }
-<<<<<<< Updated upstream
-=======
-    
+    }  
     public List<String> getProductSizeById(Long productId) {
 	    List<String> result = new ArrayList<>();
 	    Session session = null;
@@ -524,5 +537,22 @@ public class ProductDao {
 
 	    return result;
 	}
->>>>>>> Stashed changes
+
+    public Product findById(Long id) {
+        Product product = null;
+        Session session = null;
+        Transaction transaction = null;
+        try {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+            product = session.get(Product.class, id);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        } finally {
+            if (session != null) session.close();
+        }
+        return product;
+    }
 }
