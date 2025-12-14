@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Quản trị B2L Shoes</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        .text-b2l { color: #FF9900; }
+        .bg-b2l { background-color: #FF9900; }
+        .border-l-active { border-left-width: 4px; border-color: #FF9900; background-color: #111827; color: white; }
+    </style>
+</head>
+<body class="bg-gray-100 flex h-screen overflow-hidden text-sm">
+
+<div id="sidebar-overlay" onclick="toggleSidebar()"
+     class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden transition-opacity opacity-0 lg:hidden"></div>
+
+<aside id="sidebar"
+       class="fixed inset-y-0 left-0 z-30 w-64 bg-black text-white transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto flex flex-col">
+
+    <div class="h-16 flex items-center justify-between px-6 border-b border-gray-800">
+        <div class="flex items-center gap-2">
+            <img src="/customer/images/logo-white.png" class="w-[30px] h-[30px]" alt="Logo">
+            <span class="text-xl font-extrabold uppercase tracking-wider">B2L SHOES</span>
+        </div>
+        <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-white">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+    </div>
+
+    <nav class="flex-1 py-6 space-y-1 overflow-y-auto">
+        <a href="/admin/dashboard" class="flex items-center px-6 py-3 bg-gray-900 border-l-4 border-[#FF9900] text-white group">
+            <i class="fa-solid fa-table-columns w-6 text-[#FF9900]"></i>
+            <span class="font-bold">Tổng quan</span>
+        </a>
+
+        <a href="/admin/products" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
+            <i class="fa-solid fa-box-open w-6"></i>
+            <span class="font-medium">Sản phẩm</span>
+        </a>
+
+        <a href="/admin/orders" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
+            <i class="fa-solid fa-bag-shopping w-6"></i>
+            <span class="font-medium">Đơn hàng</span>
+        </a>
+
+        <a href="/admin/customers" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
+            <i class="fa-solid fa-users w-6"></i>
+            <span class="font-medium">Khách hàng</span>
+        </a>
+    </nav>
+
+    <div class="p-4 border-t border-gray-800 bg-gray-900">
+        <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-[#FF9900] font-bold">
+                <i class="fa-regular fa-user"></i>
+            </div>
+            <div>
+                <p class="text-sm font-bold text-white truncate w-32" th:text="${session.currentAdmin != null ? session.currentAdmin.name : 'Admin'}">Admin Name</p>
+                <p class="text-xs text-gray-500">Quản trị viên</p>
+            </div>
+        </div>
+        <a href="/admin/logout" class="block w-full text-center py-2 bg-[#FF9900] hover:bg-[#e68a00] text-white text-xs font-bold rounded transition">
+            <i class="fa-solid fa-right-from-bracket mr-1"></i> Đăng xuất
+        </a>
+    </div>
+</aside>
+
+<div class="flex-1 flex flex-col overflow-hidden w-full">
+
+    <header class="h-16 bg-white shadow-sm flex items-center justify-between px-4 lg:px-8 z-10 flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <button onclick="toggleSidebar()" class="lg:hidden text-gray-600 hover:text-black focus:outline-none">
+                <i class="fa-solid fa-bars text-2xl"></i>
+            </button>
+            <h2 class="text-xl font-bold text-gray-800">Dashboard</h2>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <button class="relative p-2 text-gray-400 hover:text-gray-600">
+                <i class="fa-regular fa-bell text-xl"></i>
+                <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-x-hidden overflow-y-auto bg-[#f8f9fa] p-4 lg:p-8">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col justify-between h-32">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase mb-1">Tổng doanh thu</p>
+                        <h3 class="text-2xl font-extrabold text-gray-800" th:text="${revenue != null ? #numbers.formatDecimal(revenue, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}">0 đ</h3>
+                    </div>
+                    <div class="p-2 bg-green-100 rounded-lg text-green-600">
+                        <i class="fa-solid fa-sack-dollar text-xl"></i>
+                    </div>
+                </div>
+                <span class="text-xs text-green-500 font-bold flex items-center">
+                        <i class="fa-solid fa-arrow-trend-up mr-1"></i> +12% so với tháng trước
+                    </span>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col justify-between h-32">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase mb-1">Đơn mới</p>
+                        <h3 class="text-2xl font-extrabold text-gray-800" th:text="${newOrders != null ? newOrders : 0}">0</h3>
+                    </div>
+                    <div class="p-2 bg-[#FF9900]/10 rounded-lg text-[#FF9900]">
+                        <i class="fa-solid fa-cart-shopping text-xl"></i>
+                    </div>
+                </div>
+                <span class="text-xs text-gray-400">Chờ xử lý</span>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col justify-between h-32">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase mb-1">Khách hàng</p>
+                        <h3 class="text-2xl font-extrabold text-gray-800">1,250</h3>
+                    </div>
+                    <div class="p-2 bg-blue-100 rounded-lg text-blue-600">
+                        <i class="fa-solid fa-user-group text-xl"></i>
+                    </div>
+                </div>
+                <span class="text-xs text-green-500 font-bold">+5 mới hôm nay</span>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col justify-between h-32">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase mb-1">Sản phẩm</p>
+                        <h3 class="text-2xl font-extrabold text-gray-800">45</h3>
+                    </div>
+                    <div class="p-2 bg-purple-100 rounded-lg text-purple-600">
+                        <i class="fa-solid fa-shoe-prints text-xl"></i>
+                    </div>
+                </div>
+                <span class="text-xs text-red-500 font-bold">3 sản phẩm sắp hết hàng</span>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="font-bold text-gray-800">Đơn hàng gần đây</h3>
+                <a href="/admin/orders" class="text-xs font-bold text-blue-600 hover:underline">Xem tất cả</a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-gray-600 min-w-[600px]">
+                    <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-500">
+                    <tr>
+                        <th class="px-6 py-3">Mã đơn</th>
+                        <th class="px-6 py-3">Khách hàng</th>
+                        <th class="px-6 py-3">Tổng tiền</th>
+                        <th class="px-6 py-3">Trạng thái</th>
+                        <th class="px-6 py-3 text-right">Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+
+                    <tr th:each="order : ${recentOrders}" class="hover:bg-gray-50 transition">
+
+                        <td class="px-6 py-4 font-mono font-bold text-black"
+                            th:text="'#' + ${order.id}">#DH123</td>
+
+                        <td class="px-6 py-4"
+                            th:text="${order.customer != null ? order.customer.name : 'Khách vãng lai'}">
+                            Nguyễn Văn A
+                        </td>
+
+                        <td class="px-6 py-4 font-bold"
+                            th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'COMMA')} + ' đ'">
+                            1.500.000 đ
+                        </td>
+
+                        <td class="px-6 py-4">
+                <span class="px-3 py-1 rounded-full text-xs font-bold"
+                      th:classappend="${order.deliveryStatus == 'Hoàn thành' ? 'bg-green-100 text-green-700' :
+                                      (order.deliveryStatus == 'Đã hủy' ? 'bg-red-100 text-red-700' :
+                                      'bg-yellow-100 text-yellow-700')}"
+                      th:text="${order.deliveryStatus}">
+                    Chờ xác nhận
+                </span>
+                        </td>
+
+                        <td class="px-6 py-4 text-right">
+                            <a th:href="@{/admin/order/detail/{id}(id=${order.id})}"
+                               class="text-blue-600 hover:text-blue-800 font-bold text-xs">Chi tiết</a>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${recentOrders == null || recentOrders.empty}">
+                        <td colspan="5" class="text-center py-4 text-gray-500">Chưa có dữ liệu đơn hàng.</td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="/admin/js/common.js"></script>
+
+</body>
+</html>

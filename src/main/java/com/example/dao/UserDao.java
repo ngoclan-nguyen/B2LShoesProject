@@ -249,4 +249,26 @@ public class UserDao {
             if(session != null && session.isOpen()) session.close();
         }
     }
+    public User findByEmail(String email) {
+        Session session = null;
+        Transaction transaction = null;
+        User user = null;
+
+        try {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+
+            Query<User> query = session.createQuery("FROM User u WHERE u.email = :email", User.class);
+            query.setParameter("email", email);
+            user = query.uniqueResult();
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        } finally {
+            if (session != null && session.isOpen()) session.close();
+        }
+        return user;
+    }
 }

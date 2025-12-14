@@ -1,13 +1,14 @@
 package com.example.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.example.dao.RememberMeDao;
 import com.example.model.RememberMeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RememberMeService {
+
 	@Autowired
 	private RememberMeDao rememberMeDao;
 
@@ -15,11 +16,13 @@ public class RememberMeService {
 		return rememberMeDao.findByToken(token);
 	}
 
-	public void save(RememberMeToken rmt,Long userId) {
+	@Transactional
+	public void save(RememberMeToken rmt, Long userId) {
 		rememberMeDao.save(rmt, userId);
 	}
 
+	@Transactional
 	public void removeToken(String token) {
-		rememberMeDao.removeToken(token);
+		rememberMeDao.delete(token);
 	}
 }

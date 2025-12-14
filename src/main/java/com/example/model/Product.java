@@ -2,6 +2,7 @@ package com.example.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -62,7 +63,7 @@ public class Product {
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ProductVariant> variants;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<ProductImage> productImages;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
@@ -127,8 +128,29 @@ public class Product {
     public List<ProductVariant> getVariants() { return variants; }
     public void setVariants(List<ProductVariant> variants) { this.variants = variants; }
 
-    public List<ProductImage> getImages() { return productImages; }
-    public void setImages(List<ProductImage> productImages) { this.productImages = productImages; }
+    public List<ProductImage> getProductImages() {
+        return productImages;
+    }
+
+    public void setProductImages(List<ProductImage> productImages) {
+        this.productImages = productImages;
+    }
+
+    @Transient
+    private String image; // Biến tạm để lưu link ảnh đại diện hiển thị ra view
+
+    public String getImage() { return image; }
+    public void setImage(String image) { this.image = image; }
+
+    public void addImage(ProductImage image) {
+        // Nếu list chưa có thì tạo mới ngay lập tức
+        if (this.productImages == null) {
+            this.productImages = new ArrayList<>();
+        }
+
+        this.productImages.add(image);
+        image.setProduct(this);
+    }
 
     public List<ProductReview> getReviews() { return reviews; }
     public void setReviews(List<ProductReview> reviews) { this.reviews = reviews; }

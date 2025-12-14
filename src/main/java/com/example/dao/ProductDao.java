@@ -5,13 +5,16 @@ import com.example.dto.ProductCardDTO;
 import com.example.dto.ProductDetailDTO;
 import com.example.dto.ProductDetailDTO.SizeOption;
 import com.example.model.Product;
+import com.example.model.ProductImage;
 import com.example.model.ProductVariant;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -525,5 +528,50 @@ public class ProductDao {
             if (session != null) session.close();
         }
         return product;
+    }
+
+    public List<Product> findAll() {
+        Session session = null;
+        Transaction transaction = null;
+
+        List<Product> products = new ArrayList<>();
+
+        try {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+
+            String hql = "SELECT DISTINCT p FROM Product p " +
+                    "LEFT JOIN FETCH p.productImages " +
+                    "WHERE (p.isDelete = false OR p.isDelete IS NULL) " +
+                    "ORDER BY p.id DESC";
+
+            products = session.createQuery(hql, Product.class).getResultList();
+
+            for (Product p : products) {
+                List<ProductImage> images = p.getProductImages();
+                if (images != null && !images.isEmpty()) {
+                    String primaryPath = null;
+                    for (ProductImage img : images) {
+                        if (Boolean.TRUE.equals(img.getIsPrimary())) {
+                            primaryPath = img.getPath();
+                            break;
+                        }
+                    }
+                    if (primaryPath == null) {
+                        primaryPath = images.get(0).getPath();
+                    }
+                    p.setImage(primaryPath);
+                }
+            }
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        } finally {
+            if (session != null && session.isOpen()) session.close();
+        }
+
+        return products;
     }
 }
