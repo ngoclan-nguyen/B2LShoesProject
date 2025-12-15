@@ -79,7 +79,7 @@ public class AuthController {
             cookie.setPath("/customer");
             response.addCookie(cookie);
         }
-        // Nếu có link redirect (ví dụ: /product/123) thì quay lại đó
+        // Nếu có link redirect thì quay lại đó
         if (redirectUrl != null && !redirectUrl.trim().isEmpty()) {
             return "redirect:" + redirectUrl;
         }

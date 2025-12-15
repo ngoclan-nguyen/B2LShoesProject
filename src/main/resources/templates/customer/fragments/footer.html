@@ -73,7 +73,9 @@
             <div class="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50">
                 <div class="flex items-center gap-2">
                     <img th:src="@{/customer/images/logo.png}" class="w-8 h-8"/>
-                    <span class="text-xl font-black italic uppercase tracking-tighter">B2L Shoes</span>
+                    <div class="text-xl md:text-2xl font-black italic uppercase tracking-tight text-black">
+                        B<span class="text-orange-600">2</span>L Shoes
+                    </div>
                 </div>
                 <button id="close-menu-btn" class="text-gray-400 hover:text-red-500 transition active:scale-90 p-2">
                     <i class="fa-solid fa-xmark text-3xl"></i>
@@ -83,40 +85,81 @@
             <div class="flex-1 flex flex-col p-6 overflow-y-auto">
 
                 <form action="/search" method="get" class="relative mb-8">
-                    <input type="text" name="keyword" placeholder="Tìm kiếm..."
+                    <input type="text" name="keyword" placeholder="Tìm kiếm sản phẩm..."
                            class="w-full bg-gray-50 border border-gray-200 rounded-full pl-5 pr-10 py-3 text-base focus:outline-none focus:border-black transition shadow-sm">
                     <button type="submit" class="absolute right-4 top-3 text-gray-400">
                         <i class="fa-solid fa-magnifying-glass text-lg"></i>
                     </button>
                 </form>
 
-                <ul class="flex-1 flex flex-col gap-6 text-lg font-bold text-gray-800 uppercase tracking-wide">
+                <ul class="flex-1 flex flex-col gap-4 text-base font-bold text-gray-800 uppercase tracking-wide">
                     <li>
-                        <a href="/" class="flex items-center gap-4 hover:text-orange-600 transition">
+                        <a href="/" class="flex items-center gap-4 py-2 hover:text-orange-600 transition">
                             <i class="fa-solid fa-house w-6 text-center text-gray-400"></i> Trang Chủ
                         </a>
                     </li>
+
                     <li>
-                        <a href="/products" class="flex items-center gap-4 hover:text-orange-600 transition">
-                            <i class="fa-solid fa-shoe-prints w-6 text-center text-gray-400"></i> Cửa Hàng
-                        </a>
+                        <div onclick="document.getElementById('mobile-product-submenu').classList.toggle('hidden'); document.getElementById('arrow-prod').classList.toggle('rotate-180')" class="cursor-pointer group py-2">
+                            <div class="flex items-center justify-between hover:text-orange-600 transition">
+                                <div class="flex items-center gap-4">
+                                    <i class="fa-solid fa-shoe-prints w-6 text-center text-gray-400"></i> Sản phẩm
+                                </div>
+                                <i id="arrow-prod" class="fa-solid fa-chevron-down text-sm text-gray-300 transition-transform duration-300"></i>
+                            </div>
+
+                            <ul id="mobile-product-submenu" class="hidden mt-3 ml-10 space-y-4 text-sm text-gray-600 font-medium normal-case border-l-2 border-gray-100 pl-4">
+                                <li><a href="/products" class="block hover:text-orange-500 font-bold">Tất cả sản phẩm</a></li>
+                                <li><a href="/products?gender=Nam" class="block hover:text-orange-500">Giày Nam</a></li>
+                                <li><a href="/products?gender=Nu" class="block hover:text-orange-500">Giày Nữ</a></li>
+
+                                <li class="pt-2 border-t border-gray-50">
+                                    <span class="text-xs text-gray-400 uppercase font-bold">Thương hiệu</span>
+                                    <div class="grid grid-cols-2 gap-2 mt-2">
+                                        <a href="/products?brand=Adidas" class="hover:text-orange-500">Adidas</a>
+                                        <a href="/products?brand=Nike" class="hover:text-orange-500">Nike</a>
+                                        <a href="/products?brand=Puma" class="hover:text-orange-500">Puma</a>
+                                        <a href="/products?brand=Mizuno" class="hover:text-orange-500">Mizuno</a>
+                                        <a href="/products?brand=Li-Ning" class="hover:text-orange-500">Li-Ning</a>
+                                        <a href="/products?brand=Yonex" class="hover:text-orange-500">Yonex</a>
+                                    </div>
+                                </li>
+
+                                <li class="pt-2 border-t border-gray-50">
+                                    <span class="text-xs text-gray-400 uppercase font-bold">Môn thể thao</span>
+                                    <div class="grid grid-cols-2 gap-2 mt-2">
+                                        <a href="/products?sport=Football" class="hover:text-orange-500">Bóng đá</a>
+                                        <a href="/products?sport=Running" class="hover:text-orange-500">Chạy bộ</a>
+                                        <a href="/products?sport=Basketball" class="hover:text-orange-500">Bóng Rổ</a>
+                                        <a href="/products?sport=Gym" class="hover:text-orange-500">Tập Gym / Training</a>
+                                        <a href="/products?sport=Badminton" class="hover:text-orange-500">Cầu Lông</a>
+                                        <a href="/products?sport=Volleyball" class="hover:text-orange-500">Bóng Chuyền</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </li>
+
                     <li>
-                        <div onclick="document.getElementById('mobile-submenu').classList.toggle('hidden')" class="cursor-pointer group">
+                        <div onclick="document.getElementById('mobile-submenu').classList.toggle('hidden'); document.getElementById('arrow-support').classList.toggle('rotate-180')" class="cursor-pointer group py-2">
                             <div class="flex items-center justify-between hover:text-orange-600 transition">
                                 <div class="flex items-center gap-4">
                                     <i class="fa-solid fa-headset w-6 text-center text-gray-400"></i> Hỗ trợ
                                 </div>
-                                <i class="fa-solid fa-chevron-down text-sm text-gray-300 transition-transform duration-300"></i>
+                                <i id="arrow-support" class="fa-solid fa-chevron-down text-sm text-gray-300 transition-transform duration-300"></i>
                             </div>
-                            <ul id="mobile-submenu" class="hidden mt-3 ml-10 space-y-3 text-sm text-gray-500 font-medium normal-case border-l-2 border-gray-100 pl-4 animate-fade-in-down">
+                            <ul id="mobile-submenu" class="hidden mt-3 ml-10 space-y-3 text-sm text-gray-500 font-medium normal-case border-l-2 border-gray-100 pl-4">
                                 <li><a href="/shopping-guide" class="block py-1 hover:text-orange-500">Hướng dẫn mua hàng</a></li>
                                 <li><a href="/size-guide" class="block py-1 hover:text-orange-500">Chọn size giày</a></li>
+                                <li><a href="/warranty-policy" class="block py-1 hover:text-orange-500">Chính sách bảo hành</a></li>
+                                <li><a href="/terms-conditions" class="block py-1 hover:text-orange-500">Điều khoản</a></li>
+                                <li><a href="/privacy-policy" class="block py-1 hover:text-orange-500">Chính sách bảo mật</a></li>
                             </ul>
                         </div>
                     </li>
+
                     <li>
-                        <a href="/about-us" class="flex items-center gap-4 hover:text-orange-600 transition">
+                        <a href="/about-us" class="flex items-center gap-4 py-2 hover:text-orange-600 transition">
                             <i class="fa-solid fa-users w-6 text-center text-gray-400"></i> Về chúng tôi
                         </a>
                     </li>
@@ -134,14 +177,23 @@
                     </div>
                 </a>
 
-                <div th:if="${session.currentCustomer != null}" class="flex justify-between items-center">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-lg shadow-sm">
-                            <span th:text="${#strings.substring(session.currentCustomer.name,0,1)}">U</span>
+                <div th:if="${session.currentCustomer != null}" class="flex flex-col gap-4">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-lg shadow-sm">
+                                <span th:text="${#strings.substring(session.currentCustomer.name,0,1)}">U</span>
+                            </div>
+                            <div>
+                                <p class="font-bold text-sm truncate max-w-[150px]" th:text="${session.currentCustomer.name}">User</p>
+                                <p class="text-xs text-gray-400">Thành viên</p>
+                            </div>
                         </div>
-                        <span class="font-bold text-sm truncate max-w-[120px]" th:text="${session.currentCustomer.name}">User</span>
+                        <a href="/logout" class="text-red-500 text-xs font-bold hover:underline bg-red-50 px-3 py-2 rounded-lg border border-red-100">Đăng xuất</a>
                     </div>
-                    <a href="/logout" class="text-red-500 text-xs font-bold hover:underline bg-red-50 px-3 py-2 rounded-lg border border-red-100">Đăng xuất</a>
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="/profile" class="text-center py-2 text-xs font-bold border rounded bg-white hover:border-orange-500 hover:text-orange-500 transition">Hồ sơ</a>
+                        <a href="/my-orders" class="text-center py-2 text-xs font-bold border rounded bg-white hover:border-orange-500 hover:text-orange-500 transition">Đơn hàng</a>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý sản phẩm - B2L Shoes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+        .text-b2l { color: #FF9900; }
+        .bg-b2l { background-color: #FF9900; }
+    </style>
+</head>
+<body class="bg-gray-100 flex h-screen overflow-hidden text-sm">
+
+<div id="sidebar-overlay" onclick="toggleSidebar()"
+     class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden transition-opacity opacity-0 lg:hidden"></div>
+
+<aside id="sidebar"
+       class="fixed inset-y-0 left-0 z-30 w-64 bg-black text-white transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto flex flex-col">
+
+    <div class="h-16 flex items-center justify-between px-6 border-b border-gray-800">
+        <div class="flex items-center gap-2">
+            <img src="/customer/images/logo-white.png" class="w-[30px] h-[30px]" alt="Logo">
+            <span class="text-xl font-extrabold uppercase tracking-wider">B2L SHOES</span>
+        </div>
+        <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-white">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+    </div>
+
+    <nav class="flex-1 py-6 space-y-1 overflow-y-auto">
+        <a href="/admin/dashboard" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
+            <i class="fa-solid fa-table-columns w-6"></i>
+            <span class="font-bold">Tổng quan</span>
+        </a>
+
+        <a href="/admin/products" class="flex items-center px-6 py-3 bg-gray-900 border-l-4 border-[#FF9900] text-white group">
+            <i class="fa-solid fa-box-open w-6 text-[#FF9900]"></i>
+            <span class="font-medium">Sản phẩm</span>
+        </a>
+
+        <a href="/admin/orders" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
+            <i class="fa-solid fa-bag-shopping w-6"></i>
+            <span class="font-medium">Đơn hàng</span>
+        </a>
+
+        <a href="/admin/customers" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
+            <i class="fa-solid fa-users w-6"></i>
+            <span class="font-medium">Khách hàng</span>
+        </a>
+    </nav>
+
+    <div class="p-4 border-t border-gray-800 bg-gray-900">
+        <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-[#FF9900] font-bold">
+                <i class="fa-regular fa-user"></i>
+            </div>
+            <div>
+                <p class="text-sm font-bold text-white truncate w-32" th:text="${session.currentAdmin != null ? session.currentAdmin.name : 'Admin'}">Admin Name</p>
+                <p class="text-xs text-gray-500">Quản trị viên</p>
+            </div>
+        </div>
+        <a href="/admin/logout" class="block w-full text-center py-2 bg-[#FF9900] hover:bg-[#e68a00] text-white text-xs font-bold rounded transition">
+            <i class="fa-solid fa-right-from-bracket mr-1"></i> Đăng xuất
+        </a>
+    </div>
+</aside>
+
+<div class="flex-1 flex flex-col overflow-hidden w-full">
+
+    <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8">
+        <h2 class="text-xl font-extrabold text-gray-800">DANH SÁCH SẢN PHẨM</h2>
+        <a href="/admin/product/add" class="bg-b2l hover:bg-orange-600 text-white px-4 py-2 rounded font-bold shadow transition flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i> Thêm mới
+        </a>
+    </header>
+
+    <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-8">
+
+        <div class="bg-white rounded shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-4 border-b border-gray-100 bg-white">
+                <form action="/admin/products" method="GET" class="flex flex-wrap gap-4 items-center">
+
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm tên sản phẩm..."
+                           class="border border-gray-300 rounded px-3 py-2 text-sm w-64">
+
+                    <select name="brandId" onchange="this.form.submit()"
+                            class="border border-gray-300 rounded px-3 py-2 text-sm cursor-pointer">
+                        <option value="">-- Tất cả Thương hiệu --</option>
+
+                        <option th:each="b : ${brands}"
+                                th:value="${b.id}"
+                                th:text="${b.name}"
+                                th:selected="${b.id == currentBrandId}">
+                            Adidas
+                        </option>
+                    </select>
+
+                    <select name="categoryId" onchange="this.form.submit()"
+                            class="border border-gray-300 rounded px-3 py-2 text-sm cursor-pointer">
+                        <option value="">-- Tất cả Danh mục --</option>
+
+                        <option th:each="c : ${categories}"
+                                th:value="${c.id}"
+                                th:text="${c.name}"
+                                th:selected="${c.id == currentCategoryId}">
+                            Giày Nam
+                        </option>
+                    </select>
+
+                    <a href="/admin/products" class="text-xs text-red-500 underline ml-2">Xóa bộ lọc</a>
+                </form>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-500">
+                    <tr>
+                        <th class="px-6 py-3 w-16">ID</th>
+                        <th class="px-6 py-3">Sản phẩm</th>
+                        <th class="px-6 py-3">Giá bán</th>
+                        <th class="px-6 py-3 text-center">Tồn kho</th>
+                        <th class="px-6 py-3 text-center">Trạng thái</th>
+                        <th class="px-6 py-3 text-right">Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-gray-700">
+
+                    <tr th:each="p : ${products}" class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 font-mono text-xs" th:text="${p.id}">1</td>
+
+                        <td class="px-6 py-4">
+                            <div class="flex gap-3 items-center">
+                                <div class="w-12 h-12 bg-gray-100 rounded border flex-shrink-0 overflow-hidden relative">
+
+                                    <img th:if="${p.productImages != null and !p.productImages.empty}"
+                                         th:src="${p.productImages[0].path}"
+                                         class="w-full h-full object-cover"
+                                         alt="Ảnh SP">
+
+                                    <div th:if="${p.productImages == null or p.productImages.empty}"
+                                         class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
+                                        <i class="fa-regular fa-image"></i>
+                                    </div>
+
+                                </div>
+                                <div>
+                                    <div class="font-bold text-gray-900 line-clamp-1" th:text="${p.name}">Tên giày</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">
+                                        <span th:text="${p.category != null ? p.category.name : 'Chưa phân loại'}">Category</span> |
+                                        <span th:text="${p.brand != null ? p.brand.name : 'No Brand'}">Brand</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="px-6 py-4 font-bold"
+                            th:text="${#numbers.formatDecimal(p.price, 0, 'POINT', 0, 'COMMA')} + ' đ'">
+                            2.000.000 đ
+                        </td>
+
+                        <td class="px-6 py-4 text-center">
+                            <span th:if="${p.quantity > 10}" class="text-green-600 font-bold" th:text="${p.quantity}">100</span>
+                            <span th:if="${p.quantity <= 10 && p.quantity > 0}" class="text-orange-500 font-bold" th:text="${p.quantity}">5</span>
+                            <span th:if="${p.quantity == 0}" class="px-2 py-1 bg-red-100 text-red-600 text-[10px] font-bold rounded">Hết hàng</span>
+                        </td>
+
+                        <td class="px-6 py-4 text-center">
+                            <span th:if="${p.status == 'Active'}" class="w-2 h-2 rounded-full bg-green-500 inline-block mr-1"></span>
+                            <span th:text="${p.status}">Active</span>
+                        </td>
+
+                        <td class="px-6 py-4 text-right space-x-2">
+                            <a th:href="@{/admin/product/edit/{id}(id=${p.id})}" class="text-blue-600 hover:text-blue-800" title="Sửa">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                            <button th:onclick="'deleteProduct(' + ${p.id} + ')'"
+                                    class="text-red-500 hover:text-red-700 ml-2 transition-colors duration-200"
+                                    title="Xóa sản phẩm">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${products.empty}">
+                        <td colspan="6" class="text-center py-8 text-gray-500">Chưa có sản phẩm nào.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="/admin/js/product.js"></script>
+</body>
+</html>

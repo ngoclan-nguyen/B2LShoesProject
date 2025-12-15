@@ -17,6 +17,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private RememberMeInterceptor rememberMeInterceptor;
 
+    @Autowired
+    private AdminInterceptor adminInterceptor;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // Áp dụng quy tắc này cho tất cả các API có đường dẫn bắt đầu bằng /api/
@@ -28,9 +31,19 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(rememberMeInterceptor)
-                .addPathPatterns("/**")
-                .excludePathPatterns("/admin/login","/admin/logout","/css/**", "/js/**");
+        registry.addInterceptor(adminInterceptor)
+                .addPathPatterns("/admin/**") // Chặn tất cả trang Admin
+                .excludePathPatterns( // [QUAN TRỌNG] Loại trừ các link này
+                        "/admin/login",
+                        "/admin/loginProcess",
+                        "/admin/forget-pass-view", // Form nhập email
+                        "/admin/forget-pass",      // Xử lý gửi OTP
+                        "/admin/verify-code",      // Check OTP
+                        "/admin/change-password",  // Đổi pass
+                        "/admin/logout",
+                        "/admin/assets/**",        // Tài nguyên tĩnh (nếu có)
+                        "/admin/404"
+                );
     }
 
     @Override

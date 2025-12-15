@@ -1,8 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
 
-    // ==================================================
-    // 1. XỬ LÝ GỢI Ý TÌM KIẾM (LIVE SEARCH)
-    // ==================================================
+    // XỬ LÝ GỢI Ý TÌM KIẾM
     const searchInput = document.getElementById('search-input');
     const suggestionBox = document.getElementById('search-suggestions');
     let timeoutId;
@@ -71,9 +69,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // ==================================================
-    // 2. XỬ LÝ MENU MOBILE
-    // ==================================================
+    // XỬ LÝ MENU MOBILE
     const menuContainer = document.getElementById("mobile-menu-container");
     const drawer = document.getElementById("mobile-menu-drawer");
     const overlay = document.getElementById("mobile-menu-overlay");
@@ -106,18 +102,9 @@ document.addEventListener("DOMContentLoaded", function() {
         closeBtn.addEventListener("click", closeMenu);
         overlay.addEventListener("click", closeMenu);
     }
-
-    // ==================================================
-    // 3. GỌI CẬP NHẬT GIỎ HÀNG KHI LOAD TRANG
-    // ==================================================
     updateCartCount();
 
-}); // <--- ĐÓNG SỰ KIỆN DOMContentLoaded TẠI ĐÂY LÀ CHUẨN NHẤT
-
-
-// ==================================================
-// 4. CÁC HÀM GLOBAL (Định nghĩa bên ngoài để HTML gọi được nếu cần)
-// ==================================================
+});
 
 // Hàm mở submenu (Hỗ trợ) - Dùng cho onclick trong HTML
 function toggleMobileSubmenu() {

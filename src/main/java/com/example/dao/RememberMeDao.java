@@ -1,96 +1,56 @@
 package com.example.dao;
 
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.query.MutationQuery;
-import org.hibernate.query.Query;
-import org.springframework.stereotype.Repository;
-
-import com.example.config.HibernateUtil;
 import com.example.model.RememberMeToken;
-import com.example.model.User;
-
-
+import com.example.model.User; // Import User model
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class RememberMeDao {
+
+	@PersistenceContext
+	private EntityManager entityManager;
+
+	@Transactional(readOnly = true)
 	public RememberMeToken findByToken(String token) {
-		RememberMeToken rememberMeToken = null;
-		Session session = null;
-		Transaction transaction = null;
-
 		try {
-			session = HibernateUtil.getSession();
-			transaction = session.beginTransaction();
-
-			Query<RememberMeToken> query = session.createQuery("From RememberMeToken Where token = :token",RememberMeToken.class);
-			query.setParameter("token", token);
-			rememberMeToken = query.uniqueResult();
-
-			transaction.commit();
-		}catch(Exception e) {
-			if(transaction != null) {
-				transaction.rollback();
-			}
+			String hql = "FROM RememberMeToken WHERE token = :token";
+			return entityManager.createQuery(hql, RememberMeToken.class)
+					.setParameter("token", token)
+					.getResultStream()
+					.findFirst()
+					.orElse(null);
+		} catch (Exception e) {
 			e.printStackTrace();
-		}finally {
-			if(session != null && session.isOpen()) {
-				session.close();
-			}
+			return null;
 		}
-
-		return rememberMeToken;
 	}
 
-	public void save(RememberMeToken rmt,Long userId) {
-		Session session = null;
-		Transaction transaction = null;
-
+	@Transactional
+	public void save(RememberMeToken token, Long userId) {
 		try {
-			session = HibernateUtil.getSession();
-			transaction = session.beginTransaction();
-			User user = session.getReference(User.class, userId);
-			rmt.setUser(user);
-			session.persist(rmt);
+			User userRef = entityManager.getReference(User.class, userId);
 
-			transaction.commit();
-		}catch(Exception e) {
-			if(transaction != null) {
-				transaction.rollback();
-			}
+			token.setUser(userRef);
+
+			entityManager.persist(token);
+
+		} catch (Exception e) {
 			e.printStackTrace();
-		}finally {
-			if(session != null && session.isOpen()) {
-				session.close();
-			}
 		}
-
-
 	}
 
-	public void removeToken(String token) {
-		Session session = null;
-		Transaction transaction = null;
-
+	@Transactional
+	public void delete(String token) {
 		try {
-			session = HibernateUtil.getSession();
-			transaction = session.beginTransaction();
-
-			MutationQuery query= session.createMutationQuery("Delete From RememberMeToken r Where r.token = :token");
-			query.setParameter("token", token);
-			query.executeUpdate();
-
-
-			transaction.commit();
-		}catch(Exception e) {
-			if(transaction != null) {
-				transaction.rollback();
-			}
+			String hql = "DELETE FROM RememberMeToken WHERE token = :token";
+			entityManager.createQuery(hql)
+					.setParameter("token", token)
+					.executeUpdate();
+		} catch (Exception e) {
 			e.printStackTrace();
-		}finally {
-			if(session != null && session.isOpen()) {
-				session.close();
-			}
 		}
 	}
 }

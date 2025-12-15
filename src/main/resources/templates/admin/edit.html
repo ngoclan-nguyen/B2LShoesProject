@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Sửa sản phẩm</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 py-10">
+<div class="max-w-3xl mx-auto bg-white p-8 rounded shadow-lg">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Chỉnh sửa sản phẩm</h2>
+
+    <form action="/admin/product/save" method="POST" enctype="multipart/form-data">
+
+        <input type="hidden" name="id" th:value="${p.id}">
+
+        <div class="grid grid-cols-2 gap-6">
+
+            <div class="col-span-2">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Ảnh sản phẩm</label>
+                <div class="flex items-center gap-6 p-4 border rounded-lg bg-gray-50">
+
+                    <div class="relative w-32 h-32 bg-white rounded border border-gray-300 overflow-hidden shadow-sm flex-shrink-0">
+
+                        <img th:if="${p.productImages != null and !p.productImages.empty}"
+                             th:src="${p.productImages[0].path}"
+                             class="w-full h-full object-cover"
+                             alt="Ảnh sản phẩm">
+
+                        <div th:if="${p.productImages == null or p.productImages.empty}"
+                             class="w-full h-full flex items-center justify-center text-gray-300">
+                            <i class="fa-regular fa-image text-4xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Thay đổi ảnh mới</label>
+                        <input type="file" name="imageFile" accept="image/png, image/jpeg, image/jpg"
+                               class="block w-full text-sm text-gray-500
+                                      file:mr-4 file:py-2 file:px-4
+                                      file:rounded-full file:border-0
+                                      file:text-sm file:font-semibold
+                                      file:bg-orange-100 file:text-orange-700
+                                      hover:file:bg-orange-200 cursor-pointer"/>
+                        <p class="mt-2 text-xs text-gray-500">
+                            * Chỉ chấp nhận file ảnh (JPG, PNG).<br>
+                            * Nếu không chọn ảnh mới, ảnh cũ sẽ được giữ nguyên.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-span-2">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Tên sản phẩm</label>
+                <input type="text" name="name" th:value="${p.name}" required
+                       class="border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Giá bán (VNĐ)</label>
+                <input type="number" name="price" th:value="${p.price}" required
+                       class="border rounded w-full py-2 px-3 text-gray-700">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Số lượng kho</label>
+                <input type="number" name="quantity" th:value="${p.quantity}" required
+                       class="border rounded w-full py-2 px-3 text-gray-700">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Thương hiệu</label>
+                <select name="brandId" class="border rounded w-full py-2 px-3 bg-white">
+                    <option value="">-- Chọn Thương hiệu --</option>
+                    <option th:each="b : ${brands}"
+                            th:value="${b.id}"
+                            th:text="${b.name}"
+                            th:selected="${p.brand != null && p.brand.id == b.id}">
+                    </option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Danh mục</label>
+                <select name="categoryId" class="border rounded w-full py-2 px-3 bg-white">
+                    <option value="">-- Chọn Danh mục --</option>
+                    <option th:each="c : ${categories}"
+                            th:value="${c.id}"
+                            th:text="${c.name}"
+                            th:selected="${p.category != null && p.category.id == c.id}">
+                    </option>
+                </select>
+
+            </div>
+
+            <div class="col-span-2">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Trạng thái</label>
+                <select name="status" class="border rounded w-full py-2 px-3 bg-white">
+                    <option value="Active" th:selected="${p.status == 'Active'}">Đang bán</option>
+                    <option value="Inactive" th:selected="${p.status == 'Inactive'}">Ngừng bán</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-4 mt-8">
+            <a href="/admin/products" class="text-gray-500 hover:text-black font-bold">Hủy bỏ</a>
+            <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded shadow transition duration-200">
+                Lưu thay đổi
+            </button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
