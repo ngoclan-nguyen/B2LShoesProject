@@ -1,36 +1,47 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="_csrf" th:content="${_csrf.token}" />
-    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
-    <title>Giỏ hàng</title>
+	<meta charset="UTF-8" />
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	    <link rel="icon" type="image/png" th:href="@{/customer/images/logo.png}">
+	    <title>B2L Shoes - Giỏ hàng</title>
 
-    <link rel="stylesheet" href="https://cdn.tailwindcss.com">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	    <link rel="stylesheet" href="https://cdn.tailwindcss.com">
+	    <script src="https://cdn.tailwindcss.com"></script>
+	    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+	    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <style>
-        * { box-sizing: border-box; }
-        body { font-family: 'Montserrat', sans-serif; }
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+	    <style>
+	        * { box-sizing: border-box; }
+	        body { font-family: 'Montserrat', sans-serif; }
+
+	        /* Hiệu ứng trồi lên (Scroll Reveal) */
+	        .reveal {
+	            opacity: 0;
+	            transform: translateY(30px);
+	            transition: all 0.8s ease-out;
+	        }
+	        .reveal.active { opacity: 1; transform: translateY(0); }
+
+	        /* Ẩn thanh cuộn */
+	        .hide-scrollbar::-webkit-scrollbar { display: none; }
+	        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+	    </style>
 </head>
 <body class="bg-white text-black">
     <div th:replace="~{customer/fragments/header :: header}"></div>
 
-    <h1 class="font-bold text-3xl text-left px-20 pt-10">GIỎ HÀNG CỦA BẠN</h1>
+    <h1 class="font-bold text-3xl text-left px-20 pt-10">GIỎ HÀNG</h1>
 
     <div class="w-[95%] flex gap-20 mx-auto">
         <div class="w-[70%]">
-            <div th:if="${cartItem == null || cartItem.isEmpty()}">
-                <p>Giỏ hàng của bạn đang trống. Hãy quay lại trang mua hàng nhé!</p>
+            <div th:if="${cartItem == null || cartItem.isEmpty()}"
+				class="text-center py-20">
+				<h2 class="text-2xl text-gray-500 font-bold mb-8">Giỏ hàng của bạn đang trống!</h2>
+                <a th:href="@{/}" class="bg-[#FF9900] text-white px-8 py-3 rounded-[15px] font-bold hover:bg-orange-600 hover:shadow-lg transition-all duration-300 cursor-pointer">
+                    Quay lại mua sắm
+                </a>
             </div>
             <div th:unless="${cartItem == null || cartItem.isEmpty()}" class="flex flex-col gap-10 mb-20">
                 <!-- Select All Checkbox -->
@@ -58,15 +69,16 @@
 							            th:attr="data-id=${item.productVariantId}">-</button>
 							    <p class="quantityDisplay flex items-center justify-center border border-gray-300 font-bold w-8 h-8 text-center"
 							       th:text="${item.quantity}">1</p>
-							    <button class="quantityPlus flex items-center justify-center border border-gray-300 border-l-0 font-bold text-2xl w-8 h-8 hover:bg-black hover:text-white"
-							            th:attr="data-id=${item.productVariantId}">+</button>
+								   <button class="quantityPlus flex items-center justify-center border border-gray-300 border-l-0 font-bold text-2xl w-8 h-8 hover:bg-black hover:text-white"
+								           th:data-id="${item.productVariantId}"
+								           th:data-quantity="${item.totalQuantity}">+</button>
 							</div>
 				        </div>
 				    </div>
 
 				    <div class="w-[20%] flex flex-col items-end">
 				        <input type="checkbox"
-				               class="selectedItem itemCheckbox w-6 h-6 border border-gray-400 transition-transform hover:scale-[1.1]"
+				               class="itemCheckbox w-6 h-6 border border-gray-400 transition-transform hover:scale-[1.1]"
 				               th:attr="data-id=${item.productVariantId}"
 				               th:checked="${productVariantIds != null and #lists.contains(productVariantIds, item.productVariantId)}"/>
 
@@ -122,12 +134,10 @@
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 	<script>
 		$(function() {
-		    const token = $("meta[name='_csrf']").attr("content");
-		    const header = $("meta[name='_csrf_header']").attr("content");
-			
+
 			$(document).on('click', '.cartItem', function(e) {
 			    // Nếu click vào nút xóa thì bỏ qua
-			    if ($(e.target).closest('.selectedItem').length) return;
+			    if ($(e.target).closest('.itemCheckbox').length) return;
 				if ($(e.target).closest('.adjustQuantity').length) return;
 				if ($(e.target).closest('.removeCartBtn').length) return;
 				
@@ -146,7 +156,7 @@
 		            url: '/api/cart/updateSelection',
 		            type: 'POST',
 		            contentType: 'application/json',
-		            headers: { [header]: token },
+		            headers: {},
 		            data: JSON.stringify(selectedIds),
 		            success: function(data) {
 		                $('#totalAmountDisplay').text(new Intl.NumberFormat('vi-VN').format(data.totalAmount) + 'đ');
@@ -175,11 +185,20 @@
 		        $.ajax({
 		            url: '/api/cart/remove',
 		            type: 'POST',
-		            headers: { [header]: token },
+		            headers: {},
 		            data: { productVariantId: productVariantId },
-		            success: function(res) {
+		            success: function(data) {
 		                cartItemDiv.remove();
 		                updateCartSelection(); // Cập nhật lại tổng tiền
+						const cartBadge = document.getElementById('cart-qty');
+	                    if(cartBadge) {
+	                        cartBadge.innerText = data.totalItems;
+							if (data.totalItems === 0) {
+								location.reload();
+							}
+	                        cartBadge.parentElement.classList.add('scale-125');
+	                        setTimeout(() => cartBadge.parentElement.classList.remove('scale-125'), 200);
+	                    }
 		            },
 		            error: function(xhr, status, error) {
 		                alert("Xoá thất bại!");
@@ -197,8 +216,8 @@
 	
 		        if (quantity > 1) {
 		            quantity--;
-		            qtyEl.text(quantity);
-		            updateQuantityOnServer(productVariantId, quantity);
+					updateQuantityOnServer(productVariantId, quantity);
+		            qtyEl.text(quantity); 
 		        }
 		    });
 	
@@ -206,12 +225,25 @@
 		    $(document).on('click', '.quantityPlus', function() {
 		        const btn = $(this);
 		        const productVariantId = btn.data('id');
+				let stock = parseInt(btn.data('quantity'));
 		        const qtyEl = btn.siblings('.quantityDisplay');
 		        let quantity = parseInt(qtyEl.text());
 	
-		        quantity++;
-		        qtyEl.text(quantity);
-		        updateQuantityOnServer(productVariantId, quantity);
+				if (quantity < stock) {  // Chỉ tăng nếu chưa đạt giới hạn tồn kho
+				        quantity++;
+						updateQuantityOnServer(productVariantId, quantity);
+				        qtyEl.text(quantity); 
+			    } else {
+					Swal.fire({
+					    icon: 'warning',          // icon cảnh báo
+					    title: 'Đã đạt giới hạn tồn kho!',
+					    toast: true,              // kiểu nhỏ góc màn hình
+					    position: 'top-end',      // vị trí góc trên bên phải
+					    showConfirmButton: false, // không cần nút OK
+					    timer: 2000,              // tự tắt sau 2 giây
+					    timerProgressBar: true     // thanh tiến trình
+					});
+			    }
 		    });
 	
 		    // Hàm gửi số lượng mới lên server
@@ -219,10 +251,16 @@
 		        $.ajax({
 		            url: '/api/cart/updateQuantity',
 		            type: 'POST',
-		            headers: { [header]: token },
+		            headers: {},
 		            data: { productVariantId: productVariantId, quantity: quantity },
-		            success: function(res) {
+		            success: function(data) {
 		                updateCartSelection(); // Cập nhật lại tổng tiền
+						const cartBadge = document.getElementById('cart-qty');
+	                    if(cartBadge) {
+	                        cartBadge.innerText = data.totalItems;
+	                        cartBadge.parentElement.classList.add('scale-125');
+	                        setTimeout(() => cartBadge.parentElement.classList.remove('scale-125'), 200);
+	                    }
 		            },
 		            error: function(xhr, status, error) {
 		                console.error("Cập nhật số lượng thất bại:", error);

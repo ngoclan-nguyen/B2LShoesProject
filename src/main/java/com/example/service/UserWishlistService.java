@@ -18,6 +18,10 @@ public class UserWishlistService {
 		return userWishlistDao.getUserWishlistByUserId(userId);
 	}
 	
+	public List<Long> getUserWishlistProductIds(Long userId) {
+		return userWishlistDao.getUserWishlistProductIds(userId);
+	}
+	
 	public boolean addUserWishlistByUserId(Long userId, Long productId) {
 		return userWishlistDao.addUserWishlistByUserId(userId, productId);
 	}

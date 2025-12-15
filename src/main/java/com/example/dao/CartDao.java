@@ -21,6 +21,7 @@ import com.example.model.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -99,7 +100,7 @@ public class CartDao {
 			transaction = session.beginTransaction();
 			
 			String hql = "SELECT new com.example.dto.UserCartItemDTO("
-					+ "c.id, c.createdAt, c.updatedAt, c.quantity, c.user.id, p.id, pv.id, p.name, p.price, s.sizeName, img.path) "
+					+ "c.id, c.createdAt, c.updatedAt, c.quantity, c.user.id, p.id, pv.id, p.name, p.price, pv.quantity, s.sizeName, img.path) "
 					+ "FROM CartItem c "
 					+ "LEFT JOIN c.productVariant pv "
 					+ "LEFT JOIN pv.size s "
@@ -156,71 +157,43 @@ public class CartDao {
 		return totalAmount;
     }
     
-    public boolean removeCartItem(Long userId, Integer productVariantId) {
-		Session session = null;
-		Transaction transaction = null;
-		try {
-			session = HibernateUtil.getSession();
-			transaction = session.beginTransaction();
-			
-	        String hql = "FROM CartItem c WHERE c.user.id = :uid AND c.productVariant.id = :pvid";
-	        CartItem itemToDelete = session.createQuery(hql, CartItem.class)
-                    .setParameter("uid", userId)
-                    .setParameter("pvid", productVariantId)
-                    .uniqueResult();
+    @Transactional
+    public int removeCartItem(Long userId, Integer productVariantId) {
+		Session session = getCurrentSession();
+		
+		String hql = "FROM CartItem c WHERE c.user.id = :uid AND c.productVariant.id = :pvid";
+	    CartItem itemToDelete = session.createQuery(hql, CartItem.class)
+	            .setParameter("uid", userId)
+	            .setParameter("pvid", productVariantId)
+	            .uniqueResult();
 
-			
-			if (itemToDelete != null) {
-				session.remove(itemToDelete);
-				transaction.commit();
-				return true; 
-			} else {
-				return false; 
-			}
-	    } catch (Exception e) {
-	        if (transaction != null) {
-	            transaction.rollback();
-	        }
-	        return false;
-	    } finally {
-	        if (session != null && session.isOpen()) {
-	            session.close();
-	        }
+	    if (itemToDelete != null) {
+	        session.remove(itemToDelete); // Xóa CartItem
 	    }
+
+	    return countItemsByUser(userId);
 	}
     
-    public void updateQuantity(Long userId, Long productVariantId, Integer quantity) {
-        Session session = null;
-        Transaction transaction = null;
-        try {
-			session = HibernateUtil.getSession();
-			transaction = session.beginTransaction();
-			
-	        String hql = "UPDATE CartItem c "
-	        		+ "SET c.quantity = :quantity "
-	        		+ "WHERE c.user.id = :uid "
-	        		+ "AND c.productVariant.id = :pvid";
-	        
-	        Query<?> query = session.createQuery(hql);
-            query.setParameter("uid", userId);
-            query.setParameter("pvid", productVariantId);
-            query.setParameter("quantity", quantity);
-            
-            int rowsAffected = query.executeUpdate();
-            System.out.println("Rows update: " + rowsAffected);
-			
-            transaction.commit();
-			
-	    } catch (Exception e) {
-	        if (transaction != null) {
-	            transaction.rollback();
-	        }
-	        e.printStackTrace();
-	    } finally {
-	        if (session != null && session.isOpen()) {
-	            session.close();
-	        }
-	    }
+    @Transactional
+    public int updateQuantity(Long userId, Long productVariantId, Integer quantity) {
+        Session session = getCurrentSession();
+
+        // 1. Cập nhật số lượng CartItem
+	    String hqlUpdate = "UPDATE CartItem c "
+	                     + "SET c.quantity = :quantity "
+	                     + "WHERE c.user.id = :uid "
+	                     + "AND c.productVariant.id = :pvid";
+	
+	    @SuppressWarnings("deprecation")
+		Query<?> query = session.createQuery(hqlUpdate);
+	    query.setParameter("uid", userId);
+	    query.setParameter("pvid", productVariantId);
+	    query.setParameter("quantity", quantity);
+
+        int rowsAffected = query.executeUpdate();
+        System.out.println("Rows updated: " + rowsAffected);
+
+        return countItemsByUser(userId);
     }
 
 	public int countItemsByUser(Long userId) {

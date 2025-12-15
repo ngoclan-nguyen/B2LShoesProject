@@ -6,6 +6,11 @@ import com.example.model.MasterSize;
 import com.example.model.Product;
 import com.example.model.User;
 import com.example.model.UserWishlist;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
@@ -17,6 +22,13 @@ import java.util.List;
 
 @Repository
 public class UserWishlistDao {
+	@PersistenceContext
+    private EntityManager entityManager;
+	
+	 private Session getCurrentSession() {
+	        return entityManager.unwrap(Session.class);
+	    }
+	
 	public List<UserWishlistDTO> getUserWishlistByUserId(Long userId) {
 		List<UserWishlistDTO> userWishlist = null;
 		Session session = null;
@@ -43,6 +55,17 @@ public class UserWishlistDao {
 			if (session != null) session.close();
 		}
 		return userWishlist;
+	}
+	
+	@Transactional
+	public List<Long> getUserWishlistProductIds(Long userId) {
+		Session session = getCurrentSession();
+	    String hql = "SELECT uw.product.id FROM UserWishlist uw WHERE uw.user.id = :uid";
+	    @SuppressWarnings("unchecked")
+	    List<Long> productIds = session.createQuery(hql)
+	                                   .setParameter("uid", userId)
+	                                   .getResultList();
+	    return productIds;
 	}
 	
 	public boolean addUserWishlistByUserId(Long userId, Long productId) {

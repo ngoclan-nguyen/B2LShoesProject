@@ -39,11 +39,11 @@ public class CartService {
     	return cartDao.getTotalAmountBySelectedItem(userId, productVariantIds);
     }
     
-    public boolean removeCartItem(Long userId, Integer productVariantId) {
+    public int removeCartItem(Long userId, Integer productVariantId) {
     	return cartDao.removeCartItem(userId, productVariantId);
     }
     
-    public void updateQuantity(Long userId, Long productVariantId, Integer quantity) {
-    	cartDao.updateQuantity(userId, productVariantId, quantity);
+    public int updateQuantity(Long userId, Long productVariantId, Integer quantity) {
+    	return cartDao.updateQuantity(userId, productVariantId, quantity);
     }
 }

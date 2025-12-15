@@ -2,17 +2,16 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 	<head>
 	    <meta charset="UTF-8" />
-	    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta name="_csrf" th:content="${_csrf.token}" />
-		<meta name="_csrf_header" th:content="${_csrf.headerName}" />
-	    <title>Danh sách yêu thích</title>
-	
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	    <link rel="icon" type="image/png" th:href="@{/customer/images/logo.png}">
+	    <title>B2L Shoes - Danh sách yêu thích</title>
+
 	    <link rel="stylesheet" href="https://cdn.tailwindcss.com">
 	    <script src="https://cdn.tailwindcss.com"></script>
 	    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 	    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
 	    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-	
+
 	    <style>
 	        * { box-sizing: border-box; }
 	        body { font-family: 'Montserrat', sans-serif; }
@@ -139,9 +138,7 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 		<script>
 			$(function() {
-			    const token = $("meta[name='_csrf']").attr("content");
-			    const header = $("meta[name='_csrf_header']").attr("content");
-				
+					
 				$(document).on('click', '.wishlistItem', function(e) {
 				    // Nếu click vào nút xóa thì bỏ qua
 				    if ($(e.target).closest('.removeWishlistBtn').length) return;
@@ -162,7 +159,7 @@
 			        $.ajax({
 			            url: '/api/wishlist/remove',
 			            type: 'POST',
-			            headers: { [header]: token },
+			            headers: {},
 			            data: { productId: productId },
 			            success: function(res) {
 			                wishlistDiv.remove(); // remove ngay trên trang
@@ -265,7 +262,7 @@
 			        $.ajax({
 			            url: '/api/cart/add',
 			            type: 'POST',
-			            headers: { [header]: token },
+			            headers: { },
 			            data: {
 			                productId: currentProductId,
 			                size: size,
@@ -278,7 +275,13 @@
 			                        title: res.message,
 			                        showConfirmButton: false,
 			                        timer: 1500
-			                    });             
+			                    });
+								const cartBadge = document.getElementById('cart-qty');
+			                    if(cartBadge) {
+			                        cartBadge.innerText = res.totalItems;
+			                        cartBadge.parentElement.classList.add('scale-125');
+			                        setTimeout(() => cartBadge.parentElement.classList.remove('scale-125'), 200);
+			                    }             
 			                } else {
 			                    Swal.fire({
 			                        icon: 'error',

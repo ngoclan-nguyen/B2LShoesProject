@@ -36,6 +36,19 @@ public class HomeController {
     public String home(HttpServletRequest request) {
         request.setAttribute("featuredProducts", homeService.getFeaturedProducts());
 		request.setAttribute("bestSellerProducts", homeService.getBestSellerProducts());
+		
+		UserDTO user = (UserDTO) request.getSession().getAttribute("currentCustomer");
+
+	    List<Long> userWishlistProductIds;
+	    if (user != null) {
+	        // Nếu user đã đăng nhập, lấy danh sách productId trong wishlist
+	        userWishlistProductIds = userWishlistService.getUserWishlistProductIds(user.getId());
+	    } else {
+	        // Nếu chưa đăng nhập, trả về danh sách rỗng
+	        userWishlistProductIds = List.of();
+	    }
+
+	    request.setAttribute("userWishlistProductIds", userWishlistProductIds);
 
         return "customer/home";
     }
@@ -73,21 +86,21 @@ public class HomeController {
 	
 	@GetMapping("/wishlist")
 	public String wishlist(HttpServletRequest request) {
-		//UserDTO user = (UserDTO)request.getSession().getAttribute("currentCustomer");
-		//Long userId = null;
-		//if (user != null)
-			//userId = user.getId();
-		request.setAttribute("userWishlist", userWishlistService.getUserWishlistByUserId(32L));
+		UserDTO user = (UserDTO)request.getSession().getAttribute("currentCustomer");
+		Long userId = null;
+		if (user != null)
+			userId = user.getId();
+		request.setAttribute("userWishlist", userWishlistService.getUserWishlistByUserId(userId));
 		return "customer/wishlist.html";
 	}
 	
 	@GetMapping("/cart")
 	public String cart(HttpServletRequest request) {
-		//UserDTO user = (UserDTO)request.getSession().getAttribute("currentCustomer");
-		//Long userId = null;
-		//if (user != null)
-		//	userId = user.getId();
-		request.setAttribute("cartItem", cartService.getCartItemByUserId(6L));
+		UserDTO user = (UserDTO)request.getSession().getAttribute("currentCustomer");
+		Long userId = null;
+		if (user != null)
+			userId = user.getId();
+		request.setAttribute("cartItem", cartService.getCartItemByUserId(userId));
 		return "customer/shopping_cart";
 	}
 

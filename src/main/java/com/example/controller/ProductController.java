@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.dto.ProductCardDTO;
 import com.example.dto.ProductDetailDTO;
+import com.example.dto.UserDTO;
 import com.example.service.HomeService;
+import com.example.service.UserWishlistService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -29,6 +31,8 @@ public class ProductController {
     private ProductReviewDao productReviewDao;
     @Autowired
     private SizeDao sizeDao;
+    @Autowired
+    private UserWishlistService userWishlistService;
 
     @GetMapping("/search")
     public String search(
@@ -101,6 +105,19 @@ public class ProductController {
 
         List<String> allSizes = sizeDao.getAllSizeNames();
         request.setAttribute("allSizes", allSizes);
+        
+        UserDTO user = (UserDTO) request.getSession().getAttribute("currentCustomer");
+
+	    List<Long> userWishlistProductIds;
+	    if (user != null) {
+	        // Nếu user đã đăng nhập, lấy danh sách productId trong wishlist
+	        userWishlistProductIds = userWishlistService.getUserWishlistProductIds(user.getId());
+	    } else {
+	        // Nếu chưa đăng nhập, trả về danh sách rỗng
+	        userWishlistProductIds = List.of();
+	    }
+
+	    request.setAttribute("userWishlistProductIds", userWishlistProductIds);
 
         return "customer/products";
     }

@@ -172,9 +172,15 @@
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                 <div th:each="product : ${products}" class="group relative">
                     <div class="relative aspect-square bg-[#f9f9f9] mb-3 overflow-hidden rounded-sm border border-transparent hover:border-gray-200 transition-all">
-                        <button class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 shadow-sm z-10 transition opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0">
-                            <i class="fa-regular fa-heart"></i>
-                        </button>
+						<button type="button"
+						        class="wishlist-toggle absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm z-10 transition opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 hover:bg-red-50"
+						        th:attr="data-product-id=${product.id}"
+						        onclick="toggleWishlist(this)">
+						    
+						    <i class="fa-heart transition-colors duration-300"
+						       th:classappend="${userWishlistProductIds != null and #lists.contains(userWishlistProductIds, product.id)} ? 'fa-solid text-red-500' : 'fa-regular text-gray-400 hover:text-red-500'">
+						    </i>
+						</button>
 
                         <a th:href="@{'/product/' + ${product.id}}">
                             <img th:src="@{${product.image}}" class="w-full h-full object-contain p-4 mix-blend-multiply group-hover:scale-110 transition duration-500 ease-in-out">
@@ -208,6 +214,7 @@
 
 <div th:replace="~{customer/fragments/footer :: footer}"></div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     // Hàm AJAX xử lý lọc không load lại trang
     function submitFilter() {
@@ -254,6 +261,68 @@
             searchInPage();
         }
     }
+	
+	function toggleWishlist(btnElement) {
+	        const btn = $(btnElement);
+	        const icon = btn.find('i');
+	        const productId = btn.attr('data-product-id');
+	        
+	        // Kiểm tra trạng thái hiện tại dựa trên class của icon
+	        // Nếu đang là solid (đậm) -> tức là đang thích -> hành động là Xóa
+	        const isLiked = icon.hasClass('fa-solid');
+	        
+	        const url = isLiked ? `/api/wishlist/remove?productId=${productId}` : `/api/wishlist/add?productId=${productId}`;
+
+	        $.ajax({
+	            url: url,
+	            type: 'POST',
+	            success: function(data) {
+	                // Xử lý giao diện ngay lập tức
+	                if (isLiked) {
+	                    // Đang thích -> Thành không thích
+	                    icon.removeClass('fa-solid text-red-500').addClass('fa-regular text-gray-400');
+						Swal.fire({
+		                    icon: 'error', // Hoặc 'warning' nếu muốn icon chấm than
+		                    title: 'Đã xóa khỏi danh sách yêu thích',
+		                    toast: true, position: 'top-end', showConfirmButton: false, timer: 2000
+		                });
+	                } else {
+	                    // Chưa thích -> Thành thích
+	                    icon.removeClass('fa-regular text-gray-400').addClass('fa-solid text-red-500');
+						Swal.fire({
+		                    icon: 'success',
+		                    title: 'Đã thêm vào danh sách yêu thích',
+		                    toast: true, position: 'top-end', showConfirmButton: false, timer: 2000
+		                });
+	                }
+	            },
+	            error: function(xhr) {
+	                if (xhr.status === 401) {
+	                    Swal.fire({
+	                        icon: 'warning',
+	                        title: 'Bạn chưa đăng nhập!',
+	                        text: 'Vui lòng đăng nhập để lưu sản phẩm yêu thích.',
+	                        showCancelButton: true,
+	                        confirmButtonText: 'Đăng nhập ngay',
+	                        cancelButtonText: 'Hủy',
+							customClass: {
+							            title: 'text-red-500',       // đổi màu tiêu đề
+							            content: 'text-gray-700',    // đổi màu nội dung
+							            confirmButton: 'bg-[#FF9900] text-white px-4 py-2 rounded font-bold hover:bg-orange-600', // nút xác nhận
+							            cancelButton: 'bg-white text-black px-4 py-2 rounded font-bold border border-black hover:bg-black hover:text-white'   // nút hủy
+							        }
+	                    }).then((result) => {
+	                        if (result.isConfirmed) {
+	                            window.location.href = '/login';
+	                        }
+	                    });
+	                } else {
+	                    Swal.fire('Lỗi', 'Không thể cập nhật danh sách yêu thích', 'error');
+	                    console.error(xhr.responseText);
+	                }
+	            }
+	        });
+	    }
 </script>
 </body>
 </html>
