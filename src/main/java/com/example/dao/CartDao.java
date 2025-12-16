@@ -1,18 +1,24 @@
 package com.example.dao;
 
-import com.example.model.CartItem;
-import com.example.config.HibernateUtil;
-import com.example.model.ProductVariant;
-import com.example.model.User;
+import java.util.List;
+
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.example.config.HibernateUtil;
+import com.example.model.CartItem;
+import com.example.model.ProductVariant;
+import com.example.model.User;
+
+
 @Repository
 public class CartDao {
+    private static final Logger logger = LoggerFactory.getLogger(CartDao.class);
     @Autowired
     private ProductDao productDao;
     @Autowired
@@ -38,7 +44,7 @@ public class CartDao {
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            e.printStackTrace();
+            logger.error("Error finding cart item by product and user", e);
         } finally {
             if (session != null) session.close();
         }
@@ -53,12 +59,12 @@ public class CartDao {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
 
-            session.saveOrUpdate(cartItem);
+            session.merge(cartItem);
 
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            e.printStackTrace();
+            logger.error("Error saving cart item", e);
         } finally {
             if (session != null) session.close();
         }
@@ -89,7 +95,7 @@ public class CartDao {
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            e.printStackTrace();
+            logger.error("Error counting cart items by user", e);
         } finally {
             if (session != null) session.close();
         }
@@ -106,7 +112,7 @@ public class CartDao {
             transaction = session.beginTransaction();
 
             // 2. Tìm Variant (Gọi ProductDao, truyền session vào)
-            ProductVariant variant = null;
+            ProductVariant variant;
             if (sizeName != null && !sizeName.isEmpty()) {
                 variant = productDao.findVariantByProductAndSize(productId, sizeName);
             } else {
@@ -126,14 +132,15 @@ public class CartDao {
             if (existingItem != null) {
                 // Đã có -> Cộng dồn số lượng
                 existingItem.setQuantity(existingItem.getQuantity() + quantity);
-                save(existingItem);
+                existingItem.setProductVariant(variant);
+                session.merge(existingItem);
             } else {
                 // Chưa có -> Tạo mới
                 CartItem newItem = new CartItem();
                 newItem.setUser(userRef);         // Gán User Proxy
                 newItem.setProductVariant(variant); // Gán Sản phẩm
                 newItem.setQuantity(quantity);
-                save(newItem);
+                session.merge(newItem);
             }
 
             // 5. Đếm lại tổng số lượng để cập nhật icon
@@ -144,7 +151,7 @@ public class CartDao {
 
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            e.printStackTrace();
+            logger.error("Error adding item to cart", e);
             return -4; // Lỗi hệ thống
         } finally {
             if (session != null) session.close();
@@ -152,4 +159,54 @@ public class CartDao {
 
         return totalItems;
     }
+    public List<CartItem> findItemsByUser(Long userId) {
+    Session session = null;
+    Transaction tx = null;
+    try {
+        session = HibernateUtil.getSession();
+        tx = session.beginTransaction();
+
+        String hql = """
+            select distinct c
+            from CartItem c
+            join fetch c.productVariant pv
+            join fetch pv.product p
+            join fetch pv.size s
+            left join fetch p.productImages imgs
+            where c.user.id = :uid
+        """;
+
+        List<CartItem> items = session.createQuery(hql, CartItem.class)
+                .setParameter("uid", userId)
+                .getResultList();
+
+        tx.commit();
+        return items;
+    } catch (Exception e) {
+        if (tx != null) tx.rollback();
+        throw new RuntimeException("Load cart failed", e);
+    } finally {
+        if (session != null) session.close();
+    }
+}
+
+public void deleteItemsByUser(Long userId) {
+    Session session = null;
+    Transaction tx = null;
+    try {
+        session = HibernateUtil.getSession();
+        tx = session.beginTransaction();
+
+        session.createQuery("delete from CartItem c where c.user.id = :uid", CartItem.class)
+                .setParameter("uid", userId)
+                .executeUpdate();
+
+        tx.commit();
+    } catch (Exception e) {
+        if (tx != null) tx.rollback();
+        throw new RuntimeException("Clear cart failed", e);
+    } finally {
+        if (session != null) session.close();
+    }
+}
 }

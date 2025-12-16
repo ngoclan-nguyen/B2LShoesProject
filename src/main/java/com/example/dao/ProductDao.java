@@ -1,20 +1,26 @@
 package com.example.dao;
 
+import java.util.List;
+
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
+
 import com.example.config.HibernateUtil;
 import com.example.dto.ProductCardDTO;
 import com.example.dto.ProductDetailDTO;
 import com.example.model.ProductVariant;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.query.Query;
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public class ProductDao {
+    private static final Logger logger = LoggerFactory.getLogger(ProductDao.class);
+    
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -35,13 +41,13 @@ public class ProductDao {
                     "AND (img.isPrimary = true OR img.id IS NULL) " +
                     "ORDER BY p.createdAt DESC";
 
-            Query<ProductCardDTO> query = session.createQuery(hql);
+            Query<ProductCardDTO> query = session.createQuery(hql, ProductCardDTO.class);
             query.setMaxResults(limit);
             list = query.list();
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            e.printStackTrace();
+            logger.error("Error finding featured products", e);
         } finally {
             if (session != null) session.close();
         }
@@ -66,13 +72,13 @@ public class ProductDao {
                     "AND (img.isPrimary = true OR img.id IS NULL) " +
                     "ORDER BY p.price DESC";
 
-            Query<ProductCardDTO> query = session.createQuery(hql);
+            Query<ProductCardDTO> query = session.createQuery(hql, ProductCardDTO.class);
             query.setMaxResults(limit);
             list = query.list();
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            e.printStackTrace();
+            logger.error("Error finding best seller products", e);
         } finally {
             if (session != null) session.close();
         }
@@ -107,13 +113,13 @@ public class ProductDao {
 
             hql += " ORDER BY p.createdAt DESC";
 
-            Query<ProductCardDTO> query = session.createQuery(hql);
+            Query<ProductCardDTO> query = session.createQuery(hql, ProductCardDTO.class);
 
             list = query.list();
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            e.printStackTrace();
+            logger.error("Error finding products by gender", e);
         } finally {
             if (session != null) session.close();
         }
@@ -152,7 +158,7 @@ public class ProductDao {
                 hql += " ORDER BY p.name ASC ";
             }
 
-            Query<ProductCardDTO> query = session.createQuery(hql);
+            Query<ProductCardDTO> query = session.createQuery(hql, ProductCardDTO.class);
 
             if (keyword != null && !keyword.trim().isEmpty()) {
                 query.setParameter("keyword", "%" + keyword.toLowerCase() + "%");
@@ -165,7 +171,7 @@ public class ProductDao {
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            e.printStackTrace();
+            logger.error("Error searching products", e);
         } finally {
             if (session != null) session.close();
         }
@@ -198,7 +204,7 @@ public class ProductDao {
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            e.printStackTrace();
+            logger.error("Error counting search products", e);
         } finally {
             if (session != null) session.close();
         }
@@ -225,7 +231,7 @@ public class ProductDao {
                     "AND LOWER(p.name) LIKE :keyword " +
                     "ORDER BY p.name ASC";
 
-            Query<ProductCardDTO> query = session.createQuery(hql);
+            Query<ProductCardDTO> query = session.createQuery(hql, ProductCardDTO.class);
             query.setParameter("keyword", "%" + keyword.toLowerCase() + "%");
 
             query.setMaxResults(5);
@@ -234,7 +240,7 @@ public class ProductDao {
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            e.printStackTrace();
+            logger.error("Error getting search suggestions", e);
         } finally {
             if (session != null) session.close();
         }
@@ -255,14 +261,14 @@ public class ProductDao {
                     "LEFT JOIN p.brand b " +
                     "WHERE p.id = :id AND p.isDelete = false";
 
-            Query<ProductDetailDTO> query = session.createQuery(hql);
+            Query<ProductDetailDTO> query = session.createQuery(hql, ProductDetailDTO.class);
             query.setParameter("id", id);
 
             product = query.uniqueResult();
 
             if (product != null) {
                 String imgHql = "SELECT i.path FROM ProductImage i WHERE i.product.id = :id";
-                org.hibernate.query.Query<String> imgQuery = session.createQuery(imgHql);
+                org.hibernate.query.Query<String> imgQuery = session.createQuery(imgHql, String.class);
                 imgQuery.setParameter("id", id);
                 product.setImages(imgQuery.list());
 
@@ -270,13 +276,13 @@ public class ProductDao {
                         "JOIN v.size ms " +
                         "WHERE v.product.id = :id AND v.quantity > 0 " +
                         "ORDER BY ms.id ASC";
-                org.hibernate.query.Query<String> sizeQuery = session.createQuery(sizeHql);
+                org.hibernate.query.Query<String> sizeQuery = session.createQuery(sizeHql, String.class);
                 sizeQuery.setParameter("id", id);
                 product.setSizes(sizeQuery.list());
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error finding product detail by id", e);
         }
         return product;
     }
@@ -310,7 +316,7 @@ public class ProductDao {
 
             hql += (" ORDER BY p.createdAt DESC");
 
-            Query<ProductCardDTO> query = session.createQuery(hql); // Removed .class
+            Query<ProductCardDTO> query = session.createQuery(hql, ProductCardDTO.class);
 
             if (brandName != null) {
                 query.setParameter("brandName", brandName);
@@ -325,7 +331,7 @@ public class ProductDao {
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            e.printStackTrace();
+            logger.error("Error finding related products", e);
         } finally {
             if (session != null) session.close();
         }
@@ -354,7 +360,7 @@ public class ProductDao {
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            e.printStackTrace();
+            logger.error("Error finding variant by product and size", e);
         } finally {
             if (session != null) session.close();
         }
@@ -384,7 +390,7 @@ public class ProductDao {
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            e.printStackTrace();
+            logger.error("Error finding first variant by product id", e);
         } finally {
             if (session != null) session.close();
         }
@@ -401,11 +407,7 @@ public class ProductDao {
             String priceRange) {
 
         List<ProductCardDTO> list = null;
-        Session session = null;
-        Transaction transaction = null;
-        try {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
+        try (Session session = HibernateUtil.getSession()) {
             String hql = "SELECT new com.example.dto.ProductCardDTO(" +
                     "p.id, p.name, p.price, img.path, s.name, 'Filtered') " +
                     "FROM Product p " +
@@ -462,12 +464,11 @@ public class ProductDao {
             }
 
             if (priceRange != null && !priceRange.isEmpty()) {
-                if (priceRange.equals("lt1m")) {
-                    hql += " AND p.price < 1000000 ";
-                } else if (priceRange.equals("1m-2m")) {
-                    hql += " AND p.price BETWEEN 1000000 AND 2000000 ";
-                } else if (priceRange.equals("gt2m")) {
-                    hql += " AND p.price > 2000000 ";
+                switch (priceRange) {
+                    case "lt1m" -> hql += " AND p.price < 1000000 ";
+                    case "1m-2m" -> hql += " AND p.price BETWEEN 1000000 AND 2000000 ";
+                    case "gt2m" -> hql += " AND p.price > 2000000 ";
+                    default -> {}
                 }
             }
 
@@ -475,7 +476,7 @@ public class ProductDao {
 
             hql += " ORDER BY p.createdAt DESC ";
 
-            org.hibernate.query.Query<ProductCardDTO> query = session.createQuery(hql);
+            org.hibernate.query.Query<ProductCardDTO> query = session.createQuery(hql, ProductCardDTO.class);
 
             // Set tham số (Giữ nguyên)
             if (gender != null && !gender.isEmpty()) query.setParameterList("gender", gender);
@@ -486,9 +487,7 @@ public class ProductDao {
             list = query.list();
 
         } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
+            logger.error("Error filtering products", e);
         }
         return list;
     }
