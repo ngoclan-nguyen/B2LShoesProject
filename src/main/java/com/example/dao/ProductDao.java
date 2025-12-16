@@ -510,7 +510,36 @@ public class ProductDao {
             if (session != null) session.close();
         }
         return list;
-    }
+    }  
+    public List<String> getProductSizeById(Long productId) {
+	    List<String> result = new ArrayList<>();
+	    Session session = null;
+	    Transaction transaction = null;
+
+	    try {
+	        session = HibernateUtil.getSession();
+	        transaction = session.beginTransaction();
+
+	        String hql = "SELECT s.sizeName " +
+	                     "FROM ProductVariant pv " +
+	                     "JOIN pv.size s " +
+	                     "WHERE pv.product.id = :pid";
+
+	        Query<String> query = session.createQuery(hql, String.class);
+	        query.setParameter("pid", productId);
+
+	        result = query.getResultList();
+
+	        transaction.commit();
+	    } catch (Exception e) {
+	        if (transaction != null) transaction.rollback();
+	        e.printStackTrace();
+	    } finally {
+	        if (session != null) session.close();
+	    }
+
+	    return result;
+	}
 
     public Product findById(Long id) {
         Product product = null;

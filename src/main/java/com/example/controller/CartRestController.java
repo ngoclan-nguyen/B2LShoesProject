@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -63,4 +65,72 @@ public class CartRestController {
 
         return ResponseEntity.ok(count);
     }
+    
+    @PostMapping("/remove")
+    public ResponseEntity<Map<String, Object>> removeCartItem(
+            HttpServletRequest request, 
+            @RequestParam Integer productVariantId) {
+
+        Map<String, Object> response = new HashMap<>();
+        UserDTO user = (UserDTO) request.getSession().getAttribute("currentCustomer");
+
+        if (user == null) {
+            response.put("status", "error");
+            response.put("message", "auth_required");
+            return ResponseEntity.ok(response);
+        }
+
+        int totalItems = cartService.removeCartItem(user.getId(), productVariantId);
+
+        if (totalItems >= 0) {
+            response.put("status", "success");
+            response.put("message", "Đã xóa sản phẩm khỏi giỏ hàng!");
+            response.put("totalItems", totalItems);
+        } else {
+            response.put("status", "error");
+            response.put("message", "Xóa thất bại, vui lòng thử lại!");
+        }
+
+        return ResponseEntity.ok(response);
+    }
+    
+    @PostMapping("/updateSelection")
+    @ResponseBody 
+    public Map<String, Object> updateCartSelection(HttpServletRequest request, 
+    			@RequestBody(required = false) List<Long> productVariantIds) {
+    	UserDTO user = (UserDTO)request.getSession().getAttribute("currentCustomer");
+		Long userId = null;
+		if (user != null)
+			userId = user.getId(); 
+    	request.getSession().setAttribute("productVariantIds", productVariantIds);
+    	
+    	Long totalAmount = cartService.getTotalAmountBySelectedItem(userId, productVariantIds);
+    	
+    	return Map.of("totalAmount", totalAmount != null ? totalAmount : 0L);
+    }
+    
+    @PostMapping("/updateQuantity")
+    @ResponseBody
+    public Map<String, Object> updateQuantity(@RequestParam Long productVariantId,
+                                              @RequestParam Integer quantity,
+                                              HttpServletRequest request) {
+    	Map<String, Object> response = new HashMap<>();
+
+        UserDTO user = (UserDTO) request.getSession().getAttribute("currentCustomer");
+        if (user == null) {
+            response.put("status", "error");
+            response.put("message", "auth_required");
+            response.put("totalItems", 0);
+            return response;
+        }
+        Long userId = user.getId();
+        int totalItems = cartService.updateQuantity(userId, productVariantId, quantity);
+
+        response.put("status", "success");
+        response.put("message", "Cập nhật số lượng thành công!");
+        response.put("totalItems", totalItems);
+
+        return response;
+    }
+    
 }

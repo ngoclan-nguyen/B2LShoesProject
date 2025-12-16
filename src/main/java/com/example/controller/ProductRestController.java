@@ -23,4 +23,10 @@ public class ProductRestController {
         }
         return ResponseEntity.ok(productDao.searchSuggestions(keyword));
     }
+    
+    @GetMapping("/getSize")
+	@ResponseBody
+	public List<String> getProductSizeById(@RequestParam Long productId) {
+	    return productDao.getProductSizeById(productId);
+	}
 }
