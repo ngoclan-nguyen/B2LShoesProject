@@ -15,11 +15,9 @@ public class ProductFormDTO {
     private Long brandId;
     private Long categoryId;
 
-    // --- Xử lý Ảnh ---
     private MultipartFile imageFile;
     private String oldImagePath;
 
-    // --- Xử lý Biến thể ---
     private List<Long> variantId;
     private List<String> variantColor;
     private List<String> variantSize;

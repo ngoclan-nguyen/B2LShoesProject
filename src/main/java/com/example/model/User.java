@@ -93,7 +93,9 @@ public class User {
 
     public User() {
     }
+    public User(Long id){
 
+    }
     public User(Long id, LocalDateTime createdAt, LocalDateTime updatedAt, String address, String name, String email, String gender, String phone, Boolean isDeleted, String password, String title) {
         this.id = id;
         this.createdAt = createdAt;

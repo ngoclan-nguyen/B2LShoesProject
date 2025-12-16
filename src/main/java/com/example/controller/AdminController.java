@@ -540,8 +540,7 @@ public class AdminController {
 
             voucher.setCode(codeStr);
 
-            voucher.setDiscountAmount(Long.parseLong(discountAmountStr));
-            voucher.setMinOrderAmount(Long.parseLong(minOrderAmountStr));
+            Long discountLong = Long.parseLong(request.getParameter("discount"));
             voucher.setQuantity(Integer.parseInt(quantityStr));
 
             try {

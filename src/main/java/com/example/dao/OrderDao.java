@@ -147,9 +147,8 @@ public class OrderDao {
 
         try {
             session = HibernateUtil.getSession();
-            transaction = session.beginTransaction(); // Bắt đầu Transaction ĐỌC
+            transaction = session.beginTransaction();
 
-            // --- 1. Xây dựng Truy vấn HQL Động ---
             StringBuilder queryBuilder = new StringBuilder("SELECT o FROM OrderWeb o WHERE 1=1");
             Map<String, Object> params = new HashMap<>();
 
@@ -178,16 +177,11 @@ public class OrderDao {
                 queryBuilder.append(")");
             }
 
-            // LOGIC LỌC THEO DATE RANGE ĐÃ ĐƯỢC DỌN DẸP HOÀN TOÀN
-
             queryBuilder.append(" ORDER BY o.createdAt DESC");
             String finalQuery = queryBuilder.toString();
-            // --- Kết thúc Xây dựng Truy vấn ---
 
-            // 4. Thực thi Truy vấn
             Query<OrderWeb> query = session.createQuery(finalQuery, OrderWeb.class);
 
-            // 5. Gán các tham số
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 // Chỉ còn xử lý kiểu Long và kiểu chung (String)
                 if (entry.getValue() instanceof Long) {
@@ -198,11 +192,11 @@ public class OrderDao {
             }
 
             orders = query.getResultList();
-            transaction.commit(); // Commit Transaction ĐỌC thành công
+            transaction.commit();
 
         } catch (Exception e) {
             if (transaction != null) {
-                transaction.rollback(); // Rollback nếu có lỗi
+                transaction.rollback();
             }
             System.err.println("Lỗi khi thực thi truy vấn lọc đơn hàng: " + e.getMessage());
             e.printStackTrace();

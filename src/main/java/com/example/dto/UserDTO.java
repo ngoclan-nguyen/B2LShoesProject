@@ -1,4 +1,5 @@
 package com.example.dto;
+import com.example.model.User;
 
 public class UserDTO {
     private Long id;
@@ -79,4 +80,9 @@ public class UserDTO {
 
     public void setRole(String role) {this.role = role;}
 
+    public User toEntity() {
+        User user = new User();
+        user.setId(this.id);
+        return user;
+    }
 }

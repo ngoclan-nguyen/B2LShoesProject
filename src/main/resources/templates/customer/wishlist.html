@@ -1,315 +1,146 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-	<head>
-	    <meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	    <link rel="icon" type="image/png" th:href="@{/customer/images/logo.png}">
-	    <title>B2L Shoes - Danh sách yêu thích</title>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="icon" type="image/png" th:href="@{/customer/images/logo.png}">
+	<title>B2L Shoes - Danh sách yêu thích</title>
 
-	    <link rel="stylesheet" href="https://cdn.tailwindcss.com">
-	    <script src="https://cdn.tailwindcss.com"></script>
-	    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-	    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
-	    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<link rel="stylesheet" href="https://cdn.tailwindcss.com">
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-	    <style>
-	        * { box-sizing: border-box; }
-	        body { font-family: 'Montserrat', sans-serif; }
-	
-	        /* Hiệu ứng trồi lên (Scroll Reveal) */
-	        .reveal {
-	            opacity: 0;
-	            transform: translateY(30px);
-	            transition: all 0.8s ease-out;
-	        }
-	        .reveal.active {
-	            opacity: 1;
-	            transform: translateY(0);
-	        }
-	
-	        /* Ẩn thanh cuộn nhưng vẫn trượt được */
-	        .hide-scrollbar::-webkit-scrollbar { display: none; }
-	        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-			
-			.quantityDisplay::-webkit-outer-spin-button,
-			.quantityDisplay::-webkit-inner-spin-button {
-			    -webkit-appearance: none;
-			    margin: 0;
-			}
+	<style>
+		* { box-sizing: border-box; }
+		body { font-family: 'Montserrat', sans-serif; }
+		.text-primary { color: #FF9900; }
+		.bg-primary { background-color: #FF9900; }
+		.hover\:text-primary:hover { color: #e68a00; }
+		.hover\:bg-primary:hover { background-color: #e68a00; }
 
-			/* Firefox */
-			.quantityDisplay[type=number] {
-			    -moz-appearance: textfield;
-			}
-	    </style>
-	</head>
-	<body class="bg-white text-black">
-		<div th:replace="~{customer/fragments/header :: header}"></div>
-		    <!-- Content -->
-		<div class="px-20 py-10">
-			<h2 class="font-bold text-3xl text-left pb-5">SẢN PHẨM YÊU THÍCH</h2>
-			<p>
-			    <span id="wishlistCount" th:text="${userWishlist != null} ? ${userWishlist.size()} : 0">2</span> sản phẩm
-			</p>
+		.quantityDisplay::-webkit-outer-spin-button,
+		.quantityDisplay::-webkit-inner-spin-button {
+			-webkit-appearance: none;
+			margin: 0;
+		}
+		.quantityDisplay[type=number] {
+			-moz-appearance: textfield;
+		}
+	</style>
+</head>
+<body class="bg-white text-black flex flex-col min-h-screen">
+<div th:replace="~{customer/fragments/header :: header}"></div>
+
+<div class="bg-gray-50">
+	<div class="container mx-auto px-4 py-3 text-sm text-gray-500">
+		<a href="/" class="text-gray-900 hover:underline hover:text-black transition">Trang chủ</a>
+		<span class="mx-3 text-gray-400">/</span>
+		<span class="text-black font-bold border-b border-black">Sản phẩm yêu thích</span>
+	</div>
+</div>
+
+<div class="container mx-auto flex-grow">
+
+	<div class="px-4 border-b border-gray-200 pb-5 pt-8 mb-8">
+		<h2 class="font-bold text-2xl sm:text-3xl text-gray-900 text-left">SẢN PHẨM YÊU THÍCH</h2>
+		<p class="text-sm text-gray-500 mt-2">
+			Tổng cộng: <span id="wishlistCount" th:text="${userWishlist != null} ? ${userWishlist.size()} : 0" class="font-bold text-black">0</span> sản phẩm
+		</p>
+	</div>
+
+	<div class="px-4 pb-20">
+		<div th:if="${userWishlist == null || userWishlist.isEmpty()}" class="text-center py-20 bg-gray-50 rounded-lg shadow-inner border border-gray-100">
+		<h2 class="text-xl sm:text-2xl text-gray-700 font-bold mb-4">Danh sách yêu thích của bạn đang trống!</h2>
+		<p class="text-gray-500 mb-8">Hãy tìm và thêm những sản phẩm bạn yêu thích vào đây để mua sau.</p>
+		<a th:href="@{/products}" class="bg-primary text-white px-8 py-3 rounded-full font-bold hover:bg-orange-600 shadow-md transition-all duration-300">
+			Bắt đầu mua sắm
+		</a>
+	</div>
+
+		<div th:unless="${userWishlist == null || userWishlist.isEmpty()}"
+			 class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-12">
+
+			<div th:each="product : ${userWishlist}"
+				 th:id="'wishlistItem-' + ${product.productId}"
+				 class="group wishlistItem flex flex-col justify-between p-2 rounded-lg border border-transparent hover:border-gray-200 transition-all duration-300 cursor-pointer">
+
+				<div>
+					<div class="relative mb-3 aspect-square overflow-hidden rounded-lg bg-[#f9f9f9]">
+						<button type="button"
+								class="removeWishlistBtn absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm z-10 transition-transform hover:scale-110 hover:bg-red-50/10"
+								th:attr="data-id=${product.productId}">
+							<i class="fa-solid fa-xmark text-lg text-gray-400 hover:text-red-600"></i>
+						</button>
+
+						<img th:src="${product.productImagePath}"
+							 alt="Product Image"
+							 class="w-full h-full object-contain p-4 mix-blend-multiply transition duration-500 ease-in-out group-hover:scale-105">
+					</div>
+
+					<a th:href="@{'/product/' + ${product.productId}}" class="block">
+						<p class="text-sm text-gray-900 line-clamp-2 font-bold hover:text-primary transition" th:text="${product.productName}">Tên sản phẩm</p>
+					</a>
+
+					<p class="font-bold text-sm text-red-600 mt-1" th:text="${#numbers.formatDecimal(product.productPrice, 0, 'POINT', 0, 'COMMA')} + ' đ'">Giá</p>
+					<p class="text-xs text-gray-500 line-clamp-2 mt-1" th:text="${product.productDescription}">Mô tả (ẩn bớt nếu cần)</p>
+				</div>
+
+				<div class="w-full flex justify-between gap-3 mt-4">
+					<button type="button"
+							class="addToCartBtn w-full flex items-center justify-center gap-2 bg-primary text-white py-2 px-3 rounded-lg hover:bg-orange-600 shadow transition-all duration-300 text-sm font-bold" th:data-id="${product.productId}"
+							th:data-name="${product.productName}"
+							th:data-image="${product.productImagePath}"
+							th:data-price="${product.productPrice}">
+						<i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ
+					</button>
+				</div>
+			</div>
 		</div>
-	    <div class="container mx-auto px-4 sm:px-6 lg:px-8 my-10 min-h-[500px]">
-	        <div class="flex flex-col">  
-	            <div th:if="${userWishlist == null || userWishlist.isEmpty()}" class="text-center py-20 shadow-lg">
-	                <h2 class="text-2xl text-gray-500 font-bold mb-4">Danh sách yêu thích của bạn đang trống!</h2>
-	                <p class="text-gray-500 mb-8">Hãy thêm những sản phẩm bạn yêu thích vào đây để mua sau.</p>
-	                <a th:href="@{/}" class="bg-[#FF9900] text-white px-8 py-3 rounded-[15px] font-bold hover:bg-orange-600 hover:shadow-lg transition-all duration-300 cursor-pointer">
-	                    Quay lại mua sắm
-	                </a>
-	            </div>
+	</div>
+</div>
 
-				<div th:unless="${userWishlist == null || userWishlist.isEmpty()}" 
-					class="grid grid-cols-3 gap-10">
-					<div th:each="product : ${userWishlist}" 
-					     th:id="'wishlistItem-' + ${product.productId}"
-					     class="wishlistItem flex flex-col items-center gap-3 bg-white border border-[#00000088] items-center mx-auto py-8 mb-10 transition-transform hover:scale-[1.01] cursor-pointer">
-					    <div class="w-[85%] flex flex-col justify-start gap-1">
-							<img th:src="${product.productImagePath}" 
-								alt="Product Image"
-								class="w-full aspect-square border border-gray-300">
-					        <p class="text-xl font-bold text-black line-clamp-2 mt-3">
-					           <span th:text="${product.productName}">Tên sản phẩm</span>
-					        </p>
-					        <p class="text-sm text-gray-500" 
-					        	th:text="${product.productDescription}">Mô tả		      
-					        </p>
-							<p class="text-xl font-bold text-red-600"
-								th:text="${#numbers.formatInteger(product.productPrice,3,'POINT')} + 'đ'">Giá
-							</p>
-					    </div>
-						<div class="w-[85%] flex justify-start">
-							<button type="button"
-							        class="addToCartBtn flex items-center gap-4 bg-[#FF9900] text-white h-14 py-[10px] px-4 mt-8 rounded-lg hover:bg-orange-600 hover:shadow-lg transition-all duration-300"
-							        th:data-id="${product.productId}"
-							        th:data-name="${product.productName}"
-							        th:data-image="${product.productImagePath}"
-							        th:data-description="${product.productDescription}"
-							        th:data-price="${product.productPrice}">
-							    <img th:src="@{/customer/images/white_cart.png}" class="w-8 h-8">
-							    <p class="text-lg font-bold">Thêm vào giỏ hàng</p>
-							</button>
-							<button type="button"
-						           class="removeWishlistBtn flex items-center justify-center h-14 mt-8 ml-auto transition-transform hover:scale-[1.2]"
-						           th:attr="data-id=${product.productId}">
-						       <img th:src="@{/customer/images/bin.png}" alt="Bin image" class="w-6 h-auto">
-						   </button>
-						</div>
+<div id="cartPopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 transition-opacity duration-300 opacity-0">
+	<div class="bg-white rounded-xl p-8 w-full max-w-xl relative transform scale-95 transition-transform duration-300">
+		<button id="closeCartPopup" class="absolute top-3 right-3 text-gray-500 hover:text-black text-3xl font-light">&times;</button>
+		<h3 class="text-2xl font-bold text-gray-900 border-b pb-3 mb-6">Thêm vào Giỏ hàng</h3>
+
+		<div class="flex flex-col gap-6">
+			<div class="flex gap-6">
+				<img id="popupImage" class="w-28 h-28 object-cover border border-gray-200 rounded-lg" src="" alt="Product Image">
+				<div class="flex flex-col items-start justify-center">
+					<a id="popupName" class="text-lg font-bold hover:text-primary transition" href=""></a>
+					<p id="popupPrice" class="text-red-600 font-bold text-xl mt-1"></p>
+				</div>
+			</div>
+
+			<div class="grid grid-cols-2 gap-4">
+				<div>
+					<label class="block text-sm font-medium text-gray-700 mb-2">Chọn Size:</label>
+					<select id="popupSize" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-black transition text-base"></select>
+				</div>
+
+				<div>
+					<label class="block text-sm font-medium text-gray-700 mb-2">Số lượng:</label>
+					<div class="popupQuantity flex items-center w-32 border border-gray-300 rounded-lg overflow-hidden">
+						<button class="quantityMinus text-xl w-1/3 h-10 hover:bg-gray-100 transition flex items-center justify-center font-bold text-gray-600">-</button>
+						<input id="popupQty" class="quantityDisplay w-1/3 h-10 text-center text-base focus:outline-none border-x border-gray-300" type="number" value="1" min="1">
+						<button class="quantityPlus text-xl w-1/3 h-10 hover:bg-gray-100 transition flex items-center justify-center font-bold text-gray-600">+</button>
 					</div>
 				</div>
-	        </div>
+			</div>
 		</div>
-		<!-- Popup thêm vào giỏ hàng -->
-		<div id="cartPopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-		    <div class="bg-white rounded-lg p-6 w-[600px] max-w-full relative">
-		        <button id="closeCartPopup" class="absolute top-2 right-2 text-gray-500 hover:text-black text-4xl hover:font-bold">&times;</button>
-		        <div class="flex flex-col gap-8">
-		            <div class="flex gap-8">
-		                <img id="popupImage" class="w-60 h-60 object-cover border border-gray-300" src="" alt="Product Image">
-		                <div class="flex flex-col items-start gap-4">
-		                    <a id="popupName" class="text-xl font-bold mb-2 hover:text-red-600 transition" href=""></a>
-		                    <p id="popupPrice" class="text-red-600 font-bold text-xl mb-2"></p>
-		                    <div class="mb-2">
-		                        <label class="mr-4">Size:</label>
-		                        <select id="popupSize" class="border border-gray-300 rounded px-2 py-1"></select>
-		                    </div>
-		                    <div class="flex items-center gap-4">
-		                        <p>Số lượng: </p>
-		                        <div class="popupQuantity flex items-center ml-auto">
-		                            <button class="quantityMinus flex items-center justify-center border border-gray-300 border-r-0 rounded-l text-2xl w-8 h-8 hover:bg-black hover:text-white">-</button>
-		                            <input id="popupQty" class="quantityDisplay flex items-center justify-center border border-gray-300 w-8 h-8 text-center" type="number" value="1" min="1">
-		                            <button class="quantityPlus flex items-center justify-center border border-gray-300 border-l-0 rounded-r text-2xl w-8 h-8 hover:bg-black hover:text-white">+</button>
-		                        </div>
-		                    </div>
-		                </div>
-		            </div>
-		            <div class="flex gap-2 mx-auto">
-		                <button id="popupAddToCart" class="bg-[#FF9900] text-white px-4 py-2 rounded font-bold hover:bg-orange-600">Thêm vào giỏ hàng</button>
-		                <button id="popupCancel" class="bg-white text-black px-4 py-2 rounded font-bold border border-black hover:bg-black hover:text-white">Hủy</button>
-		            </div>
-		        </div>
-		    </div>
+
+		<div class="flex justify-end gap-3 mt-8">
+			<button id="popupCancel" class="bg-white text-black px-5 py-2 rounded-full font-bold border border-black hover:bg-black hover:text-white transition">Hủy</button>
+			<button id="popupAddToCart" class="bg-primary text-white px-5 py-2 rounded-full font-bold hover:bg-orange-600 transition">Thêm vào giỏ</button>
 		</div>
-		
-		<div th:replace="~{customer/fragments/footer :: footer}"></div>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-		<script>
-			$(function() {
-					
-				$(document).on('click', '.wishlistItem', function(e) {
-				    // Nếu click vào nút xóa thì bỏ qua
-				    if ($(e.target).closest('.removeWishlistBtn').length) return;
-					if ($(e.target).closest('.addToCartBtn').length) return;
-					
-					console.log($(this).attr('id'));
+	</div>
+</div>
 
-				    const productId = $(this).attr('id').replace('wishlistItem-', '');
-				    window.location.href = `/product/${productId}`;
-				});
-
-			    $(document).on('click', '.removeWishlistBtn', function(e) {
-					e.preventDefault();
-					e.stopPropagation();
-			        const productId = $(this).data('id'); 
-			        const wishlistDiv = $(this).closest('.wishlistItem');
-
-			        $.ajax({
-			            url: '/api/wishlist/remove',
-			            type: 'POST',
-			            headers: {},
-			            data: { productId: productId },
-			            success: function(res) {
-			                wishlistDiv.remove(); // remove ngay trên trang
-			                // cập nhật số lượng sản phẩm
-							const countEl = $('#wishlistCount');
-							if(countEl.length) {
-							    let count = parseInt(countEl.text()) - 1;
-							    countEl.text(count);
-
-							    // Nếu sau khi trừ = 0 → reload trang
-							    if(count === 0) {
-							        location.reload();
-							    }
-							}
-			            },
-			            error: function(xhr, status, error) {
-			                alert("Xóa thất bại!");
-			                console.error("Xóa thất bại:", error);
-			            }
-			        });
-			    });
-				
-				let currentProductId = null; // lưu productId đang thao tác
-
-				// Click nút Thêm vào giỏ hàng
-				$(document).on('click', '.addToCartBtn', function(e) {
-			        e.stopPropagation();
-			        currentProductId = $(this).data('id');
-			        const productName = $(this).data('name');
-			        const productImage = $(this).data('image');
-			        const productPrice = $(this).data('price');
-
-			        // Điền dữ liệu vào popup
-			        $('#popupImage').attr('src', productImage);
-			        $('#popupName').attr('href', '/product/' + currentProductId);
-			        $('#popupName').text(productName);
-			        $('#popupPrice').text(new Intl.NumberFormat('vi-VN').format(productPrice) + 'đ');
-
-			        $('#popupQty').val(1);
-					// === Gọi API lấy size ===
-					$.ajax({
-					       url: '/api/products/getSize',
-					       type: 'GET',
-					       data: { productId: currentProductId },
-					       success: function (sizes) {
-					           const $sizeSelect = $('#popupSize');
-					           $sizeSelect.empty(); // clear size cũ
-
-					           if (sizes && sizes.length > 0) {
-					               sizes.forEach(function (size) {
-					                   $sizeSelect.append(
-					                       `<option value="${size}">${size}</option>`
-					                   );
-					               });
-					           } else {
-							       $sizeSelect
-							           .append('<option selected>Không có size</option>')
-							           .prop('disabled', true);
-							   }
-					       },
-					       error: function () {
-					           alert('Không lấy được danh sách size');
-					       }
-					   });
-
-					   // Hiển thị popup
-					   $('#cartPopup').removeClass('hidden');
-
-			        // Hiển thị popup
-			        $('#cartPopup').removeClass('hidden');
-			    });
-
-			    // Đóng popup khi click × hoặc click Hủy
-			    $('#closeCartPopup, #popupCancel').on('click', function() {
-			        $('#cartPopup').addClass('hidden');
-			    });
-
-			    // Đóng popup khi click ra ngoài modal content
-			    $('#cartPopup').on('click', function(e) {
-			        if ($(e.target).is('#cartPopup')) {
-			            $(this).addClass('hidden');
-			        }
-			    });
-
-			    // Thêm vào giỏ hàng
-			    $('#popupAddToCart').on('click', function() {
-					const $sizeSelect = $('#popupSize');
-
-					if ($sizeSelect.is(':disabled')) {
-					    Swal.fire({
-					        icon: 'warning',
-					        title: 'Không thể thêm vào giỏ',
-					        text: 'Sản phẩm này không có size'
-					    });
-					    return;
-					}
-			        const size = $sizeSelect.val();
-			        const qty = parseInt($('#popupQty').val()) || 1;
-
-			        $.ajax({
-			            url: '/api/cart/add',
-			            type: 'POST',
-			            headers: { },
-			            data: {
-			                productId: currentProductId,
-			                size: size,
-			                quantity: qty
-			            },
-			            success: function(res) {
-							if (res.status === 'success') {
-			                    Swal.fire({
-			                        icon: 'success',
-			                        title: res.message,
-			                        showConfirmButton: false,
-			                        timer: 1500
-			                    });
-								const cartBadge = document.getElementById('cart-qty');
-			                    if(cartBadge) {
-			                        cartBadge.innerText = res.totalItems;
-			                        cartBadge.parentElement.classList.add('scale-125');
-			                        setTimeout(() => cartBadge.parentElement.classList.remove('scale-125'), 200);
-			                    }             
-			                } else {
-			                    Swal.fire({
-			                        icon: 'error',
-			                        title: 'Lỗi',
-			                        text: res.message
-			                    });
-			                }
-							$('#cartPopup').addClass('hidden');
-			            },
-			            error: function(err) {
-			                alert('Thêm thất bại: ' + err.responseText);
-			            }
-			        });
-			    });
-
-			    // Tăng giảm số lượng
-			    $('#cartPopup .quantityPlus').click(function() {
-			        const input = $(this).siblings('.quantityDisplay');
-			        let current = parseInt(input.val()) || 1;
-			        input.val(current + 1);
-			    });
-
-			    $('#cartPopup .quantityMinus').click(function() {
-			        const input = $(this).siblings('.quantityDisplay');
-			        let current = parseInt(input.val()) || 1;
-			        if (current > 1) input.val(current - 1);
-			    });
-			});
-		</script>
-	</body>
+<div th:replace="~{customer/fragments/footer :: footer}"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="/customer/js/wishlist.js"></script>
+</body>
 </html>

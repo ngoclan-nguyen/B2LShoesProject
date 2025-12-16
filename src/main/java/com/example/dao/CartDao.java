@@ -204,5 +204,83 @@ public class CartDao {
         Long result = query.uniqueResult();
         return result != null ? result.intValue() : 0;
     }
+	public Long calculateTotalAmount(Long userId, List<Long> productVariantIds) {
+		Session session = null;
+		Transaction transaction = null;
+		Long total = 0L;
+
+		try {
+			session = HibernateUtil.getSession();
+			transaction = session.beginTransaction();
+
+			String hql = "SELECT SUM(p.price * c.quantity) " +
+					"FROM CartItem c " +
+					"JOIN c.productVariant v " +
+					"JOIN v.product p " +
+					"WHERE c.user.id = :userId " +
+					"AND v.id IN (:variantIds)";
+
+			Query<Long> query = session.createQuery(hql, Long.class);
+			query.setParameter("userId", userId);
+			query.setParameter("variantIds", productVariantIds);
+
+			total = query.uniqueResult();
+
+			transaction.commit();
+		} catch (Exception e) {
+			if (transaction != null) transaction.rollback();
+			e.printStackTrace();
+		} finally {
+			if (session != null && session.isOpen()) session.close();
+		}
+
+		return total != null ? total : 0L;
+	}
+
+	public CartItem getCartItemByUserAndVariant(Long userId, Long variantId) {
+		Session session = null;
+		Transaction transaction = null;
+		CartItem item = null;
+		try {
+			session = HibernateUtil.getSession();
+			transaction = session.beginTransaction();
+			String hql = "FROM CartItem c WHERE c.user.id = :userId AND c.productVariant.id = :variantId";
+
+			Query<CartItem> query = session.createQuery(hql, CartItem.class);
+			query.setParameter("userId", userId);
+			query.setParameter("variantId", variantId);
+			item = query.uniqueResult();
+			transaction.commit();
+		} catch (Exception e) {
+			if (transaction != null) transaction.rollback();
+			e.printStackTrace();
+		} finally {
+			if (session != null && session.isOpen()) session.close();
+		}
+
+		return item;
+	}
+	public void deleteCartItem(Long userId, Long variantId) {
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = HibernateUtil.getSession();
+			transaction = session.beginTransaction();
+
+			String hql = "DELETE FROM CartItem c WHERE c.user.id = :userId AND c.productVariant.id = :variantId";
+
+			session.createQuery(hql)
+					.setParameter("userId", userId)
+					.setParameter("variantId", variantId)
+					.executeUpdate();
+
+			transaction.commit();
+		} catch (Exception e) {
+			if (transaction != null) transaction.rollback();
+			e.printStackTrace();
+		} finally {
+			if (session != null && session.isOpen()) session.close();
+		}
+	}
 }
 

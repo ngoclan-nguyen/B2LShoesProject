@@ -1,7 +1,9 @@
 package com.example.controller;
 
 import com.example.dto.UserDTO;
+import com.example.dto.VoucherApplyResultDTO;
 import com.example.service.CartService;
+import com.example.service.VoucherService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,8 @@ public class CartRestController {
 
     @Autowired
     private CartService cartService;
+    @Autowired
+    private VoucherService voucherService;
 
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> addToCart(
@@ -45,7 +49,6 @@ public class CartRestController {
             response.put("message", "Lỗi hệ thống, vui lòng thử lại!");
         } else {
             response.put("status", "success");
-            response.put("message", "Đã thêm vào giỏ hàng!");
             response.put("totalItems", result);
         }
 
@@ -131,6 +134,49 @@ public class CartRestController {
         response.put("totalItems", totalItems);
 
         return response;
+    }
+
+    @PostMapping("/applyVoucher")
+    public ResponseEntity<Map<String, Object>> applyVoucher(
+            @RequestParam String voucherCode,
+            @RequestParam(required = false) List<Long> productVariantIds,
+            HttpServletRequest request) {
+
+        Map<String, Object> response = new HashMap<>();
+        UserDTO userDto = (UserDTO) request.getSession().getAttribute("currentCustomer");
+
+        if (userDto == null) {
+            response.put("status", "error");
+            response.put("message", "Vui lòng đăng nhập để sử dụng mã khuyến mãi.");
+            return ResponseEntity.ok(response);
+        }
+
+        // Gọi CartService/VoucherService để xử lý logic kiểm tra và tính toán
+        try {
+            // Hàm này sẽ kiểm tra tính hợp lệ và tính toán số tiền giảm giá
+            VoucherApplyResultDTO result = voucherService.applyVoucher(
+                    userDto.getId(),
+                    voucherCode,
+                    productVariantIds
+            );
+
+            response.put("status", "success");
+            response.put("message", "Áp dụng mã khuyến mãi thành công!");
+            response.put("originalAmount", result.getOriginalAmount());
+            response.put("discountAmount", result.getDiscountAmount());
+            response.put("finalAmount", result.getFinalAmount());
+            response.put("data", result);
+
+            // Lưu mã giảm giá vào session hoặc DB để sử dụng khi đặt hàng
+            request.getSession().setAttribute("appliedVoucherCode", voucherCode);
+
+        } catch (Exception e) {
+            // Xử lý các lỗi nghiệp vụ: Hết hạn, không đủ điều kiện, mã không tồn tại...
+            response.put("status", "error");
+            response.put("message", e.getMessage()); // Truyền thông báo lỗi từ Service
+        }
+
+        return ResponseEntity.ok(response);
     }
     
 }

@@ -42,11 +42,34 @@ public class OrderWeb {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private User customer; // Khớp với mappedBy="customer" ở User.java
+    @Column(name = "sub_total") // Tổng tiền hàng (trước giảm giá, trước phí ship)
+    private Long subTotal;
 
-    @OneToMany(mappedBy = "orderWeb", cascade = CascadeType.ALL)
+    @Column(name = "discount_amount") // Số tiền giảm giá
+    private Long discount;
+
+    public Long getSubTotal() {
+        return subTotal;
+    }
+
+    public void setSubTotal(Long subTotal) {
+        this.subTotal = subTotal;
+    }
+
+    public Long getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Long discount) {
+        this.discount = discount;
+    }
+    // Quan hệ với User (Customer)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    private User customer;
+
+    // Quan hệ với OrderDetail
+    @OneToMany(mappedBy = "orderWeb", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderWebDetail> orderDetails;
 
     public OrderWeb() {}
@@ -89,27 +112,4 @@ public class OrderWeb {
 
     public List<OrderWebDetail> getOrderDetails() { return orderDetails; }
     public void setOrderDetails(List<OrderWebDetail> orderDetails) { this.orderDetails = orderDetails; }
-
-    @Transient // Báo cho Hibernate biết đây không phải là cột DB
-    public Long getSubTotal() {
-        if (this.orderDetails == null || this.orderDetails.isEmpty()) {
-            return 0L;
-        }
-
-        return this.orderDetails.stream()
-                .mapToLong(detail -> detail.getPrice() * detail.getQuantity())
-                .sum();
-    }
-    @Transient
-    public Long getDiscount() {
-
-        Long subTotal = this.getSubTotal();
-        Long deliveryFee = this.getDeliveryFee() != null ? this.getDeliveryFee() : 0L;
-        Long totalAmount = this.getTotalAmount() != null ? this.getTotalAmount() : 0L;
-
-        // Giảm giá = (Tổng tiền hàng + Phí ship) - Tổng tiền cuối cùng
-        Long calculatedDiscount = (subTotal + deliveryFee) - totalAmount;
-
-        return Math.max(0L, calculatedDiscount);
-    }
 }

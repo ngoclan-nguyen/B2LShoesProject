@@ -186,8 +186,9 @@
                             <img th:src="@{${product.image}}" class="w-full h-full object-contain p-4 mix-blend-multiply group-hover:scale-110 transition duration-500 ease-in-out">
                         </a>
 
-                        <button class="absolute bottom-0 left-0 w-full bg-[#FF9900] text-white py-2 text-xs font-bold uppercase translate-y-full group-hover:translate-y-0 transition duration-300 flex items-center justify-center gap-2 hover:bg-[#e68a00]">
-                            <i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ
+                        <button class="absolute bottom-0 left-0 w-full bg-[#FF9900] text-white py-2 text-xs font-bold uppercase translate-y-full group-hover:translate-y-0 transition duration-300 flex items-center justify-center gap-2 hover:bg-[#e68a00] add-to-cart-btn"
+                                th:attr="data-product-id=${product.id}"
+                                th:onclick="addToCart(this, null)"> <i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ
                         </button>
                     </div>
 
@@ -323,6 +324,93 @@
 	            }
 	        });
 	    }
+    function addToCart(btnElement, size) {
+        const btn = $(btnElement);
+        const productId = btn.attr('data-product-id');
+
+        // Xây dựng URL với các tham số, size được bỏ qua nếu là null
+        const url = `/api/cart/add?productId=${productId}&quantity=1` + (size ? `&size=${size}` : '');
+
+        // Vô hiệu hóa nút trong khi chờ phản hồi
+        btn.prop('disabled', true).html('Đang thêm...');
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            dataType: 'json',
+            success: function(response) {
+                // Re-enable nút
+                btn.prop('disabled', false).html('<i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ');
+
+                // --- Xử lý logic từ Controller ---
+                if (response.status === 'error') {
+                    if (response.message === 'auth_required') {
+                        // Lỗi 401: Yêu cầu đăng nhập (dù Controller trả về 200 OK)
+                        showAuthRequiredAlert();
+                    } else {
+                        // Lỗi nghiệp vụ (Hết hàng, thiếu kho)
+                        Swal.fire('Thất bại', response.message, 'warning');
+                    }
+                } else if (response.status === 'success') {
+                    // Thành công
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đã thêm vào giỏ hàng!',
+                        text: response.message, // Lấy message: "Đã thêm vào giỏ hàng!"
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+
+                    // Cập nhật số lượng giỏ hàng trên Header (nếu có element)
+                    updateCartCount(response.totalItems);
+                }
+            },
+            error: function(xhr) {
+                // Lỗi kết nối hoặc lỗi Server (500)
+                btn.prop('disabled', false).html('<i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ');
+                Swal.fire('Lỗi Hệ thống', 'Không thể kết nối đến máy chủ. Vui lòng thử lại.', 'error');
+                console.error(xhr.responseText);
+            }
+        });
+    }
+
+    // Hàm cảnh báo đăng nhập tách biệt để tái sử dụng
+    function showAuthRequiredAlert() {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Bạn chưa đăng nhập!',
+            text: 'Vui lòng đăng nhập để thêm vào giỏ hàng.',
+            showCancelButton: true,
+            confirmButtonText: 'Đăng nhập ngay',
+            cancelButtonText: 'Hủy',
+            customClass: {
+                title: 'text-red-500',
+                confirmButton: 'bg-[#FF9900] text-white px-4 py-2 rounded font-bold hover:bg-orange-600',
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/login';
+            }
+        });
+    }
+
+    function updateCartCount(count) {
+        const cartCountElement = document.getElementById('cart-count-badge');
+        if (cartCountElement) {
+            cartCountElement.textContent = count;
+            // Hiển thị nếu count > 0
+            cartCountElement.style.display = count > 0 ? 'inline-flex' : 'none';
+        }
+    }
+
+    document.getElementById('pageSearchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            searchInPage();
+        }
+    });
 </script>
 </body>
 </html>

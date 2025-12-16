@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${pageTitle}"></title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+
+        /* Đồng bộ màu sắc và hiệu ứng hover */
+        .text-primary { color: #FF9900; }
+        .bg-primary { background-color: #FF9900; }
+        .hover\:bg-primary:hover { background-color: #e68a00; }
+
+        /* Active link style */
+        .active-link {
+            background-color: white;
+            color: #FF9900; /* Màu chữ chính */
+            font-weight: 700; /* bold */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+            border: 1px solid #f3f4f6; /* border-gray-100 */
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800 flex flex-col min-h-screen">
+<div th:replace="~{customer/fragments/header :: header}"></div>
+
+<div class="bg-gray-50">
+    <div class="container mx-auto px-4 py-3 text-sm text-gray-500">
+        <a href="/" class="text-gray-900 hover:underline hover:text-black transition">Trang chủ</a>
+        <span class="mx-3 text-gray-400">/</span>
+        <span class="text-black font-bold border-b border-black">Đơn hàng của tôi</span>
+    </div>
+</div>
+
+<section class="container mx-auto px-4 py-10 flex-grow">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+
+        <aside class="md:col-span-1">
+            <div class="bg-gray-50 rounded-xl p-6 border border-gray-100 shadow-sm sticky top-24">
+
+                <div class="flex items-center gap-4 mb-8 pb-6 border-b border-gray-200">
+                    <div class="w-14 h-14 bg-gray-200 rounded-full flex items-center justify-center text-xl font-bold text-gray-500 border-2 border-white shadow-md">
+                        <span th:text="${#strings.substring(session.currentCustomer.name, 0, 1).toUpperCase()}">U</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-gray-500">Xin chào,</p>
+                        <h3 class="font-bold text-gray-800 truncate" th:text="${session.currentCustomer.name}">User Name</h3>
+                    </div>
+                </div>
+
+                <nav class="space-y-1">
+                    <a href="/customer/profile" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-white hover:text-black hover:font-bold hover:shadow-sm rounded-lg transition-all">
+                        <i class="fa-regular fa-user w-5 text-center"></i> Thông tin tài khoản
+                    </a>
+
+                    <a href="/customer/orders" class="flex items-center gap-3 px-4 py-3 active-link">
+                        <i class="fa-solid fa-box-open w-5 text-center"></i> Đơn hàng của tôi
+                    </a>
+
+                    <a href="/customer/vouchers" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-white hover:text-black hover:font-bold hover:shadow-sm rounded-lg transition-all">
+                        <i class="fa-solid fa-tag w-5 text-center"></i> Ví voucher của tôi
+                    </a>
+
+                    <a href="/logout" class="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 font-medium rounded-lg transition-all mt-4 border-t border-transparent hover:border-red-100">
+                        <i class="fa-solid fa-right-from-bracket w-5 text-center"></i> Đăng xuất
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <div class="md:col-span-3">
+            <h1 class="font-bold text-2xl uppercase mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-list-check text-primary"></i> Lịch sử Đơn hàng
+            </h1>
+
+            <div th:if="${orders.isEmpty()}" class="text-center py-16 bg-white rounded-xl shadow-sm border border-gray-100">
+                <i class="fa-solid fa-clipboard-list text-6xl text-gray-300 mb-4"></i>
+                <p class="text-lg text-gray-700 font-bold">Bạn chưa có đơn hàng nào.</p>
+                <p class="text-gray-500 mt-2">Hãy bắt đầu hành trình mua sắm của mình!</p>
+                <a href="/products" class="bg-primary text-white px-6 py-2 rounded-full font-bold mt-5 inline-block hover:bg-primary transition">Khám phá sản phẩm</a>
+            </div>
+
+            <div th:unless="${orders.isEmpty()}" class="space-y-6">
+                <div th:each="order : ${orders}" class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 transition hover:shadow-lg">
+
+                    <div class="flex justify-between items-start pb-3 mb-3 border-b border-gray-200">
+                        <h2 class="font-bold text-base sm:text-lg text-gray-800 flex items-center gap-2">
+                            <i class="fa-solid fa-receipt text-primary"></i>
+                            Mã Đơn: <span th:text="${'#' + order.id}" class="text-gray-900 ml-1">#1001</span>
+                        </h2>
+
+                        <span class="px-2 py-0.5 text-xs font-bold rounded-full whitespace-nowrap"
+                              th:text="${order.deliveryStatus}"
+                              th:classappend="${order.deliveryStatus == 'COMPLETED' ? 'bg-green-100 text-green-700' :
+                                             (order.deliveryStatus == 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                                             'bg-red-100 text-red-700')}">
+                            PENDING
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-y-3 text-sm mb-4">
+                        <div class="col-span-2 md:col-span-1">
+                            <p class="text-gray-500">Ngày đặt:</p>
+                            <span th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}" class="font-medium text-gray-800"></span>
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <p class="text-gray-500">Người nhận:</p>
+                            <span th:text="${order.consignee}" class="font-medium text-gray-800"></span>
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <p class="text-gray-500">Thanh toán:</p>
+                            <span th:text="${order.paymentMethod == 'COD' ? 'COD' : 'Chuyển khoản'}" class="font-medium text-gray-800">COD</span>
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <p class="text-gray-500">Tổng tiền:</p>
+                            <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'COMMA') + 'đ'}" class="font-bold text-red-600 text-base"></span>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-gray-600 mb-4 pt-3 border-t border-dashed">
+                        <i class="fa-solid fa-location-dot mr-1 text-primary"></i> Địa chỉ:
+                        <span th:text="${order.deliveryAddress}" class="font-medium text-gray-800 line-clamp-1"></span>
+                    </p>
+
+                    <div class="text-right pt-3 border-t">
+                        <a th:href="@{/customer/orders/{orderId}(orderId=${order.id})}"
+                           class="text-primary font-bold hover:underline text-sm flex items-center justify-end gap-1">
+                            Xem chi tiết &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{customer/fragments/footer :: footer}"></div>
+</body>
+</html>

@@ -113,7 +113,7 @@
                                 <li><a href="/products?gender=Nam" class="block hover:text-orange-500">Giày Nam</a></li>
                                 <li><a href="/products?gender=Nu" class="block hover:text-orange-500">Giày Nữ</a></li>
 
-                                <li class="pt-2 border-t border-gray-50">
+                                <li class="pt-2 border-t border-gray-100">
                                     <span class="text-xs text-gray-400 uppercase font-bold">Thương hiệu</span>
                                     <div class="grid grid-cols-2 gap-2 mt-2">
                                         <a href="/products?brand=Adidas" class="hover:text-orange-500">Adidas</a>
@@ -125,7 +125,7 @@
                                     </div>
                                 </li>
 
-                                <li class="pt-2 border-t border-gray-50">
+                                <li class="pt-2 border-t border-gray-100">
                                     <span class="text-xs text-gray-400 uppercase font-bold">Môn thể thao</span>
                                     <div class="grid grid-cols-2 gap-2 mt-2">
                                         <a href="/products?sport=Football" class="hover:text-orange-500">Bóng đá</a>
@@ -166,36 +166,6 @@
                 </ul>
             </div>
 
-            <div class="p-6 bg-gray-50 border-t border-gray-100">
-                <a th:if="${session.currentCustomer == null}" href="/login" class="flex items-center gap-4 group">
-                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-gray-400 border border-gray-200 group-hover:border-orange-500 group-hover:text-orange-500 transition">
-                        <i class="fa-regular fa-user text-xl"></i>
-                    </div>
-                    <div>
-                        <p class="font-bold text-gray-900 group-hover:text-orange-600 transition">Đăng nhập</p>
-                        <p class="text-xs text-gray-500">Để nhận ưu đãi thành viên</p>
-                    </div>
-                </a>
-
-                <div th:if="${session.currentCustomer != null}" class="flex flex-col gap-4">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-lg shadow-sm">
-                                <span th:text="${#strings.substring(session.currentCustomer.name,0,1)}">U</span>
-                            </div>
-                            <div>
-                                <p class="font-bold text-sm truncate max-w-[150px]" th:text="${session.currentCustomer.name}">User</p>
-                                <p class="text-xs text-gray-400">Thành viên</p>
-                            </div>
-                        </div>
-                        <a href="/logout" class="text-red-500 text-xs font-bold hover:underline bg-red-50 px-3 py-2 rounded-lg border border-red-100">Đăng xuất</a>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <a href="/profile" class="text-center py-2 text-xs font-bold border rounded bg-white hover:border-orange-500 hover:text-orange-500 transition">Hồ sơ</a>
-                        <a href="/my-orders" class="text-center py-2 text-xs font-bold border rounded bg-white hover:border-orange-500 hover:text-orange-500 transition">Đơn hàng</a>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
     <script th:src="@{/customer/js/main.js}"></script>

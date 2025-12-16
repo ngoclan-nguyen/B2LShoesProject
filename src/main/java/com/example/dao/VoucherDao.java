@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Optional;
 @Repository
 public class VoucherDao {
 
@@ -104,5 +104,32 @@ public class VoucherDao {
         } finally {
             if (session != null && session.isOpen()) session.close();
         }
+    }
+
+    public Optional<Voucher> findByCode(String code) {
+        Session session = null;
+        Transaction transaction = null;
+        Voucher voucher = null;
+
+        try {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+
+            // Sử dụng HQL/JPQL để tìm kiếm theo trường 'code'
+            String hql = "FROM Voucher v WHERE v.code = :voucherCode";
+            Query<Voucher> query = session.createQuery(hql, Voucher.class);
+            query.setParameter("voucherCode", code);
+
+            // Lấy kết quả duy nhất, hoặc null nếu không tìm thấy
+            voucher = query.uniqueResult();
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        } finally {
+            if (session != null && session.isOpen()) session.close();
+        }
+        return Optional.ofNullable(voucher);
     }
 }

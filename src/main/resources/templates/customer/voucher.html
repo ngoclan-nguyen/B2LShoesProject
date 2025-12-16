@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" th:href="@{/customer/images/logo.png}">
+    <title>B2L Shoes - Ví Voucher</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; }
+
+        /* Màu chủ đạo */
+        .text-primary { color: #FF9900; }
+        .bg-primary { background-color: #FF9900; }
+        .hover\:bg-primary:hover { background-color: #e68a00; }
+        .border-primary { border-color: #FF9900; }
+
+        /* Active link style - Đồng bộ với trang profile */
+        .active-link {
+            background-color: white;
+            color: #FF9900; /* Màu chữ chính */
+            font-weight: 700; /* bold */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+            border: 1px solid #f3f4f6; /* border-gray-100 */
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800 flex flex-col min-h-screen">
+
+<div th:replace="~{customer/fragments/header :: header}"></div>
+
+<div class="bg-gray-50">
+    <div class="container mx-auto px-4 py-3 text-sm text-gray-500">
+        <a href="/" class="text-gray-900 hover:underline hover:text-black transition">Trang chủ</a>
+        <span class="mx-3 text-gray-400">/</span>
+        <span class="text-black font-bold border-b border-black">Ví voucher của tôi</span>
+    </div>
+</div>
+
+<section class="container mx-auto px-4 py-10 flex-grow">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+
+        <aside class="md:col-span-1">
+            <div class="bg-gray-50 rounded-xl p-6 border border-gray-100 shadow-sm sticky top-24">
+
+                <div class="flex items-center gap-4 mb-8 pb-6 border-b border-gray-200">
+                    <div class="w-14 h-14 bg-gray-200 rounded-full flex items-center justify-center text-xl font-bold text-gray-500 border-2 border-white shadow-md">
+                        <span th:text="${#strings.substring(session.currentCustomer.name, 0, 1).toUpperCase()}">U</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-gray-500">Xin chào,</p>
+                        <h3 class="font-bold text-gray-800 truncate" th:text="${session.currentCustomer.name}">User Name</h3>
+                    </div>
+                </div>
+
+                <nav class="space-y-1">
+                    <a href="/customer/profile" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-white hover:text-black hover:font-bold hover:shadow-sm rounded-lg transition-all">
+                        <i class="fa-regular fa-user w-5 text-center"></i> Thông tin tài khoản
+                    </a>
+
+                    <a href="/customer/orders" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-white hover:text-black hover:font-bold hover:shadow-sm rounded-lg transition-all">
+                        <i class="fa-solid fa-box-open w-5 text-center"></i> Đơn hàng của tôi
+                    </a>
+
+                    <a href="/customer/vouchers" class="flex items-center gap-3 px-4 py-3 active-link">
+                        <i class="fa-solid fa-tag w-5 text-center"></i> Ví voucher của tôi
+                    </a>
+
+                    <a href="/logout" class="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 font-medium rounded-lg transition-all mt-4 border-t border-transparent hover:border-red-100">
+                        <i class="fa-solid fa-right-from-bracket w-5 text-center"></i> Đăng xuất
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <div class="md:col-span-3">
+            <h1 class="font-bold text-2xl uppercase mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-wallet text-primary"></i> VÍ VOUCHER CỦA TÔI
+            </h1>
+
+            <div th:if="${vouchers == null || vouchers.isEmpty()}" class="text-center py-16 bg-white rounded-xl shadow-sm border border-gray-100">
+                <i class="fa-regular fa-ticket-simple text-6xl text-gray-300 mb-4"></i>
+                <p class="text-lg font-bold text-gray-700">Chưa có mã khuyến mãi nào</p>
+                <p class="text-gray-500 mt-2 mb-6">Hãy theo dõi các chương trình sắp tới của B2L Shoes nhé!</p>
+                <a href="/" class="px-6 py-2 bg-primary text-white rounded-full font-bold hover:bg-orange-600 transition">Quay về trang chủ</a>
+            </div>
+
+            <div th:unless="${vouchers == null || vouchers.isEmpty()}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <div th:each="voucher : ${vouchers}"
+                     class="group relative bg-white rounded-xl shadow-sm border border-gray-100 p-0 overflow-hidden transition hover:shadow-lg hover:-translate-y-0.5"
+                     th:classappend="${voucher.status == 'EXPIRED' || voucher.status == 'USED' ? 'opacity-70 grayscale bg-gray-50' : ''}">
+
+                    <div class="h-2 w-full"
+                         th:classappend="${voucher.status == 'ACTIVE' ? 'bg-primary' : 'bg-gray-400'}"></div>
+
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-gift text-2xl" th:classappend="${voucher.status == 'ACTIVE' ? 'text-primary' : 'text-gray-400'}"></i>
+                                <h2 class="text-xl font-black tracking-wide"
+                                    th:classappend="${voucher.status == 'ACTIVE' ? 'text-gray-800' : 'text-gray-500'}"
+                                    th:text="${voucher.code}">CODE</h2>
+                            </div>
+
+                            <span class="text-xs font-bold px-2 py-1 rounded border"
+                                  th:classappend="${voucher.status == 'ACTIVE' ? 'bg-green-50 text-green-700 border-green-200' : (voucher.status == 'USED' ? 'bg-gray-100 text-gray-600 border-gray-200' : 'bg-red-50 text-red-600 border-red-200')}"
+                                  th:text="${voucher.status == 'ACTIVE' ? 'Sẵn sàng' : (voucher.status == 'EXPIRED' ? 'Hết hạn' : 'Hết lượt')}">
+                                Trạng thái
+                            </span>
+                        </div>
+
+                        <div class="space-y-1 mb-4">
+                            <p class="text-2xl font-bold text-gray-900">
+                                Giảm <span class="text-red-600" th:text="${#numbers.formatDecimal(voucher.discountAmount, 0, 'POINT', 0, 'COMMA') + 'đ'}">0đ</span>
+                            </p>
+                            <p class="text-sm text-gray-600">
+                                Đơn tối thiểu: <span class="font-bold" th:text="${#numbers.formatDecimal(voucher.minOrderAmount, 0, 'POINT', 0, 'COMMA') + 'đ'}">0đ</span>
+                            </p>
+                            <p th:if="${voucher.expiryDate != null}" class="text-xs text-gray-500 flex items-center gap-1">
+                                <i class="fa-regular fa-clock"></i>
+                                Hạn dùng: <span th:text="${#dates.format(voucher.expiryDate, 'dd/MM/yyyy')}">--/--/----</span>
+                            </p>
+                        </div>
+
+                        <div class="pt-4 border-t border-dashed border-gray-200 flex justify-end">
+                            <button th:if="${voucher.status == 'ACTIVE'}"
+                                    class="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-orange-600 transition active:scale-95"
+                                    th:data-code="${voucher.code}"
+                                    onclick="copyToClipboard(this)">
+                                <i class="fa-regular fa-copy"></i> Sao chép
+                            </button>
+
+                            <span th:if="${voucher.status != 'ACTIVE'}" class="text-sm text-gray-400 font-semibold cursor-not-allowed py-2">
+                                <i class="fa-solid fa-ban"></i> Không khả dụng
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{customer/fragments/footer :: footer}"></div>
+
+<script>
+    function copyToClipboard(btn) {
+        const code = btn.getAttribute('data-code');
+
+        // Copy text vào clipboard
+        navigator.clipboard.writeText(code).then(() => {
+            // Thông báo thành công
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            Toast.fire({
+                icon: 'success',
+                title: 'Đã sao chép mã: ' + code
+            });
+
+            // Hiệu ứng nút bấm
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Đã chép';
+            btn.classList.add('bg-green-600', 'hover:bg-green-700');
+            btn.classList.remove('bg-primary', 'hover:bg-orange-600');
+
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                btn.classList.add('bg-primary', 'hover:bg-orange-600');
+            }, 2000);
+
+        }).catch(err => {
+            console.error('Không thể sao chép', err);
+            Swal.fire('Lỗi', 'Trình duyệt không hỗ trợ sao chép nhanh', 'error');
+        });
+    }
+</script>
+
+</body>
+</html>

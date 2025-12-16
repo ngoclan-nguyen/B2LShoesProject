@@ -8,6 +8,7 @@ import com.example.model.CartItem;
 import com.example.model.ProductVariant;
 import com.example.model.User;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,5 +46,16 @@ public class CartService {
     
     public int updateQuantity(Long userId, Long productVariantId, Integer quantity) {
     	return cartDao.updateQuantity(userId, productVariantId, quantity);
+    }
+
+    public Long calculateTotalAmount(Long userId, List<Long> productVariantIds) {
+        if (productVariantIds == null || productVariantIds.isEmpty()) {
+            return 0L;
+        }
+
+        if (userId == null) {
+            return 0L;
+        }
+        return cartDao.calculateTotalAmount(userId, productVariantIds);
     }
 }

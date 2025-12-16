@@ -2,6 +2,8 @@ package com.example.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.dto.VoucherDTO;
+import com.example.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,10 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.dto.UserDTO;
 import com.example.model.MasterSize;
-import com.example.service.CartService;
-import com.example.service.HomeService;
-import com.example.service.MasterSizeService;
-import com.example.service.UserWishlistService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -31,6 +29,9 @@ public class HomeController {
 	
 	@Autowired
 	private CartService cartService;
+
+	@Autowired
+	private VoucherService voucherService;
 
     @GetMapping("/")
     public String home(HttpServletRequest request) {
@@ -98,12 +99,17 @@ public class HomeController {
 	public String cart(HttpServletRequest request) {
 		UserDTO user = (UserDTO)request.getSession().getAttribute("currentCustomer");
 		Long userId = null;
-		if (user != null)
+		if (user != null){
 			userId = user.getId();
 		request.setAttribute("cartItem", cartService.getCartItemByUserId(userId));
+		List<VoucherDTO> vouchers = voucherService.getAvailableVouchersForUser(userId);
+		System.out.println("SỐ LƯỢNG VOUCHER TÌM THẤY: " + vouchers.size());
+		request.setAttribute("vouchers", vouchers);
+		boolean hasVoucher = voucherService.checkIfUserHasAvailableVouchers(userId);
+		request.setAttribute("userHasAvailableVoucher", hasVoucher);
+		} else {
+			request.setAttribute("vouchers", new ArrayList<>());
+		}
 		return "customer/shopping_cart";
 	}
-
-	@GetMapping("/profile")
-	public String profile(HttpServletRequest request) {return "customer/profile";}
 }

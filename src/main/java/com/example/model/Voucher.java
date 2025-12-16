@@ -12,12 +12,12 @@ public class Voucher {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String code;         // Mã code (GIAMGIA100)
+    private String code;
 
-    @Column(nullable = false, name = "discount_amount") // <--- FIX DISCOUNT AMOUNT
+    @Column(nullable = false, name = "discount_amount")
     private Long discountAmount;
 
-    @Column(nullable = false, name = "min_order_amount") // <--- FIX MIN ORDER AMOUNT
+    @Column(nullable = false, name = "min_order_amount")
     private Long minOrderAmount;
 
     @Column(nullable = false)
