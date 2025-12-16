@@ -16,6 +16,7 @@ public class UserWishlistDTO {
 	private String productName;
 	private String productDescription;
 	private Long productPrice;
+	private String productBrand;
 	private String productImagePath;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
@@ -24,13 +25,15 @@ public class UserWishlistDTO {
 		
 	}
 	
-	public UserWishlistDTO(Long id, Long userId, Long productId, String productName, String productDescription, Long productPrice, String productImagePath, LocalDateTime createdAt, LocalDateTime updatedAt) {
+	public UserWishlistDTO(Long id, Long userId, Long productId, String productName, String productDescription, Long productPrice, String productBrand,
+			String productImagePath, LocalDateTime createdAt, LocalDateTime updatedAt) {
 		this.id =  id;
 		this.userId = userId;
 		this.productId = productId;
 		this.productName = productName;
 		this.productDescription = productDescription;
 		this.productPrice = productPrice;
+		this.productBrand = productBrand;
 		this.productImagePath = productImagePath;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
@@ -82,6 +85,14 @@ public class UserWishlistDTO {
 	
 	public void setProductPrice(Long productPrice) {
 		this.productPrice = productPrice;
+	}
+	
+	public String getProductBrand() {
+		return productBrand;
+	}
+	
+	public void setProductBrand(String productBrand) {
+		this.productBrand = productBrand;
 	}
 	
 	public String getProductImagePath() {

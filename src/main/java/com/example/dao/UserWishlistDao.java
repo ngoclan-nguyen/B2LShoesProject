@@ -37,10 +37,11 @@ public class UserWishlistDao {
 			session = HibernateUtil.getSession();
 			transaction = session.beginTransaction();
 			
-			String hql = "SELECT new com.example.dto.UserWishlistDTO(uw.id, uw.user.Id, p.id, p.name, p.description, p.price, img.path, uw.createdAt, uw.updatedAt) "
+			String hql = "SELECT new com.example.dto.UserWishlistDTO(uw.id, uw.user.Id, p.id, p.name, p.description, p.price, b.name, img.path, uw.createdAt, uw.updatedAt) "
 					+ "FROM UserWishlist uw "
 					+ "LEFT JOIN uw.product p "
-					+ "LEFT JOIN uw.product.productImages img "
+					+ "LEFT JOIN p.productImages img "
+					+ "LEFT JOIN p.brand b "
 					+ "WHERE uw.user.id = :userId "
 					+ "AND img.isPrimary = true";
 			Query<UserWishlistDTO> query = session.createQuery(hql, UserWishlistDTO.class);

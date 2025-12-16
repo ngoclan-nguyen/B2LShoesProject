@@ -8,7 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
@@ -17,64 +16,328 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .text-b2l { color: #FF9900; }
         .bg-b2l { background-color: #FF9900; }
+        /* Ẩn scrollbar ngang cho tab trên mobile nhưng vẫn scroll được */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none;  scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-gray-100 flex h-screen overflow-hidden text-sm">
-<div id="sidebar-overlay" onclick="toggleSidebar()"
-     class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden transition-opacity opacity-0 lg:hidden"></div>
 
-<aside id="sidebar"
-       class="fixed inset-y-0 left-0 z-30 w-64 bg-black text-white transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto flex flex-col">
+	<div id="sidebar-overlay" onclick="toggleSidebar()"
+	     class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden transition-opacity opacity-0 lg:hidden"></div>
 
-    <div class="h-16 flex items-center justify-between px-6 border-b border-gray-800">
-        <div class="flex items-center gap-2">
-            <img src="/customer/images/logo-white.png" class="w-[30px] h-[30px]" alt="Logo">
-            <span class="text-xl font-extrabold uppercase tracking-wider">B2L SHOES</span>
+	<aside id="sidebar"
+	       class="fixed inset-y-0 left-0 z-30 w-64 bg-black text-white transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto flex flex-col">
+
+	    <div class="h-16 flex items-center justify-between px-6 border-b border-gray-800">
+	        <div class="flex items-center gap-2">
+	            <img src="/customer/images/logo-white.png" class="w-[30px] h-[30px]" alt="Logo">
+	            <span class="text-xl font-extrabold uppercase tracking-wider">B2L SHOES</span>
+	        </div>
+	        <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-white">
+	            <i class="fa-solid fa-xmark text-xl"></i>
+	        </button>
+	    </div>
+
+	    <nav class="flex-1 py-6 space-y-1 overflow-y-auto">
+	        <a href="/admin/dashboard" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
+	            <i class="fa-solid fa-table-columns w-6"></i>
+	            <span class="font-bold">Tổng quan</span>
+	        </a>
+
+	        <a href="/admin/products" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
+	            <i class="fa-solid fa-box-open w-6"></i>
+	            <span class="font-medium">Sản phẩm</span>
+	        </a>
+
+	        <a href="/admin/orders" class="flex items-center px-6 py-3 bg-gray-900 border-l-4 border-[#FF9900] text-white group">
+	            <i class="fa-solid fa-bag-shopping w-6 text-[#FF9900]"></i>
+	            <span class="font-medium">Đơn hàng</span>
+	        </a>
+
+	        <a href="/admin/customers" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
+	            <i class="fa-solid fa-users w-6"></i>
+	            <span class="font-medium">Khách hàng</span>
+	        </a>
+	    </nav>
+
+	    <div class="p-4 border-t border-gray-800 bg-gray-900">
+	        <div class="flex items-center gap-3 mb-3">
+	            <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-[#FF9900] font-bold">
+	                <i class="fa-regular fa-user"></i>
+	            </div>
+	            <div>
+	                <p class="text-sm font-bold text-white truncate w-32" th:text="${session.currentAdmin != null ? session.currentAdmin.name : 'Admin'}">Admin Name</p>
+	                <p class="text-xs text-gray-500">Quản trị viên</p>
+	            </div>
+	        </div>
+	        <a href="/admin/logout" class="block w-full text-center py-2 bg-[#FF9900] hover:bg-[#e68a00] text-white text-xs font-bold rounded transition">
+	            <i class="fa-solid fa-right-from-bracket mr-1"></i> Đăng xuất
+	        </a>
+	    </div>
+	</aside>
+
+<div class="flex-1 flex flex-col overflow-hidden w-full">
+    
+	<header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-8 shadow-sm z-10 flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <button onclick="toggleSidebar()" class="lg:hidden text-gray-600 hover:text-black focus:outline-none">
+                <i class="fa-solid fa-bars text-2xl"></i>
+            </button>
+			<button th:onclick="|window.location.href='@{/admin/customers}'|"
+	                class="p-2 rounded-full hover:bg-gray-100 text-black hover:text-[#FF9900] transition">
+	            <i class="fa-solid fa-chevron-left text-xl"></i>
+	        </button>
+			<p class="text-xl md:text-xl font-bold break-words">Chi tiết khách hàng: 
+                <span th:text="${info.name}" class="text-[#FF9900] block md:inline mt-1 md:mt-0"></span>
+            </p>
         </div>
-        <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-white">
-            <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
-    </div>
+    </header>
 
-    <nav class="flex-1 py-6 space-y-1 overflow-y-auto">
-        <a href="/admin/dashboard" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
-            <i class="fa-solid fa-table-columns w-6"></i>
-            <span class="font-bold">Tổng quan</span>
-        </a>
+    <main class="flex-1 overflow-y-auto p-4 md:p-10">
+        <div class="flex flex-col gap-6 md:gap-10 text-base max-w-7xl mx-auto">
+            
+            
 
-        <a href="/admin/products" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
-            <i class="fa-solid fa-box-open w-6"></i>
-            <span class="font-medium">Sản phẩm</span>
-        </a>
-
-        <a href="/admin/orders" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
-            <i class="fa-solid fa-bag-shopping w-6"></i>
-            <span class="font-medium">Đơn hàng</span>
-        </a>
-
-        <a href="/admin/customers" class="flex items-center px-6 py-3 bg-gray-900 border-l-4 border-[#FF9900] text-white group">
-            <i class="fa-solid fa-users w-6 text-[#FF9900]"></i>
-            <span class="font-medium">Khách hàng</span>
-        </a>
-    </nav>
-
-    <div class="p-4 border-t border-gray-800 bg-gray-900">
-        <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-[#FF9900] font-bold">
-                <i class="fa-regular fa-user"></i>
+            <div class="w-full md:w-[90%] lg:w-[80%] mx-auto border-b-2 border-black pb-2 overflow-x-auto no-scrollbar">
+                <div class="flex min-w-max md:min-w-0 divide-x divide-gray-500">
+                    <div onclick="switchTab('info', this)"
+                         class="tab-item flex-1 px-4 py-2 text-sm md:text-xl font-bold cursor-pointer text-center whitespace-nowrap
+                                text-[#FF9900] underline underline-offset-2 transition-colors">
+                        Thông tin
+                    </div>
+                    <div onclick="switchTab('wishlist', this)"
+                         class="tab-item flex-1 px-4 py-2 text-sm md:text-xl font-bold cursor-pointer text-center whitespace-nowrap hover:text-[#FF9900] transition-colors">
+                        Yêu thích
+                    </div>
+                    <div onclick="switchTab('cart', this)"
+                         class="tab-item flex-1 px-4 py-2 text-sm md:text-xl font-bold cursor-pointer text-center whitespace-nowrap hover:text-[#FF9900] transition-colors">
+                        Giỏ hàng
+                    </div>
+                    <div onclick="switchTab('orders', this)"
+                         class="tab-item flex-1 px-4 py-2 text-sm md:text-xl font-bold cursor-pointer text-center whitespace-nowrap hover:text-[#FF9900] transition-colors">
+                        Đơn hàng
+                    </div>
+                </div>
             </div>
-            <div>
-                <p class="text-sm font-bold text-white truncate w-32" th:text="${session.currentAdmin != null ? session.currentAdmin.name : 'Admin'}">Admin Name</p>
-                <p class="text-xs text-gray-500">Quản trị viên</p>
+            
+            <div class="w-full md:w-[95%] lg:w-[90%] mx-auto pb-10">
+                
+                <div id="info" class="tab-content block bg-white rounded-lg shadow-sm py-6 px-4 md:py-8 md:px-20">
+                    <h2 class="text-2xl md:text-3xl font-semibold text-gray-800 pb-4 border-b pb-2 mb-6"
+                        th:text="${info.name}">
+                    </h2>
+
+                    <div class="space-y-6 text-base md:text-lg text-gray-700">
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b sm:border-none pb-2 sm:pb-0">
+                            <span class="font-medium text-gray-500 mb-1 sm:mb-0">Giới tính</span>
+                            <span th:text="${info.gender == '1' ? 'Nam' : 'Nữ'}"
+                                  th:classappend="${info.gender == '1' ? 'text-blue-600' : 'text-pink-600'}"
+                                  class="font-bold">
+                            </span>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b sm:border-none pb-2 sm:pb-0">
+                            <span class="font-medium text-gray-500 mb-1 sm:mb-0">Số điện thoại</span>
+                            <span th:text="${info.phone}" class="text-black font-semibold">0123456789</span>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b sm:border-none pb-2 sm:pb-0">
+                            <span class="font-medium text-gray-500 mb-1 sm:mb-0">Email</span>
+                            <span th:text="${info.email}" class="text-black break-all">email@gmail.com</span>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-start border-b sm:border-none pb-2 sm:pb-0">
+                            <span class="font-medium text-gray-500 mb-1 sm:mb-0 shrink-0">Địa chỉ</span>
+                            <span class="text-left sm:text-right sm:max-w-[60%] text-black leading-snug" th:text="${info.address}">
+                                TP.HCM
+                            </span>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center">
+                            <span class="font-medium text-gray-500 mb-1 sm:mb-0">Hạng thành viên</span>
+                            <span class="text-b2l font-semibold uppercase border border-[#FF9900] px-3 py-1 rounded-full text-xs md:text-sm" th:text="${info.title}">
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="wishlist" class="tab-content hidden flex flex-col gap-6">
+                    <div th:each="item : ${wishlist}"
+                        class="flex flex-col md:flex-row gap-4 md:gap-8 rounded-lg border border-gray-200 p-4 shadow-sm bg-white hover:shadow-md transition-shadow">
+                        <div class="w-full md:w-32 lg:w-40 aspect-square shrink-0 overflow-hidden rounded bg-gray-50">
+                            <img th:src="${item.productImagePath}" 
+                                alt="Product Image"
+                                class="w-full h-full object-cover">
+                        </div>
+                        
+                        <div class="flex flex-col gap-2 flex-1">
+                            <p class="text-lg md:text-xl font-bold text-black line-clamp-2">
+                               <span th:text="${item.productName}">Tên sản phẩm</span>
+                            </p>
+                            <div class="text-sm md:text-base space-y-1">
+                                <p class="text-gray-500">
+                                    Thương hiệu: <span th:text="${item.productBrand}" class="text-black font-bold"></span>
+                                </p>
+                                <p class="text-gray-500 line-clamp-2 md:line-clamp-none" th:text="${item.productDescription}">
+                                    Mô tả
+                                </p>
+                            </div>
+                            <p class="text-lg md:text-xl font-bold text-red-600 mt-2 md:mt-auto"
+                                th:text="${#numbers.formatInteger(item.productPrice,3,'POINT')} + 'đ'">Giá
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="cart" class="tab-content hidden flex flex-col gap-6">
+                    <div th:each="item : ${cart}" 
+                        class="flex flex-col md:flex-row gap-4 md:gap-8 rounded-lg border border-gray-200 p-4 shadow-sm bg-white">
+                        <div class="w-full md:w-32 lg:w-40 aspect-square shrink-0 overflow-hidden rounded bg-gray-50">
+                            <img th:src="${item.productImagePath}" class="w-full h-full object-cover">
+                        </div>
+                        
+                        <div class="flex flex-col gap-2 flex-1">
+                            <h1 class="font-bold text-lg md:text-xl lg:text-2xl" th:text="${item.productName}">Tên sản phẩm</h1>
+                            
+                            <div class="space-y-1 text-sm md:text-base">
+                                <p class="text-gray-500">
+                                    Thương hiệu: <span th:text="${item.productBrand}" class="text-black font-bold"></span>
+                                </p>
+                                <p class="text-gray-500">
+                                    Giá: <span th:text="${#numbers.formatInteger(item.productPrice, 0, 'POINT') + 'đ'}" class="text-red-600 font-bold"></span>
+                                </p>
+                            </div>
+                            
+                            <div class="flex flex-wrap items-center mt-2 md:mt-auto justify-between border-t md:border-t-0 pt-3 md:pt-0">
+                                <p class="text-gray-500 text-sm md:text-base">
+                                    Kích thước: <span th:text="${item.productSizeName}" class="text-black font-bold bg-gray-100 px-2 py-1 rounded"></span>
+                                </p>
+                                <p class="text-gray-500 text-sm md:text-base">
+                                    Số lượng: <span th:text="${item.quantity}" class="text-black font-bold"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="orders" class="tab-content hidden flex flex-col gap-6">
+                    <div th:each="order : ${orders}"
+                             class="bg-white rounded-xl border border-gray-200 p-4 md:p-6 shadow-sm">
+                            
+                            <div class="border-b border-dashed border-gray-300 pb-4 mb-4">
+                                <div class="mb-4">
+                                    <p class="font-bold text-xl md:text-2xl text-black">
+                                        Mã đơn: <span class="text-[#FF9900]">#<span th:text="${order.orderId}"></span></span>
+                                    </p>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm md:text-base">
+                                    <p class="text-gray-500">Ngày đặt:
+                                       <span th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}"
+                                       class="font-semibold text-black float-right sm:float-none"></span>
+                                    </p>
+                                    <p class="text-gray-500">Thanh toán:
+                                        <span class="font-semibold text-black float-right sm:float-none"
+                                              th:text="${order.paymentStatus}"></span>
+                                    </p>
+                                    <p class="text-gray-500">Phương thức:
+                                        <span class="font-semibold text-black float-right sm:float-none"
+                                              th:text="${order.paymentMethod}"></span>
+                                    </p>
+                                    <p class="text-gray-500">Giao hàng:
+                                        <span class="font-semibold text-black float-right sm:float-none"
+                                              th:text="${order.deliveryStatus}"></span>
+                                    </p>
+                                </div>
+                            </div>
+    
+                            <div class="space-y-4">
+                                <div th:each="item : ${order.orderDetails}"
+                                     class="flex flex-col md:flex-row gap-4 border border-gray-100 rounded-lg p-3 bg-gray-50/50">
+                                    <img th:src="${item.productImage}"
+                                         class="w-full md:w-20 lg:w-24 aspect-square border border-gray-200 rounded object-cover">
+                                    <div class="flex flex-col gap-1 flex-1">
+                                        <h1 class="font-bold text-base md:text-lg line-clamp-1"
+                                            th:text="${item.productName}">
+                                            Tên sản phẩm
+                                        </h1>
+    
+                                        <p class="text-xs md:text-sm text-gray-500">
+                                            Thương hiệu: <span class="font-bold text-black" th:text="${item.productBrand}"></span>
+                                        </p>
+    
+                                        <div class="flex justify-between items-end mt-2">
+                                            <div class="text-xs md:text-sm">
+                                                 <span class="bg-white border px-2 py-1 rounded text-black font-bold" th:text="${item.sizeName}">Size</span>
+                                                 <span class="text-gray-500 ml-2">x <span class="font-bold text-black" th:text="${item.quantity}">1</span></span>
+                                            </div>
+                                            <span class="text-red-600 font-bold text-sm md:text-base"
+                                                  th:text="${#numbers.formatInteger(item.productPrice,0,'POINT') + 'đ'}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+    
+                            <div class="flex justify-between items-center border-t mt-4 pt-4">
+                                <span class="text-gray-600 font-bold text-base md:text-lg">Tổng tiền:</span>
+                                <span class="text-xl md:text-2xl font-bold text-red-600"
+                                      th:text="${#numbers.formatInteger(order.totalAmount,0,'POINT') + 'đ'}">
+                                </span>
+                            </div>
+                        </div>
+                </div>
             </div>
         </div>
-        <a href="/admin/logout" class="block w-full text-center py-2 bg-[#FF9900] hover:bg-[#e68a00] text-white text-xs font-bold rounded transition">
-            <i class="fa-solid fa-right-from-bracket mr-1"></i> Đăng xuất
-        </a>
-    </div>
-</aside>
+    </main>
+</div>
 
 <script src="/admin/js/common.js"></script>
+<script>
+    // Hàm toggle sidebar
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        
+        // Kiểm tra xem đang ẩn hay hiện
+        const isHidden = sidebar.classList.contains('-translate-x-full');
+        
+        if (isHidden) {
+            // Hiện sidebar
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.remove('hidden', 'opacity-0');
+            // Ngăn body scroll khi mở menu mobile
+            document.body.style.overflow = 'hidden'; 
+        } else {
+            // Ẩn sidebar
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+            }, 300); // Đợi hiệu ứng fade out
+             // Cho phép body scroll lại
+             document.body.style.overflow = '';
+        }
+    }
+
+    function switchTab(tabId, element) {
+        // Ẩn tất cả content
+        document.querySelectorAll('.tab-content').forEach(c => {
+            c.classList.add('hidden');
+        });
+
+        // Hiện content được chọn
+        document.getElementById(tabId).classList.remove('hidden');
+
+        // Reset style tất cả tab
+        document.querySelectorAll('.tab-item').forEach(t => {
+            t.classList.remove('text-[#FF9900]', 'underline', 'underline-offset-2');
+            t.classList.add('hover:text-[#FF9900]');
+        });
+
+        // Active tab
+        element.classList.add('text-[#FF9900]', 'underline', 'underline-offset-2');
+    }
+</script>
 
 </body>
 </html>

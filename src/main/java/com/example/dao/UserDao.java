@@ -271,4 +271,155 @@ public class UserDao {
         }
         return user;
     }
+
+    public List<UserDTO> getAllCustomer() {
+    	Session session = null;
+    	Transaction transaction = null;
+    	List<UserDTO> customers = null;
+    	
+    	try {
+    		session = HibernateUtil.getSession();
+    		transaction = session.beginTransaction();
+    		
+    		String hql = "SELECT new com.example.dto.UserDTO(u.id, u.name, u.email, u.phone, u.address, u.gender, u.role, u.title) "
+    				+ "FROM User u "
+    				+ "WHERE u.role = 'Customer' "
+    				+ "AND u.isDeleted = false";
+    		Query<UserDTO> query = session.createQuery(hql, UserDTO.class);
+    		
+    		customers = query.list();
+    		transaction.commit();
+    	}
+    	catch (Exception e) {
+			if (transaction != null) transaction.rollback();
+		 	e.printStackTrace();
+		} finally {
+			if (session != null) session.close();
+		}
+		return customers;
+	}	
+    
+    public UserDTO getUserById(Long userId) {
+    	Session session = null;
+    	Transaction transaction = null;
+    	UserDTO customer = null;
+    	
+    	try {
+    		session = HibernateUtil.getSession();
+    		transaction = session.beginTransaction();
+    		
+    		String hql = "SELECT new com.example.dto.UserDTO(u.id, u.name, u.email, u.phone, u.address, u.gender, u.role, u.title) "
+    				+ "FROM User u "
+    				+ "WHERE u.role = 'Customer' "
+    				+ "AND u.isDeleted = false "
+    				+ "AND u.id = :uid";
+    		Query<UserDTO> query = session.createQuery(hql, UserDTO.class);
+    		query.setParameter("uid", userId);
+    		
+    		customer = query.uniqueResult();
+    		transaction.commit();
+    	}
+    	catch (Exception e) {
+			if (transaction != null) transaction.rollback();
+		 	e.printStackTrace();
+		} finally {
+			if (session != null) session.close();
+		}
+		return customer;
+	}
+    
+    public List<OrderDetailDTO> getOrderDetailsByOrderId(
+            Session session, Long orderId) {
+
+        String hql =
+            "SELECT new com.example.dto.OrderDetailDTO( "
+            + "od.id, p.id, p.name, p.price, b.name, "
+            + "od.totalAmount, od.quantity, s.sizeName, img.path ) "
+            + "FROM OrderWebDetail od "
+            + "JOIN od.productVariant pv "
+            + "JOIN pv.product p "
+            + "JOIN p.brand b "
+            + "JOIN p.productImages img "
+            + "JOIN pv.size s "
+            + "WHERE od.orderWeb.id = :oid "
+            + "AND img.isPrimary = true";
+
+        return session.createQuery(hql, OrderDetailDTO.class)
+                .setParameter("oid", orderId)
+                .list();
+    }
+    
+    public List<OrderDTO> getAllOrderByUserId(Long userId) {
+        Session session = null;
+        Transaction transaction = null;
+        List<OrderDTO> orders = new ArrayList<>();
+
+        try {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+
+            String hql =
+                "SELECT new com.example.dto.OrderDTO(" +
+                " o.id, o.totalAmount, o.paymentMethod, " +
+                " o.paymentStatus, o.deliveryStatus, o.createdAt ) " +
+                "FROM OrderWeb o " +
+                "WHERE o.customer.id = :uid " +
+                "ORDER BY o.createdAt DESC";
+
+            Query<OrderDTO> query = session.createQuery(hql, OrderDTO.class);
+            query.setParameter("uid", userId);
+
+            orders = query.list();
+            
+            for (OrderDTO order : orders) {
+                List<OrderDetailDTO> details =
+                    getOrderDetailsByOrderId(session, order.getOrderId());
+                order.setOrderDetails(details);
+            }
+            
+            transaction.commit();
+
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        } finally {
+            if (session != null) session.close();
+        }
+
+        return orders;
+    }
+    
+    public Long deleteUserById(Long userId) {
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+
+            String updateHql = "UPDATE User u SET u.isDeleted = true WHERE u.id = :uid";
+            session.createQuery(updateHql)
+                   .setParameter("uid", userId)
+                   .executeUpdate();
+
+            String countHql = "SELECT COUNT(u.id) FROM User u WHERE u.isDeleted = false AND u.role='Customer'";
+            Long activeUserCount = (Long) session.createQuery(countHql)
+                                                 .uniqueResult();
+
+            transaction.commit();
+
+            return activeUserCount;
+
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return 0L;
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+    }
 }
