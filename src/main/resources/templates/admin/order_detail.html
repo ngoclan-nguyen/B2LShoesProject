@@ -2,13 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi tiết đơn hàng - B2L Shoes</title>
+    <title th:text="'Chi tiết đơn hàng #' + ${order.id}"></title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
@@ -17,18 +14,13 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .text-b2l { color: #FF9900; }
         .bg-b2l { background-color: #FF9900; }
-        .hover-bg-b2l:hover { background-color: #e68a00; }
     </style>
 </head>
 <body class="bg-gray-100 flex h-screen overflow-hidden text-sm">
-
-<div id="sidebar-overlay" onclick="toggleSidebar()"
 <div id="sidebar-overlay" onclick="toggleSidebar()"
      class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden transition-opacity opacity-0 lg:hidden"></div>
-
 <aside id="sidebar"
        class="fixed inset-y-0 left-0 z-30 w-64 bg-black text-white transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto flex flex-col">
-
     <div class="h-16 flex items-center justify-between px-6 border-b border-gray-800">
         <div class="flex items-center gap-2">
             <img src="/customer/images/logo-white.png" class="w-[30px] h-[30px]" alt="Logo">
@@ -54,13 +46,15 @@
             <i class="fa-solid fa-bag-shopping w-6 text-[#FF9900]"></i>
             <span class="font-medium">Đơn hàng</span>
         </a>
-
+        <a href="/admin/vouchers" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
+            <i class="fa-solid fa-ticket w-6"></i>
+            <span class="font-medium">Mã giảm giá</span>
+        </a>
         <a href="/admin/customers" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
             <i class="fa-solid fa-users w-6"></i>
             <span class="font-medium">Khách hàng</span>
         </a>
     </nav>
-
     <div class="p-4 border-t border-gray-800 bg-gray-900">
         <div class="flex items-center gap-3 mb-3">
             <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-[#FF9900] font-bold">
@@ -76,5 +70,165 @@
         </a>
     </div>
 </aside>
+
+<div class="flex-1 flex flex-col overflow-hidden w-full">
+    <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-8 shadow-sm z-10 flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <button onclick="goBackOrToList()" class="text-gray-600 hover:text-black focus:outline-none">
+                <i class="fa-solid fa-arrow-left text-xl"></i>
+            </button>
+            <h2 class="text-lg lg:text-xl font-extrabold text-gray-800 truncate" th:text="'CHI TIẾT ĐƠN HÀNG #' + ${order.id}">CHI TIẾT ĐƠN HÀNG</h2>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded font-bold text-xs shadow transition flex items-center gap-1">
+                <i class="fa-solid fa-print"></i> In
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 lg:p-8">
+
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <div class="lg:col-span-2 space-y-6">
+
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <h3 class="text-xl font-extrabold text-gray-800 mb-4 flex justify-between items-center">
+                        Trạng thái Đơn hàng
+                        <span th:classappend="${order.deliveryStatus == 'Hoàn thành' ? 'bg-green-100 text-green-700' :
+                                                 (order.deliveryStatus == 'Đã hủy' ? 'bg-red-100 text-red-700' :
+                                                 'bg-orange-100 text-orange-700')}"
+                              class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"
+                              th:text="${order.deliveryStatus}">
+                            Chờ xác nhận
+                        </span>
+                    </h3>
+
+                    <form th:action="@{/admin/order/updateStatus}" method="post" class="mt-4 flex gap-3 items-center">
+                        <input type="hidden" name="orderId" th:value="${order.id}">
+
+                        <select name="newStatus"
+                                class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-b2l text-sm">
+                            <option value="">-- Chọn Trạng thái mới --</option>
+                            <option th:each="status : ${T(java.util.List).of('Chờ xác nhận', 'Đang xử lý', 'Đã giao hàng', 'Hoàn thành', 'Đã hủy')}"
+                                    th:value="${status}"
+                                    th:text="${status}"
+                                    th:selected="${order.deliveryStatus == status}">Đang giao</option>
+                        </select>
+
+                        <button type="submit"
+                                class="bg-b2l hover:bg-orange-600 text-white px-4 py-2 rounded font-bold text-sm shadow transition">
+                            Cập nhật
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100">
+                        <h3 class="font-bold text-lg text-gray-800">Sản phẩm (<span th:text="${order.orderDetails.size()}">3</span>)</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600 min-w-[700px]">
+                            <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-500">
+                            <tr>
+                                <th class="px-6 py-3 w-1/2">Sản phẩm</th>
+                                <th class="px-6 py-3 text-center">Đơn giá</th>
+                                <th class="px-6 py-3 text-center">Số lượng</th>
+                                <th class="px-6 py-3 text-right">Thành tiền</th>
+                            </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                            <tr th:each="detail : ${order.orderDetails}">
+
+                                <td class="px-6 py-4 flex items-center gap-3">
+                                    <div th:if="${detail.productVariant != null and detail.productVariant.product != null}">
+                                        <img th:src="@{${detail.productVariant.product.image}}" alt="Product Image" class="w-12 h-12 object-cover border rounded">
+                                        <div>
+                                            <div class="font-bold text-gray-900" th:text="${detail.productVariant.product.name}">Giày chạy bộ ABC</div>
+
+                                            <div class="text-xs text-gray-500"
+                                                 th:with="colorName=${detail.productVariant.product.color.name},
+                          sizeValue=${detail.productVariant.size.sizeName}" th:text="'Size: ' + ${sizeValue} + ' - Màu: ' + ${colorName}">
+                                                Size: 40 - Màu: Đen
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div th:unless="${detail.productVariant != null}">
+                                        <span class="text-red-500">Sản phẩm đã bị xóa (ID: <span th:text="${detail.productVariantId}"></span>)</span>
+                                    </div>
+                                </td>
+
+                                <td class="py-4 px-6 text-center"
+                                    th:text="${#numbers.formatDecimal(detail.price, 0, 'POINT', 0, 'COMMA')} + ' đ'">500.000 đ</td>
+
+                                <td class="py-4 px-6 text-center"
+                                    th:text="${detail.quantity}">2</td>
+
+                                <td class="py-4 px-6 text-right font-bold text-gray-900"
+                                    th:text="${#numbers.formatDecimal(detail.price * detail.quantity, 0, 'POINT', 0, 'COMMA')} + ' đ'">1.000.000 đ</td>
+
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1 space-y-6">
+
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <h3 class="font-bold text-lg text-gray-800 mb-3"><i class="fa-solid fa-truck-fast mr-2"></i>Thông tin Giao hàng</h3>
+
+                    <p class="font-bold text-gray-900" th:text="${order.consignee}">Trần Minh Hiếu</p>
+                    <p class="text-gray-600" th:text="${order.phoneNumber}">0988 123 456</p>
+
+                    <p class="text-gray-600 mt-2 text-sm" th:text="${order.deliveryAddress}">123 Đường ABC, Phường X, Quận Y, TP.HCM</p>
+
+                    <h3 class="font-bold text-lg text-gray-800 mt-4 mb-3"><i class="fa-solid fa-money-check-dollar mr-2"></i>Thanh toán</h3>
+                </div>
+                    <div class="text-sm">
+                        <p>Phương thức: <span class="font-bold" th:text="${order.paymentMethod}">Thanh toán khi nhận hàng (COD)</span></p>
+                        <p>Trạng thái: <span th:classappend="${order.paymentStatus == 'Đã TT' ? 'text-green-600 font-bold' : 'text-gray-600 font-bold'}" th:text="${order.paymentStatus}">Chưa TT</span></p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <h3 class="font-bold text-lg text-gray-800 mb-4">Tóm tắt Chi phí</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Tổng tiền hàng:</span>
+                            <span th:text="${#numbers.formatDecimal(order.subTotal, 0, 'POINT', 0, 'COMMA')} + ' đ'">2.000.000 đ</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Phí vận chuyển:</span>
+                            <span th:text="${#numbers.formatDecimal(order.deliveryFee, 0, 'POINT', 0, 'COMMA')} + ' đ'">30.000 đ</span>
+                        </div>
+                        <div class="flex justify-between border-b pb-2">
+                            <span class="text-red-500 font-medium">Mã giảm giá:</span>
+                            <span class="text-red-500 font-medium" th:text="'-' + ${#numbers.formatDecimal(order.discount, 0, 'POINT', 0, 'COMMA')} + ' đ'">- 100.000 đ</span>
+                        </div>
+                        <div class="flex justify-between pt-2">
+                            <span class="text-xl font-extrabold text-b2l">TỔNG CỘNG:</span>
+                            <span class="text-xl font-extrabold text-b2l" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'COMMA')} + ' đ'">1.930.000 đ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script th:replace="~{admin/order :: script}"></script>
+<script>
+    function goBackOrToList() {
+        // Kiểm tra xem có mục lịch sử nào để quay lại không
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            // Nếu không có lịch sử (truy cập trực tiếp), chuyển về trang danh sách đơn hàng
+            window.location.href = '/admin/orders';
+        }
+    }
+</script>
 </body>
 </html>

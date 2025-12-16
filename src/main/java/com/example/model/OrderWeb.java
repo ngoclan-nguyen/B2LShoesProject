@@ -89,4 +89,27 @@ public class OrderWeb {
 
     public List<OrderWebDetail> getOrderDetails() { return orderDetails; }
     public void setOrderDetails(List<OrderWebDetail> orderDetails) { this.orderDetails = orderDetails; }
+
+    @Transient // Báo cho Hibernate biết đây không phải là cột DB
+    public Long getSubTotal() {
+        if (this.orderDetails == null || this.orderDetails.isEmpty()) {
+            return 0L;
+        }
+
+        return this.orderDetails.stream()
+                .mapToLong(detail -> detail.getPrice() * detail.getQuantity())
+                .sum();
+    }
+    @Transient
+    public Long getDiscount() {
+
+        Long subTotal = this.getSubTotal();
+        Long deliveryFee = this.getDeliveryFee() != null ? this.getDeliveryFee() : 0L;
+        Long totalAmount = this.getTotalAmount() != null ? this.getTotalAmount() : 0L;
+
+        // Giảm giá = (Tổng tiền hàng + Phí ship) - Tổng tiền cuối cùng
+        Long calculatedDiscount = (subTotal + deliveryFee) - totalAmount;
+
+        return Math.max(0L, calculatedDiscount);
+    }
 }

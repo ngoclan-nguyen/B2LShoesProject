@@ -103,29 +103,31 @@ public class AdminProductDao {
     }
 
     public boolean saveOrUpdate(Product product) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        Session session = HibernateUtil.getSession();
         Transaction transaction = null;
         try {
             transaction = session.beginTransaction();
 
-            // Nếu là thêm mới, set thời gian tạo
             if (product.getId() == null) {
                 product.setCreatedAt(LocalDateTime.now());
                 product.setIsDelete(false);
             }
+
             product.setUpdatedAt(LocalDateTime.now());
 
-            // saveOrUpdate: nếu id null -> Insert, nếu id có -> Update
             session.merge(product);
 
             transaction.commit();
             return true;
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
+            System.err.println("LỖI LƯU SẢN PHẨM trong DAO: " + e.getMessage());
             e.printStackTrace();
             return false;
         } finally {
-            session.close();
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
         }
     }
 

@@ -22,6 +22,10 @@ public class Brand {
 
     public Brand() {}
 
+    public Brand(Long id) {
+        this.id = id;
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

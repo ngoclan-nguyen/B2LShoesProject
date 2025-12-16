@@ -57,6 +57,8 @@ public class HibernateUtil {
                 configuration.addAnnotatedClass(DeliveryLog.class);
                 configuration.addAnnotatedClass(ProductReview.class);
                 configuration.addAnnotatedClass(ReviewImage.class);
+                configuration.addAnnotatedClass(Voucher.class);
+                configuration.addAnnotatedClass(Notification.class);
 
                 ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                         .applySettings(configuration.getProperties())

@@ -32,11 +32,11 @@ public class OrderWebDetail {
 
     @ManyToOne
     @JoinColumn(name = "product_variant_id", nullable = false)
+    @org.hibernate.annotations.NotFound(action = org.hibernate.annotations.NotFoundAction.IGNORE)
     private ProductVariant productVariant;
 
     public OrderWebDetail() {}
 
-    // Getters & Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

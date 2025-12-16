@@ -9,7 +9,6 @@ public class MvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Cấu hình này nói rằng:
         // Mọi đường dẫn bắt đầu bằng /uploads/** (bao gồm cả /uploads/reviews/...)
         // Sẽ được tìm trong thư mục vật lý "uploads" nằm ngay gốc dự án
         registry.addResourceHandler("/uploads/**")

@@ -20,10 +20,12 @@
                 <div class="flex items-center gap-6 p-4 border rounded-lg bg-gray-50">
 
                     <div class="relative w-32 h-32 bg-white rounded border border-gray-300 overflow-hidden shadow-sm flex-shrink-0">
+                        <th:block th:if="${p.productImages != null and !p.productImages.empty}">
+                            <input type="hidden" name="oldImagePath" th:value="${p.productImages[0].path}">
+                        </th:block>
 
                         <img th:if="${p.productImages != null and !p.productImages.empty}"
-                             th:src="${p.productImages[0].path}"
-                             class="w-full h-full object-cover"
+                             th:src="${p.productImages[0].path}" class="w-full h-full object-cover"
                              alt="Ảnh sản phẩm">
 
                         <div th:if="${p.productImages == null or p.productImages.empty}"
@@ -36,11 +38,11 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Thay đổi ảnh mới</label>
                         <input type="file" name="imageFile" accept="image/png, image/jpeg, image/jpg"
                                class="block w-full text-sm text-gray-500
-                                      file:mr-4 file:py-2 file:px-4
-                                      file:rounded-full file:border-0
-                                      file:text-sm file:font-semibold
-                                      file:bg-orange-100 file:text-orange-700
-                                      hover:file:bg-orange-200 cursor-pointer"/>
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-full file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-orange-100 file:text-orange-700
+                  hover:file:bg-orange-200 cursor-pointer"/>
                         <p class="mt-2 text-xs text-gray-500">
                             * Chỉ chấp nhận file ảnh (JPG, PNG).<br>
                             * Nếu không chọn ảnh mới, ảnh cũ sẽ được giữ nguyên.
@@ -94,8 +96,8 @@
             <div class="col-span-2">
                 <label class="block text-gray-700 text-sm font-bold mb-2">Trạng thái</label>
                 <select name="status" class="border rounded w-full py-2 px-3 bg-white">
-                    <option value="Active" th:selected="${p.status == 'Active'}">Đang bán</option>
-                    <option value="Inactive" th:selected="${p.status == 'Inactive'}">Ngừng bán</option>
+                    <option value="Đang bán" th:selected="${p.status == 'Đang bán'}">Đang bán</option>
+                    <option value="Ngừng bán" th:selected="${p.status == 'Ngừng bán'}">Ngừng bán</option>
                 </select>
             </div>
         </div>
@@ -108,5 +110,86 @@
         </div>
     </form>
 </div>
+<script th:inline="javascript">
+    // 1. Hàm Toggle
+    function toggleVariants() {
+        const isChecked = document.getElementById('hasVariants').checked;
+        const section = document.getElementById('variantSection');
+        const simpleStock = document.getElementById('simpleStock');
+
+        if (isChecked) {
+            section.classList.remove('hidden');
+            simpleStock.classList.add('hidden');
+            document.querySelector('#simpleStock input[name="quantity"]').value = 0;
+        } else {
+            section.classList.add('hidden');
+            simpleStock.classList.remove('hidden');
+        }
+    }
+
+    // 2. Hàm Thêm dòng biến thể
+    function addVariantRow() {
+        const tbody = document.getElementById('variantTableBody');
+        const firstRow = tbody.querySelector('.variant-row');
+        const newRow = firstRow.cloneNode(true);
+
+        newRow.querySelectorAll('input').forEach(input => input.value = '');
+        const selectColor = newRow.querySelector('select[name^="variantColor"]');
+        if (selectColor) selectColor.selectedIndex = 0;
+
+        // Cập nhật lại index cho các trường name
+        const rowsCount = tbody.querySelectorAll('.variant-row').length;
+
+        newRow.querySelectorAll('[name^="variantId"], [name^="variantColor"], [name^="variantSize"], [name^="variantStock"]').forEach(input => {
+            const originalName = input.getAttribute('name');
+            // Thay thế index cũ (nếu có) bằng index mới (rowsCount)
+            if (originalName.includes('[')) {
+                input.setAttribute('name', originalName.replace(/\[\d+\]/, `[${rowsCount}]`));
+            } else {
+                // Trường hợp thêm dòng từ mẫu rỗng (không có index)
+                input.setAttribute('name', `${originalName}[${rowsCount}]`);
+            }
+        });
+
+        tbody.appendChild(newRow);
+    }
+
+    // 3. Hàm Xóa dòng
+    function removeRow(btn) {
+        const row = btn.closest('tr');
+        const tbody = document.getElementById('variantTableBody');
+        if (tbody.querySelectorAll('tr').length > 1) {
+            row.remove();
+        } else {
+            alert("Phải có ít nhất một biến thể!");
+        }
+    }
+
+    // 4. Hàm Preview ảnh
+    function previewImages(input) {
+        const container = document.getElementById('imagePreview');
+        container.innerHTML = '';
+
+        if (input.files) {
+            Array.from(input.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'w-full h-20 bg-gray-100 rounded overflow-hidden border border-gray-200 relative group';
+                    div.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                    container.appendChild(div);
+                }
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+
+    // 5. Hàm Khởi tạo trạng thái ban đầu
+    function checkInitialState() {
+        toggleVariants();
+    }
+
+    document.addEventListener('DOMContentLoaded', checkInitialState);
+</script>
 </body>
 </html>

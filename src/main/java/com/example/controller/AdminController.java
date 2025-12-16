@@ -1,11 +1,10 @@
 package com.example.controller;
 
-import com.example.dao.AdminProductDao;
-import com.example.dao.DashboardDao;
-import com.example.dao.ProductDao;
-import com.example.dao.UserDao;
+import com.example.dao.*;
+import com.example.dto.ProductFormDTO;
 import com.example.dto.UserDTO;
 import com.example.model.*;
+import com.example.service.NotificationService;
 import com.example.service.RememberMeService;
 import com.example.service.UserService;
 import jakarta.mail.MessagingException;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Controller
@@ -49,6 +50,20 @@ public class AdminController {
     @Autowired
     private AdminProductDao adminProductDao;
 
+    @Autowired
+    private VoucherDao voucherDao;
+
+    @Autowired
+    private OrderDao orderDao;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    private static final String DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm";
+
+    private static final List<String> VALID_STATUSES = List.of(
+            "Tất cả", "Chờ xác nhận", "Đang giao", "Hoàn thành", "Đã hủy"
+    );
     @GetMapping("/login")
     public String loginPage(HttpServletRequest request) {
         if (request.getSession().getAttribute("currentAdmin") != null) {
@@ -223,12 +238,16 @@ public class AdminController {
         Long totalProducts = dashboardDao.getTotalProducts();
 
         List<OrderWeb> recentOrders = dashboardDao.getRecentOrders();
+        Integer unreadCount = notificationService.getUnreadCount();
+        List<Notification> notifications = notificationService.getRecentNotifications(5);
 
         request.setAttribute("revenue", revenue);
         request.setAttribute("newOrders", newOrders);
         request.setAttribute("totalCustomers", totalCustomers);
         request.setAttribute("totalProducts", totalProducts);
         request.setAttribute("recentOrders", recentOrders);
+        request.setAttribute("unreadCount", unreadCount);
+        request.setAttribute("notifications", notifications);
 
         return "admin/dashboard";
     }
@@ -259,6 +278,19 @@ public class AdminController {
         return "admin/products";
     }
 
+    @GetMapping("/admin/products/filter")
+    public String filterProducts(HttpServletRequest request,
+                                 @RequestParam(required = false) String keyword,
+                                 @RequestParam(required = false) Long brandId,
+                                 @RequestParam(required = false) Long categoryId) {
+
+        List<Product> products = adminProductDao.searchProducts(keyword, brandId, categoryId);
+        request.setAttribute("products", products);
+
+        // Trả về chỉ phần HTML bên trong div#product-list-container
+        return "admin/products :: product-list-container";
+    }
+
     @GetMapping("product/edit/{id}")
     public String editPage(@PathVariable Long id, HttpServletRequest request) {
         Product product = adminProductDao.getProductById(id);
@@ -274,86 +306,90 @@ public class AdminController {
     }
 
     @PostMapping("product/save")
-    public String saveProduct(HttpServletRequest request,
-                              @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
+    public String saveProduct(@ModelAttribute ProductFormDTO form) {
         try {
-            // 1. LẤY ID & KHỞI TẠO PRODUCT
-            Long id = safeParseLong(request.getParameter("id"));
             Product product;
-
-            if (id != null && id > 0) {
-                // Sửa: Load cũ lên
-                product = adminProductDao.getProductById(id);
-                // Fix lỗi null list
-                if (product.getProductImages() == null) {
-                    product.setProductImages(new ArrayList<>());
-                }
+            if (form.getId() != null && form.getId() > 0) {
+                // Load cũ lên
+                product = adminProductDao.getProductById(form.getId());
+                if (product.getProductImages() == null) product.setProductImages(new ArrayList<>());
                 product.setUpdatedAt(LocalDateTime.now());
             } else {
-                // Thêm mới
+                // THÊM MỚI
                 product = new Product();
                 product.setProductImages(new ArrayList<>());
                 product.setCreatedAt(LocalDateTime.now());
                 product.setUpdatedAt(LocalDateTime.now());
                 product.setIsDelete(false);
-                product.setStatus("Active"); // Mặc định Active
             }
 
-            // 2. SET THÔNG TIN CƠ BẢN
-            product.setName(request.getParameter("name"));
-            product.setPrice(safeParseLong(request.getParameter("price")) != null ? safeParseLong(request.getParameter("price")) : 0L);
-            product.setQuantity(safeParseInt(request.getParameter("quantity")) != null ? safeParseInt(request.getParameter("quantity")) : 0);
-            product.setDescription(request.getParameter("description"));
+            // set thông tin từ dto
+            product.setName(form.getName());
+            product.setDescription(form.getDescription());
+            product.setPrice(form.getPrice() != null ? form.getPrice() : 0L);
+            product.setSalePrice(form.getSalePrice()); // Dòng này giờ đã hoạt động!
+            product.setStatus(form.getStatus() != null ? form.getStatus() : "Đang bán");
 
-            Long brandId = safeParseLong(request.getParameter("brandId"));
-            if (brandId != null) { Brand b = new Brand(); b.setId(brandId); product.setBrand(b); }
+            Long brandId = form.getBrandId();
+            if (brandId != null) product.setBrand(new Brand(brandId));
 
-            Long categoryId = safeParseLong(request.getParameter("categoryId"));
-            if (categoryId != null) { Category c = new Category(); c.setId(categoryId); product.setCategory(c); }
+            Long categoryId = form.getCategoryId();
+            if (categoryId != null) product.setCategory(new Category(categoryId));
 
-            // Xử lý Status (nếu form có gửi lên)
-            String status = request.getParameter("status");
-            if(status != null) product.setStatus(status);
-
-            // ======================================================
-            // 3. XỬ LÝ FILE ẢNH (CHỈ CHẠY KHI CÓ ẢNH UPLOAD)
-            // ======================================================
+            // xử lý ảnh mới và xóa ảnh cũ
+            MultipartFile imageFile = form.getImageFile();
             if (imageFile != null && !imageFile.isEmpty()) {
 
-                // Trỏ vào thư mục uploads ở gốc dự án (Giống logic Review)
-                Path uploadPath = Paths.get(UPLOAD_DIR);
-
-                if (!Files.exists(uploadPath)) {
-                    Files.createDirectories(uploadPath);
-                }
-
-                String fileName = System.currentTimeMillis() + "_" + StringUtils.cleanPath(imageFile.getOriginalFilename());
-                Path filePath = uploadPath.resolve(fileName);
-
-                // Lưu file vật lý
-                Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-                // Tạo đối tượng ảnh
-                ProductImage img = new ProductImage();
-                img.setPath("/uploads/" + fileName); // Đường dẫn chuẩn
-                img.setSize((int) imageFile.getSize());
-                img.setIsPrimary(true);
-                img.setCreatedAt(LocalDateTime.now());
-
-                // Reset ảnh chính cũ (nếu có)
-                if (product.getId() != null && product.getProductImages() != null) {
+                // Logic xóa ảnh cũ
+                String oldImagePath = form.getOldImagePath();
+                if (product.getId() != null && oldImagePath != null && !oldImagePath.isEmpty()) {
+                    ProductImage imageToRemove = null;
                     for (ProductImage oldImg : product.getProductImages()) {
-                        oldImg.setIsPrimary(false);
+                        if (oldImg.getPath().equals(oldImagePath)) {
+                            imageToRemove = oldImg;
+                            break;
+                        }
+                    }
+                    if (imageToRemove != null) {
+                        String oldFileName = oldImagePath.substring(oldImagePath.lastIndexOf('/') + 1);
+                        Path oldPath = Paths.get(UPLOAD_DIR, oldFileName);
+                        Files.deleteIfExists(oldPath);
+                        product.getProductImages().remove(imageToRemove);
                     }
                 }
 
-                // Thêm vào list
+                // Logic lưu file mới và tạo ProductImage mới
+                Path uploadPath = Paths.get(UPLOAD_DIR);
+                if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
+
+                String fileName = System.currentTimeMillis() + "_" + StringUtils.cleanPath(imageFile.getOriginalFilename());
+                Path filePath = uploadPath.resolve(fileName);
+                Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                ProductImage img = new ProductImage();
+                img.setPath("/uploads/" + fileName);
+                img.setIsPrimary(true);
+                img.setCreatedAt(LocalDateTime.now());
+
+                product.getProductImages().forEach(i -> i.setIsPrimary(false));
                 product.addImage(img);
             }
-            // ======================================================
 
-            // 4. LƯU VÀO DATABASE (QUAN TRỌNG: PHẢI ĐỂ Ở NGOÀI CÙNG)
-            // Code cũ của bạn để dòng này trong khối if(image) nên không lưu được nếu không có ảnh
+            // Xử lys tồn kho và biến theer
+            List<String> variantColors = form.getVariantColor();
+
+            if (variantColors != null && !variantColors.isEmpty()) {
+                product.setQuantity(0); // Set tổng Quantity về 0 nếu dùng Biến thể
+
+            } else {
+                product.setQuantity(form.getQuantity() != null ? form.getQuantity() : 0);
+
+                // Nếu sản phẩm cũ có biến thể, cần xóa chúng nếu Admin bỏ check
+                if (product.getVariants() != null) {
+
+                }
+            }
+
             boolean isSaved = adminProductDao.saveOrUpdate(product);
 
             if (isSaved) return "redirect:/admin/products?saveSuccess=true";
@@ -363,16 +399,6 @@ public class AdminController {
             e.printStackTrace();
             return "redirect:/admin/products?error=true";
         }
-    }
-
-    private Long safeParseLong(String value) {
-        if (value == null || value.trim().isEmpty()) return null;
-        try { return Long.valueOf(value); } catch (Exception e) { return null; }
-    }
-
-    private Integer safeParseInt(String value) {
-        if (value == null || value.trim().isEmpty()) return null;
-        try { return Integer.valueOf(value); } catch (Exception e) { return null; }
     }
 
     @GetMapping("/product/add")
@@ -394,9 +420,61 @@ public class AdminController {
     }
 
     @GetMapping("/orders")
-    public String orderListPage(HttpServletRequest request) {
+    public String listOrders(HttpServletRequest request,
+                             @RequestParam(value = "status", required = false, defaultValue = "Tất cả") String status,
+                             @RequestParam(value = "keyword", required = false) String keyword) {
+
+        List<OrderWeb> orders;
+
+        if ("Tất cả".equals(status) && (keyword == null || keyword.isEmpty()) ) {
+            orders = orderDao.findFilteredOrders("Tất cả", null);
+        } else {
+            orders = orderDao.findFilteredOrders(status, keyword);
+        }
+
+        request.setAttribute("orders", orders);
+        request.setAttribute("currentStatus", status);
+        request.setAttribute("keyword", keyword);
 
         return "admin/order";
+    }
+
+    @GetMapping("/order/detail/{id}")
+    public String orderDetail(@PathVariable("id") Long id, HttpServletRequest request) {
+        OrderWeb order = orderDao.findById(id);
+
+        if (order == null) {
+            return "redirect:/admin/order";
+        }
+
+        request.setAttribute("order", order);
+
+        return "admin/order_detail";
+    }
+
+    @PostMapping("/order/updateStatus")
+    public String updateOrderStatus(@RequestParam("orderId") Long orderId,
+                                    @RequestParam("newStatus") String newStatus,
+                                    RedirectAttributes redirectAttributes) {
+
+        // Danh sách các trạng thái hợp lệ
+        List<String> VALID_STATUSES = List.of("Chờ xác nhận", "Đang giao", "Hoàn thành", "Đã hủy");
+
+        // Kiểm tra trạng thái mới có hợp lệ không
+        if (!VALID_STATUSES.contains(newStatus)) {
+            redirectAttributes.addFlashAttribute("error", "Trạng thái cập nhật không hợp lệ.");
+            return "redirect:/admin/order/detail/" + orderId;
+        }
+
+        try {
+            orderDao.updateDeliveryStatus(orderId, newStatus);
+            redirectAttributes.addFlashAttribute("success", "Cập nhật trạng thái đơn hàng #" + orderId + " thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi hệ thống khi cập nhật trạng thái.");
+            e.printStackTrace();
+        }
+
+        return "redirect:/admin/order/detail/" + orderId;
     }
 
     @GetMapping("/customers")
@@ -404,4 +482,125 @@ public class AdminController {
         return "admin/customer_list";
     }
 
+    @GetMapping("/vouchers")
+    public String listVouchers(HttpServletRequest request) {
+        List<Voucher> vouchers = voucherDao.findAll();
+
+        request.setAttribute("vouchers", vouchers);
+        request.setAttribute("voucher", new Voucher());
+
+        return "admin/voucher";
+    }
+
+    @GetMapping("/vouchers/edit/{id}")
+    public String editVoucher(@PathVariable("id") Long id, HttpServletRequest request) {
+        Voucher voucher = voucherDao.findById(id);
+        if (voucher == null) {
+            return "redirect:/admin/vouchers?error=notfound";
+        }
+
+        request.setAttribute("voucher", voucher);
+        request.setAttribute("vouchers", voucherDao.findAll()); // Hiển thị danh sách
+        return "admin/voucher";
+    }
+
+    @PostMapping("/vouchers/save")
+    public String saveVoucher(HttpServletRequest request, RedirectAttributes redirectAttributes) {
+
+        String idParam = request.getParameter("id");
+        Long id = (idParam != null && !idParam.isEmpty()) ? Long.parseLong(idParam) : null;
+
+        Voucher voucher;
+        if (id != null) {
+            voucher = voucherDao.findById(id);
+            if (voucher == null) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy Voucher cần cập nhật.");
+                return "redirect:/admin/vouchers";
+            }
+        } else {
+            voucher = new Voucher();
+        }
+
+        try {
+            // --- Lấy các giá trị bắt buộc từ form ---
+            String codeStr = request.getParameter("code");
+            String discountAmountStr = request.getParameter("discountAmount");
+            String minOrderAmountStr = request.getParameter("minOrderAmount");
+            String quantityStr = request.getParameter("quantity");
+            String expiryDateStr = request.getParameter("expiryDate");
+
+            if (codeStr == null || codeStr.isEmpty() ||
+                    discountAmountStr == null || discountAmountStr.isEmpty() ||
+                    minOrderAmountStr == null || minOrderAmountStr.isEmpty() ||
+                    quantityStr == null || quantityStr.isEmpty() ||
+                    expiryDateStr == null || expiryDateStr.isEmpty()) { // KIỂM TRA EXPIRY DATE
+
+                throw new IllegalArgumentException("Vui lòng điền đầy đủ Mã Code, Giá trị, Số lượng và Hạn sử dụng.");
+            }
+
+            voucher.setCode(codeStr);
+
+            voucher.setDiscountAmount(Long.parseLong(discountAmountStr));
+            voucher.setMinOrderAmount(Long.parseLong(minOrderAmountStr));
+            voucher.setQuantity(Integer.parseInt(quantityStr));
+
+            try {
+                voucher.setExpiryDate(LocalDateTime.parse(expiryDateStr));
+            } catch (DateTimeParseException ex) {
+                throw new IllegalArgumentException("Định dạng Ngày/Giờ không hợp lệ. Vui lòng kiểm tra lại Hạn sử dụng.");
+            }
+
+            String isActiveParam = request.getParameter("isActive");
+            voucher.setActive(isActiveParam != null);
+
+            voucherDao.save(voucher);
+            redirectAttributes.addFlashAttribute("success", "Lưu Voucher thành công!");
+
+        } catch (NumberFormatException e) {
+            // Xử lý lỗi khi parse Long/Integer thất bại
+            redirectAttributes.addFlashAttribute("error", "Lỗi dữ liệu: Giá trị giảm, Đơn tối thiểu hoặc Số lượng phải là số nguyên hợp lệ.");
+            e.printStackTrace();
+            return "redirect:/admin/vouchers";
+        } catch (IllegalArgumentException e) {
+            // Xử lý lỗi nếu thiếu trường hoặc lỗi định dạng ngày giờ
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+            e.printStackTrace();
+            return "redirect:/admin/vouchers";
+        } catch (Exception e) {
+            String errorMsg = e.getMessage();
+            if (errorMsg != null && errorMsg.contains("Duplicate entry")) {
+                redirectAttributes.addFlashAttribute("error", "Mã Voucher đã tồn tại. Vui lòng chọn Mã Code khác.");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Lỗi hệ thống khi lưu Voucher.");
+            }
+            e.printStackTrace();
+            return "redirect:/admin/vouchers";
+        }
+
+        return "redirect:/admin/vouchers";
+    }
+
+    @GetMapping("/vouchers/delete/{id}")
+    public String deleteVoucher(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+        voucherDao.delete(id);
+        redirectAttributes.addFlashAttribute("success", "Xóa Voucher thành công!");
+        return "redirect:/admin/vouchers";
+    }
+
+    @GetMapping("/notifications")
+    public String listNotifications(HttpServletRequest request) {
+
+        List<Notification> notifications = notificationService.findAll();
+
+        request.setAttribute("notifications", notifications);
+
+        return "admin/notifications";
+    }
+
+    @PostMapping("/notifications/mark-read/{id}")
+    @ResponseBody
+    public String markNotificationAsRead(@PathVariable Long id) {
+        boolean success = notificationService.markAsRead(id);
+        return success ? "OK" : "Error";
+    }
 }

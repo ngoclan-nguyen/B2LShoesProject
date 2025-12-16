@@ -47,7 +47,10 @@
             <i class="fa-solid fa-bag-shopping w-6"></i>
             <span class="font-medium">Đơn hàng</span>
         </a>
-
+        <a href="/admin/vouchers" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
+            <i class="fa-solid fa-ticket w-6"></i>
+            <span class="font-medium">Mã giảm giá</span>
+        </a>
         <a href="/admin/customers" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
             <i class="fa-solid fa-users w-6"></i>
             <span class="font-medium">Khách hàng</span>
@@ -80,7 +83,10 @@
     </header>
 
     <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-8">
-
+        <div id="product-list-container">
+            <div class="bg-white rounded shadow-sm border border-gray-200 overflow-hidden">
+            </div>
+        </div>
         <div class="bg-white rounded shadow-sm border border-gray-200 overflow-hidden">
             <div class="p-4 border-b border-gray-100 bg-white">
                 <form action="/admin/products" method="GET" class="flex flex-wrap gap-4 items-center">
@@ -137,16 +143,15 @@
                             <div class="flex gap-3 items-center">
                                 <div class="w-12 h-12 bg-gray-100 rounded border flex-shrink-0 overflow-hidden relative">
 
-                                    <img th:if="${p.productImages != null and !p.productImages.empty}"
-                                         th:src="${p.productImages[0].path}"
+                                    <img th:if="${p.image != null and !p.image.isEmpty() and p.image != '/admin/images/no-image.png'}"
+                                         th:src="${p.image}"
                                          class="w-full h-full object-cover"
                                          alt="Ảnh SP">
 
-                                    <div th:if="${p.productImages == null or p.productImages.empty}"
+                                    <div th:if="${p.image == null or p.image.isEmpty() or p.image == '/admin/images/no-image.png'}"
                                          class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
                                         <i class="fa-regular fa-image"></i>
                                     </div>
-
                                 </div>
                                 <div>
                                     <div class="font-bold text-gray-900 line-clamp-1" th:text="${p.name}">Tên giày</div>
@@ -164,14 +169,26 @@
                         </td>
 
                         <td class="px-6 py-4 text-center">
-                            <span th:if="${p.quantity > 10}" class="text-green-600 font-bold" th:text="${p.quantity}">100</span>
-                            <span th:if="${p.quantity <= 10 && p.quantity > 0}" class="text-orange-500 font-bold" th:text="${p.quantity}">5</span>
-                            <span th:if="${p.quantity == 0}" class="px-2 py-1 bg-red-100 text-red-600 text-[10px] font-bold rounded">Hết hàng</span>
+                            <div th:switch="${p.quantity}">
+                                <span th:case="0" class="px-2 py-1 bg-red-100 text-red-600 text-[10px] font-bold rounded">HẾT HÀNG</span>
+
+                                <span th:case="*{T(java.lang.Integer).valueOf(p.quantity) &lt;= 10 and T(java.lang.Integer).valueOf(p.quantity) &gt; 0}"
+                                      class="text-orange-500 font-bold"
+                                      th:text="${p.quantity} + ' (Thấp)'">5 (Thấp)</span>
+
+                                <span th:case="*" class="text-green-600 font-bold" th:text="${p.quantity}">100</span>
+                            </div>
                         </td>
 
                         <td class="px-6 py-4 text-center">
-                            <span th:if="${p.status == 'Active'}" class="w-2 h-2 rounded-full bg-green-500 inline-block mr-1"></span>
-                            <span th:text="${p.status}">Active</span>
+                        <span th:if="${p.status == 'Đang bán'}"
+                              class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full">
+                            Đang bán
+                        </span>
+                            <span th:if="${p.status == 'Ngừng bán'}"
+                                  class="px-2 py-1 bg-gray-200 text-gray-600 text-[10px] font-bold rounded-full">
+                            Ngừng bán
+                        </span>
                         </td>
 
                         <td class="px-6 py-4 text-right space-x-2">

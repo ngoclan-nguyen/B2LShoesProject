@@ -6,33 +6,28 @@
     <title>Quản lý đơn hàng - B2L Shoes</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
     <style>
         body { font-family: 'Montserrat', sans-serif; }
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .text-b2l { color: #FF9900; }
         .bg-b2l { background-color: #FF9900; }
-
         /* Style cho Tab Active */
         .tab-active {
-            color: #000;
+            color: #FF9900;
             font-weight: 700;
-            border-bottom: 2px solid #000;
+            border-bottom: 2px solid #FF9900;
         }
     </style>
 </head>
 <body class="bg-gray-100 flex h-screen overflow-hidden text-sm">
 <div id="sidebar-overlay" onclick="toggleSidebar()"
      class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden transition-opacity opacity-0 lg:hidden"></div>
-
 <aside id="sidebar"
        class="fixed inset-y-0 left-0 z-30 w-64 bg-black text-white transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto flex flex-col">
-
     <div class="h-16 flex items-center justify-between px-6 border-b border-gray-800">
         <div class="flex items-center gap-2">
             <img src="/customer/images/logo-white.png" class="w-[30px] h-[30px]" alt="Logo">
@@ -58,13 +53,15 @@
             <i class="fa-solid fa-bag-shopping w-6 text-[#FF9900]"></i>
             <span class="font-medium">Đơn hàng</span>
         </a>
-
+        <a href="/admin/vouchers" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
+            <i class="fa-solid fa-ticket w-6"></i>
+            <span class="font-medium">Mã giảm giá</span>
+        </a>
         <a href="/admin/customers" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
             <i class="fa-solid fa-users w-6"></i>
             <span class="font-medium">Khách hàng</span>
         </a>
     </nav>
-
     <div class="p-4 border-t border-gray-800 bg-gray-900">
         <div class="flex items-center gap-3 mb-3">
             <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-[#FF9900] font-bold">
@@ -80,6 +77,7 @@
         </a>
     </div>
 </aside>
+
 <div class="flex-1 flex flex-col overflow-hidden w-full">
 
     <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-8 shadow-sm z-10 flex-shrink-0">
@@ -89,38 +87,36 @@
             </button>
             <h2 class="text-lg lg:text-xl font-extrabold text-gray-800 truncate">DANH SÁCH ĐƠN HÀNG</h2>
         </div>
-
-        <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 lg:px-4 lg:py-2 rounded font-bold flex items-center gap-2 shadow transition text-xs uppercase">
-            <i class="fa-solid fa-file-excel text-sm"></i>
-            <span class="hidden sm:inline">Xuất Excel</span>
-        </button>
     </header>
 
     <div class="bg-white px-4 lg:px-8 py-4 border-b border-gray-200">
+        <div th:if="${error}" class="bg-red-100 text-red-700 p-3 rounded mb-4 text-xs" th:text="${error}"></div>
+        <div th:if="${success}" class="bg-green-100 text-green-700 p-3 rounded mb-4 text-xs" th:text="${success}"></div>
+
+
         <div class="flex overflow-x-auto gap-6 border-b border-gray-100 mb-4 pb-2 text-gray-500 font-medium whitespace-nowrap">
-            <a href="#" class="tab-active hover:text-black transition">Tất cả</a>
-            <a href="#" class="hover:text-black transition">Chờ xác nhận</a>
-            <a href="#" class="hover:text-black transition">Đang giao</a>
-            <a href="#" class="hover:text-black transition">Hoàn thành</a>
-            <a href="#" class="hover:text-black transition">Đã hủy</a>
+            <a th:each="s : ${T(java.util.List).of('Tất cả', 'Chờ xác nhận', 'Đang xử lý', 'Đang giao hàng', 'Hoàn thành', 'Đã hủy')}"
+               th:href="@{/admin/orders(status=${s}, keyword=${keyword}, dateRange=${dateRange})}"
+               th:text="${s}"
+               th:classappend="${currentStatus == s ? 'tab-active text-b2l' : 'hover:text-black'}"
+               class="transition">Tất cả</a>
         </div>
 
-        <div class="flex flex-col md:flex-row gap-3">
+        <form th:action="@{/admin/orders}" method="get" class="flex flex-col md:flex-row gap-3">
+            <input type="hidden" name="status" th:value="${currentStatus}">
+
             <div class="flex-1 relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </span>
-                <input type="text" placeholder="Tìm mã đơn, tên khách..."
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" placeholder="Tìm mã đơn, tên khách..." name="keyword"
+                       th:value="${keyword}"
                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500 bg-gray-50 focus:bg-white text-sm">
             </div>
-            <div class="w-full md:w-48 relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                        <i class="fa-regular fa-calendar"></i>
-                    </span>
-                <input type="text" placeholder="mm/dd/yyyy"
-                       class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500 bg-gray-50 focus:bg-white text-sm">
-            </div>
-        </div>
+            <button type="submit" class="bg-b2l hover:bg-orange-600 text-white px-4 py-2 rounded font-bold text-sm shadow transition">
+                Tìm
+            </button>
+        </form>
     </div>
 
     <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 lg:p-8">
@@ -141,38 +137,44 @@
                     <tbody class="text-gray-700 text-sm divide-y divide-gray-100">
 
                     <tr th:each="o : ${orders}" class="hover:bg-orange-50 transition duration-150">
-                        <td class="py-4 px-4 font-bold text-orange-500 underline cursor-pointer" th:text="${o.id}">#DH00125</td>
+                        <td class="py-4 px-4 font-bold text-orange-500 underline cursor-pointer">
+                            <a th:href="@{/admin/order/detail/{id}(id=${o.id})}" th:text="'#DH' + ${o.id}">#DH00125</a>
+                        </td>
 
                         <td class="py-4 px-4 text-xs">
-                            <span class="block text-gray-900" th:text="${o.date.split(' ')[0]}">27/11/2025</span>
-                            <span class="text-gray-400" th:text="${o.date.split(' ')[1] + ' ' + o.date.split(' ')[2]}">10:30 AM</span>
+                            <span class="block text-gray-900" th:text="${#temporals.format(o.createdAt, 'dd/MM/yyyy')}">27/11/2025</span>
+                            <span class="text-gray-400" th:text="${#temporals.format(o.createdAt, 'HH:mm')}">10:30</span>
                         </td>
 
                         <td class="py-4 px-4">
-                            <div class="font-bold text-gray-900" th:text="${o.customer}">Trần Minh Hiếu</div>
-                            <div class="text-xs text-gray-500 mt-0.5" th:if="${o.phone != ''}" th:text="${o.phone}">0988 123 456</div>
+                            <div class="font-bold text-gray-900" th:text="${o.consignee}">Trần Minh Hiếu</div>
+                            <div class="text-xs text-gray-500 mt-0.5" th:text="${o.phoneNumber}">0988 123 456</div>
                         </td>
 
                         <td class="py-4 px-4 text-right font-bold text-gray-900"
-                            th:text="${#numbers.formatDecimal(o.total, 0, 'POINT', 0, 'COMMA')} + 'đ'">2.090.000đ</td>
+                            th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'POINT', 0, 'COMMA')} + ' đ'">2.090.000 đ</td>
 
                         <td class="py-4 px-4 text-center">
                             <span th:if="${o.paymentStatus == 'Đã TT'}" class="px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-bold">Đã TT</span>
                             <span th:if="${o.paymentStatus == 'Chưa TT'}" class="px-2 py-1 rounded bg-gray-100 text-gray-600 text-xs font-bold">Chưa TT</span>
-                            <span th:if="${o.paymentStatus == 'COD'}" class="px-2 py-1 rounded bg-blue-100 text-blue-600 text-xs font-bold">COD</span>
+                            <span th:if="${o.paymentMethod == 'Tiền mặt (COD)'}" class="px-2 py-1 rounded bg-blue-100 text-blue-600 text-xs font-bold">COD</span>
                         </td>
 
                         <td class="py-4 px-4 text-center">
-                            <span th:if="${o.status == 'Hoàn thành'}" class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold whitespace-nowrap">Hoàn thành</span>
-                            <span th:if="${o.status == 'Đã hủy'}" class="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold whitespace-nowrap">Đã hủy</span>
-                            <span th:if="${o.status == 'Đang giao'}" class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold whitespace-nowrap">Đang giao</span>
-                            <span th:if="${o.status == 'Chờ xác nhận'}" class="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-bold whitespace-nowrap">Chờ xác nhận</span>
+                            <div th:switch="${o.deliveryStatus}">
+                                <span th:case="'Hoàn thành'" class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold whitespace-nowrap" th:text="${o.deliveryStatus}">Hoàn thành</span>
+                                <span th:case="'Đã hủy'" class="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold whitespace-nowrap" th:text="${o.deliveryStatus}">Đã hủy</span>
+                                <span th:case="'Đang giao hàng'" class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold whitespace-nowrap" th:text="${o.deliveryStatus}">Đang giao hàng</span>
+                                <span th:case="'Đang xử lý'" class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-bold whitespace-nowrap" th:text="${o.deliveryStatus}">Đang xử lý</span>
+                                <span th:case="'Chờ xác nhận'" class="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-bold whitespace-nowrap" th:text="${o.deliveryStatus}">Chờ xác nhận</span>
+                                <span th:case="*" class="px-3 py-1 rounded-full bg-gray-300 text-gray-800 text-xs font-bold whitespace-nowrap">Không rõ</span>
+                            </div>
                         </td>
 
                         <td class="py-4 px-4 text-center">
-                            <a href="#" class="text-blue-600 hover:text-blue-800 font-bold text-xs hover:underline mr-2">Xem</a>
+                            <a th:href="@{/admin/order/detail/{id}(id=${o.id})}" class="text-blue-600 hover:text-blue-800 font-bold text-xs hover:underline mr-2">Xem</a>
                             <span class="text-gray-300">|</span>
-                            <a href="#" class="text-gray-500 hover:text-black text-xs ml-2">In</a>
+                            <button onclick="alert('Chức năng in đơn hàng chưa được lập trình!')" class="text-gray-500 hover:text-black text-xs ml-2">In</button>
                         </td>
                     </tr>
 
@@ -182,15 +184,12 @@
         </div>
 
         <div class="mt-6 flex flex-col sm:flex-row justify-between items-center text-gray-600 text-xs font-medium gap-4">
-            <div class="mt-6 flex flex-col sm:flex-row justify-between items-center text-gray-600 text-xs font-medium gap-4"
-                 th:if="${orders != null && !orders.empty}">
-                <div>Hiển thị <span class="font-bold text-black">1</span> đến <span class="font-bold text-black" th:text="${orders.size()}">10</span>...</div>
+            <div th:if="${orders != null && !orders.empty}">
+                <div>Đã tải <span class="font-bold text-black" th:text="${orders.size()}">10</span> đơn hàng.</div>
             </div>
             <div class="flex border rounded overflow-hidden bg-white">
                 <button class="px-3 py-2 border-r hover:bg-gray-50 disabled:opacity-50" disabled><i class="fa-solid fa-chevron-left"></i></button>
                 <button class="px-4 py-2 border-r bg-b2l text-white font-bold">1</button>
-                <button class="px-4 py-2 border-r hover:bg-gray-50">2</button>
-                <button class="px-4 py-2 border-r hover:bg-gray-50">3</button>
                 <button class="px-3 py-2 hover:bg-gray-50"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
         </div>
@@ -198,7 +197,26 @@
     </main>
 </div>
 
-<script src="/admin/js/common.js"></script>
+<script th:fragment="script">
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const isHidden = sidebar.classList.contains('-translate-x-full');
+
+        if (isHidden) {
+            sidebar.classList.remove('-translate-x-full');
+            sidebar.classList.add('translate-x-0');
+            overlay.classList.remove('hidden', 'opacity-0');
+            overlay.classList.add('opacity-100');
+        } else {
+            sidebar.classList.add('-translate-x-full');
+            sidebar.classList.remove('translate-x-0');
+            overlay.classList.add('opacity-0');
+            overlay.classList.remove('opacity-100');
+            setTimeout(() => { overlay.classList.add('hidden'); }, 300);
+        }
+    }
+</script>
 
 </body>
 </html>

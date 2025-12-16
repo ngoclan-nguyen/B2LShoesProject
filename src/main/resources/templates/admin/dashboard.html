@@ -32,10 +32,10 @@
        class="fixed inset-y-0 left-0 z-30 w-64 bg-black text-white transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto flex flex-col">
 
     <div class="h-16 flex items-center justify-between px-6 border-b border-gray-800">
-        <div class="flex items-center gap-2">
+        <a href="/" class="flex items-center gap-2">
             <img src="/customer/images/logo-white.png" class="w-[30px] h-[30px]" alt="Logo">
             <span class="text-xl font-extrabold uppercase tracking-wider">B2L SHOES</span>
-        </div>
+        </a>
         <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-white">
             <i class="fa-solid fa-xmark text-xl"></i>
         </button>
@@ -55,6 +55,11 @@
         <a href="/admin/orders" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
             <i class="fa-solid fa-bag-shopping w-6"></i>
             <span class="font-medium">Đơn hàng</span>
+        </a>
+
+        <a href="/admin/vouchers" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
+            <i class="fa-solid fa-ticket w-6"></i>
+            <span class="font-medium">Mã giảm giá</span>
         </a>
 
         <a href="/admin/customers" class="flex items-center px-6 py-3 text-gray-400 hover:bg-gray-900 hover:text-white border-l-4 border-transparent hover:border-gray-600 transition-all">
@@ -89,12 +94,53 @@
             <h2 class="text-xl font-bold text-gray-800">Dashboard</h2>
         </div>
 
-        <div class="flex items-center gap-4">
-            <button class="relative p-2 text-gray-400 hover:text-gray-600">
+        <<div class="flex items-center gap-4">
+
+        <div class="relative group" id="notification-dropdown">
+
+            <button class="relative p-2 text-gray-400 hover:text-gray-600" id="notification-toggle" onclick="toggleNotificationDropdown()">
                 <i class="fa-regular fa-bell text-xl"></i>
-                <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+
+                <span th:if="${unreadCount != null and unreadCount > 0}"
+                      th:text="${unreadCount}"
+                      class="absolute -top-1 -right-1 min-w-[18px] h-4 text-[10px] bg-red-600 text-white rounded-full flex items-center justify-center font-bold px-1">
+                99
+            </span>
             </button>
+
+            <div id="notification-content"
+                 class="absolute right-0 mt-3 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 transform origin-top-right transition duration-200 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100">
+
+                <div class="p-4 border-b">
+                    <h4 class="font-bold text-gray-800">Thông báo mới (<span th:text="${unreadCount}">0</span>)</h4>
+                </div>
+
+                <div class="max-h-80 overflow-y-auto divide-y divide-gray-100">
+
+                    <a th:each="n : ${notifications}"
+                       th:href="${n.url != null ? n.url : '#'}"
+                       th:classappend="${n.isRead} ? 'bg-white hover:bg-gray-50' : 'bg-yellow-50/50 hover:bg-yellow-100'"
+                       class="flex flex-col px-4 py-3 transition duration-150"
+                       onclick="markAsRead(this, [[${n.id}]])"> <p class="font-semibold text-gray-800 text-sm" th:text="${n.title}">Đơn hàng mới #1234</p>
+                        <p th:text="${n.message}" class="text-xs text-gray-500 line-clamp-2 mt-1">
+                            Khách hàng Nguyễn Văn B vừa đặt một đôi giày Size 40.
+                        </p>
+                        <span class="text-[10px] text-gray-400 mt-1" th:text="${#temporals.format(n.createdAt, 'HH:mm dd/MM')}">10:30 15/12</span>
+                    </a>
+
+                    <div th:if="${notifications == null or notifications.empty}">
+                        <p class="p-4 text-center text-gray-500 text-xs">Không có thông báo mới.</p>
+                    </div>
+
+                </div>
+
+                <div class="p-2 border-t text-center">
+                    <a href="/admin/notifications" class="text-xs font-bold text-blue-600 hover:underline">Xem tất cả</a>
+                </div>
+
+            </div>
         </div>
+    </div>
     </header>
 
     <main class="flex-1 overflow-x-hidden overflow-y-auto bg-[#f8f9fa] p-4 lg:p-8">
@@ -217,6 +263,32 @@
 </div>
 
 <script src="/admin/js/common.js"></script>
+<script>
+    // JS cho Sidebar
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        sidebar.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('hidden');
+        setTimeout(() => overlay.classList.toggle('opacity-0'), 50); // Cho hiệu ứng mờ
+    }
 
+    // JS cho Dropdown Notification
+    function toggleNotificationDropdown() {
+        const content = document.getElementById('notification-content');
+        content.classList.toggle('scale-0');
+        content.classList.toggle('opacity-0');
+    }
+
+    // JS giả định để đánh dấu đã đọc
+    function markAsRead(element, id) {
+        // Đây là nơi bạn cần thêm code AJAX để gọi API đánh dấu thông báo là đã đọc
+        console.log('Marking notification ' + id + ' as read');
+        element.classList.remove('bg-yellow-50/50', 'hover:bg-yellow-100');
+        element.classList.add('bg-white', 'hover:bg-gray-50');
+        Ngăn chặn chuyển hướng để AJAX kịp chạy (hoặc xử lý chuyển hướng sau)
+        event.preventDefault();
+    }
+</script>
 </body>
 </html>

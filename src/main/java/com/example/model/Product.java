@@ -44,7 +44,7 @@ public class Product {
     @JoinColumn(name = "product_group_id")
     private ProductGroup productGroup;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_brand_id")
     private Brand brand;
 
@@ -60,10 +60,13 @@ public class Product {
     @JoinColumn(name = "color_id")
     private Color color;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Column(name = "sale_price")
+    private Long salePrice;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<ProductVariant> variants;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<ProductImage> productImages;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
@@ -78,6 +81,14 @@ public class Product {
         this.quantity = quantity;
         this.status = status;
         this.isDelete = isDelete;
+    }
+
+    public Long getSalePrice() {
+        return salePrice;
+    }
+
+    public void setSalePrice(Long salePrice) {
+        this.salePrice = salePrice;
     }
 
     public Long getId() { return id; }
