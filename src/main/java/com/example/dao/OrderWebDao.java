@@ -136,7 +136,11 @@ public class OrderWebDao {
     }
     public OrderWeb findOrderById(Long orderId) {
         Session session = HibernateUtil.getSession();
+        Transaction transaction = null;
+        OrderWeb order = null;
         try {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
             // JOIN FETCH giúp lấy Order -> Details -> Variant -> Product -> Image
             String hql = "SELECT DISTINCT o FROM OrderWeb o " +
                     "LEFT JOIN FETCH o.orderDetails od " +
@@ -144,11 +148,16 @@ public class OrderWebDao {
                     "LEFT JOIN FETCH pv.product p " +
                     "WHERE o.id = :orderId";
 
-            return session.createQuery(hql, OrderWeb.class)
+            order = session.createQuery(hql, OrderWeb.class)
                     .setParameter("orderId", orderId)
                     .uniqueResult();
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
         } finally {
             if (session != null && session.isOpen()) session.close();
         }
+        return order;
     }
 }

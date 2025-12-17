@@ -217,30 +217,45 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-	const csrfToken  = document.querySelector("meta[name='_csrf']")?.content;
-	const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.content;
+    const csrfToken  = document.querySelector("meta[name='_csrf']")?.content;
+    const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.content;
 
-	// Tự động gắn CSRF token cho TẤT CẢ request AJAX
-	$.ajaxSetup({
-	    beforeSend: function (xhr) {
-	        if (csrfToken && csrfHeader) {
-	            xhr.setRequestHeader(csrfHeader, csrfToken);
-	        }
-	    }
-	});
+    $.ajaxSetup({
+        beforeSend: function (xhr) {
+            if (csrfToken && csrfHeader) xhr.setRequestHeader(csrfHeader, csrfToken);
+        }
+    });
+
+    // --- 1. TÁCH RIÊNG HÀM DỊCH THUẬT ---
+    function translateError(errorKey) {
+        const messages = {
+            'auth_required': 'Vui lòng đăng nhập để thực hiện thao tác này!',
+            'access_denied': 'Bạn không có quyền truy cập chức năng này.',
+            'invalid_csrf': 'Phiên làm việc hết hạn, vui lòng tải lại trang.',
+            'bad_credentials': 'Sai tài khoản hoặc mật khẩu.',
+            'User is disabled': 'Tài khoản đã bị vô hiệu hóa.',
+            'out_of_stock': 'Sản phẩm này hiện đã hết hàng.', // Ví dụ thêm
+        };
+        // Trả về câu tiếng Việt, nếu không có thì trả về nguyên gốc
+        return messages[errorKey] || errorKey || 'Có lỗi xảy ra.';
+    }
+
+    // --- 2. HÀM LẤY MESSAGE TỪ AJAX RESPONSE ---
+    function getMessageFromXhr(xhr) {
+        let key = xhr.responseJSON ? xhr.responseJSON.message : xhr.responseText;
+        if (key) key = key.replace(/['"]+/g, '').trim();
+        return translateError(key);
+    }
 
     document.addEventListener("DOMContentLoaded", function() {
-        // Hiện khi cuộn (Scroll Reveal)
+        // (Giữ nguyên phần Scroll Reveal và Slider của bạn)
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                }
+                if (entry.isIntersecting) entry.target.classList.add('active');
             });
         }, { threshold: 0.1 });
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-        // Slider logic
         const slider = document.getElementById('product-slider');
         const btnPrev = document.getElementById('btn-prev');
         const btnNext = document.getElementById('btn-next');
@@ -250,90 +265,82 @@
         }
     });
 
-    // Hàm thêm giỏ hàng
-	function addToCart(productId) {
-	    $.ajax({
-	        url: `/api/cart/add`,
-	        type: 'POST',
-	        data: {
-	            productId: productId
-	        },
-	        success: function (data) {
-	            if (data.status === 'success') {
-	                // Cập nhật số lượng giỏ hàng
-	                const cartBadge = document.getElementById('cart-qty');
-	                if (cartBadge) {
-	                    cartBadge.innerText = data.totalItems;
-	                    cartBadge.parentElement.classList.add('scale-125');
-	                    setTimeout(() => {
-	                        cartBadge.parentElement.classList.remove('scale-125');
-	                    }, 200);
-	                }
+    // --- 3. CẬP NHẬT HÀM ADD TO CART ---
+    function addToCart(productId) {
+        $.ajax({
+            url: `/api/cart/add`,
+            type: 'POST',
+            data: { productId: productId },
+            success: function (data) {
+                // TRƯỜNG HỢP 1: Thành công thật sự
+                if (data.status === 'success') {
+                    const cartBadge = document.getElementById('cart-qty');
+                    if (cartBadge) {
+                        cartBadge.innerText = data.totalItems;
+                        cartBadge.parentElement.classList.add('scale-125');
+                        setTimeout(() => cartBadge.parentElement.classList.remove('scale-125'), 200);
+                    }
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đã thêm vào giỏ hàng!',
+                        toast: true, position: 'top-end', showConfirmButton: false, timer: 2000
+                    });
+                }
+                // TRƯỜNG HỢP 2: Server trả về 200 OK nhưng nội dung là lỗi (VD: auth_required)
+                else {
+                    // DỊCH LỖI Ở ĐÂY
+                    let vietnameseMsg = translateError(data.message);
 
-	                Swal.fire({
-	                    icon: 'success',
-	                    title: 'Đã thêm vào giỏ hàng!',
-	                    toast: true,
-	                    position: 'top-end',
-	                    showConfirmButton: false,
-	                    timer: 2000
-	                });
-	            } else {
-	                Swal.fire({
-	                    icon: 'warning',
-	                    title: data.message,
-	                    toast: true,
-	                    position: 'top-end',
-	                    showConfirmButton: false,
-	                    timer: 2000
-	                });
-	            }
-	        },
-	        error: function (xhr) {
-	            console.error(xhr);
-	            Swal.fire('Lỗi', 'Có lỗi xảy ra, vui lòng thử lại', 'error');
-	        }
-	    });
-	}
-	
-	
-	    // ... Các đoạn code scroll reveal / slider giữ nguyên ...
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Thông báo',
+                        text: vietnameseMsg, // Hiển thị tiếng Việt
+                        toast: true, position: 'top-end', showConfirmButton: false, timer: 3000
+                    });
+                }
+            },
+            error: function (xhr) {
+                // TRƯỜNG HỢP 3: Lỗi Server thực sự (401, 403, 500...)
+                let msg = getMessageFromXhr(xhr);
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Thông báo',
+                    text: msg,
+                    confirmButtonColor: '#FF9900'
+                });
+            }
+        });
+    }
 
+    // --- 4. CẬP NHẬT TOGGLE WISHLIST ---
     function toggleWishlist(btnElement) {
         const btn = $(btnElement);
         const icon = btn.find('i');
         const productId = btn.attr('data-product-id');
-        
-        // Kiểm tra trạng thái hiện tại dựa trên class của icon
-        // Nếu đang là solid (đậm) -> tức là đang thích -> hành động là Xóa
         const isLiked = icon.hasClass('fa-solid');
-        
         const url = isLiked ? `/api/wishlist/remove?productId=${productId}` : `/api/wishlist/add?productId=${productId}`;
 
         $.ajax({
             url: url,
             type: 'POST',
             success: function(data) {
-                // Xử lý giao diện ngay lập tức
-				if (isLiked) {
-                    // Đang thích -> Thành không thích
-                    icon.removeClass('fa-solid text-red-500').addClass('fa-regular text-gray-400');
-					Swal.fire({
-	                    icon: 'error', // Hoặc 'warning' nếu muốn icon chấm than
-	                    title: 'Đã xóa khỏi danh sách yêu thích',
-	                    toast: true, position: 'top-end', showConfirmButton: false, timer: 2000
-	                });
+                // Kiểm tra status thành công hay thất bại
+                if (data.status === 'success' || data === 'success') { // Tùy API trả về
+                    if (isLiked) {
+                        icon.removeClass('fa-solid text-red-500').addClass('fa-regular text-gray-400');
+                        Swal.fire({ icon: 'info', title: 'Đã xóa khỏi yêu thích', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+                    } else {
+                        icon.removeClass('fa-regular text-gray-400').addClass('fa-solid text-red-500');
+                        Swal.fire({ icon: 'success', title: 'Đã thêm vào yêu thích', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+                    }
                 } else {
-                    // Chưa thích -> Thành thích
-                    icon.removeClass('fa-regular text-gray-400').addClass('fa-solid text-red-500');
-					Swal.fire({
-	                    icon: 'success',
-	                    title: 'Đã thêm vào danh sách yêu thích',
-	                    toast: true, position: 'top-end', showConfirmButton: false, timer: 2000
-	                });
+                    // Nếu thất bại (trả về auth_required trong success)
+                    let msg = translateError(data.message || data);
+                    Swal.fire({ icon: 'warning', title: 'Thông báo', text: msg, toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
                 }
             },
             error: function(xhr) {
+                // Nếu API trả về mã lỗi 401
                 if (xhr.status === 401) {
                     Swal.fire({
                         icon: 'warning',
@@ -342,25 +349,16 @@
                         showCancelButton: true,
                         confirmButtonText: 'Đăng nhập ngay',
                         cancelButtonText: 'Hủy',
-						customClass: {
-						            title: 'text-red-500',       // đổi màu tiêu đề
-						            content: 'text-gray-700',    // đổi màu nội dung
-						            confirmButton: 'bg-[#FF9900] text-white px-4 py-2 rounded font-bold hover:bg-orange-600', // nút xác nhận
-						            cancelButton: 'bg-white text-black px-4 py-2 rounded font-bold border border-black hover:bg-black hover:text-white'   // nút hủy
-						        }
+                        confirmButtonColor: '#FF9900'
                     }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = '/login';
-                        }
+                        if (result.isConfirmed) window.location.href = '/login';
                     });
                 } else {
-                    Swal.fire('Lỗi', 'Không thể cập nhật danh sách yêu thích', 'error');
-                    console.error(xhr.responseText);
+                    Swal.fire('Lỗi', getMessageFromXhr(xhr), 'error');
                 }
             }
         });
     }
 </script>
-
 </body>
 </html>

@@ -196,6 +196,7 @@ public class OrderService {
         return orderWebDao.findOrderById(orderId);
     }
 
+    @Transactional
     public void updatePaymentStatus(Long orderId, String status) {
         OrderWeb order = orderWebDao.findOrderById(orderId);
 
