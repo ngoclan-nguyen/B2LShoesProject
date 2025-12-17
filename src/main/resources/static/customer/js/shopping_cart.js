@@ -1,4 +1,18 @@
 $(function() {
+
+    const csrfToken  = document.querySelector("meta[name='_csrf']")?.content;
+    const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.content;
+
+    // Tự động gắn CSRF token cho TẤT CẢ request AJAX
+    $.ajaxSetup({
+        beforeSend: function (xhr) {
+            if (csrfToken && csrfHeader) {
+                xhr.setRequestHeader(csrfHeader, csrfToken);
+            }
+        }
+    });
+
+
     // Hàm định dạng tiền tệ (VNĐ)
     function formatCurrency(amount) {
         if (amount === undefined || amount === null) return '0 ₫';
