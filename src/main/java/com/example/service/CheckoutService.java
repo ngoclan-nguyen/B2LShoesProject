@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.dao.CartDao;
+import com.example.dao.ProductDao;
 import com.example.dto.CheckoutSummaryDTO;
 import com.example.dto.UserCartItemDTO;
 import com.example.model.Product;
@@ -18,49 +19,60 @@ public class CheckoutService {
     @Autowired
     private CartDao cartDao;
 
-    private static final Long DEFAULT_DELIVERY_FEE = 30000L;
+    @Autowired
+    private VoucherService voucherService;
 
-    /**
-     * Lấy tóm tắt giỏ hàng, chỉ bao gồm các ProductVariantId đã được chọn.
-     * @param customerId ID khách hàng
-     * @param selectedIdsString Chuỗi ID ProductVariant được chọn (ví dụ: "1,5,8")
-     */
-    public CheckoutSummaryDTO getCheckoutSummary(Long customerId, String selectedIdsString) {
+    public CheckoutSummaryDTO getCheckoutSummary(Long userId, String selectedIdsString, String voucherCode) {
 
+        CheckoutSummaryDTO summary = new CheckoutSummaryDTO();
+        long subTotal = 0L;
+
+        // 1. Phân tích chuỗi ID đã chọn và tải các mục trong giỏ hàng
         List<Long> selectedVariantIds = Arrays.stream(selectedIdsString.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
-                .map(Long::valueOf)
+                .map(Long::parseLong)
                 .collect(Collectors.toList());
 
-        // Lấy tất cả Cart Items của khách hàng
-        List<UserCartItemDTO> allItemsDto = cartDao.getCartItemByUserId(customerId);
-
-        // Lọc ra các item đã được chọn
-        List<UserCartItemDTO> selectedItems = allItemsDto.stream()
+        // Lấy toàn bộ giỏ hàng và lọc theo ID đã chọn
+        // Giả định cartDao.getCartItemsByCustomerId() lấy được dữ liệu cần thiết
+        List<UserCartItemDTO> allCartItems = cartDao.getCartItemByUserId(userId);
+        List<UserCartItemDTO> selectedItems = allCartItems.stream()
                 .filter(item -> selectedVariantIds.contains(item.getProductVariantId().longValue()))
                 .collect(Collectors.toList());
 
-        CheckoutSummaryDTO summary = new CheckoutSummaryDTO();
-        summary.setCartItems(selectedItems);
-
-        long subTotal = 0L;
-
-        // Tính SubTotal và gán ảnh (Logic gán ảnh phải được chuyển sang CartDao/DTO nếu có thể)
-        for (UserCartItemDTO itemDto : selectedItems) {
-            Long price = itemDto.getProductPrice();
-            Integer quantity = itemDto.getQuantity();
-
-            if (price != null && quantity != null) {
-                subTotal += price * quantity.longValue();
-            }
-            // Logic gán ảnh đã được thực hiện trong CartDao hoặc DTO constructor
+        // 2. Tính SubTotal
+        for (UserCartItemDTO item : selectedItems) {
+            subTotal += item.getProductPrice() * item.getQuantity();
         }
 
+        summary.setCartItems(selectedItems);
         summary.setSubTotal(subTotal);
-        summary.setDeliveryFee(DEFAULT_DELIVERY_FEE);
-        summary.setDiscountAmount(0L);
-        summary.setFinalTotal(subTotal + DEFAULT_DELIVERY_FEE);
+
+        long discountAmount = 0L;
+
+        // 3. Xử lý Voucher (Nếu mã voucher được gửi từ Giỏ hàng)
+        if (voucherCode != null && !voucherCode.isEmpty()) {
+            try {
+                // Gọi VoucherService để tính toán giảm giá thực tế (dựa trên subTotal)
+                discountAmount = voucherService.calculateDiscount(userId, voucherCode, subTotal);
+
+                // Nếu tính toán thành công:
+                summary.setVoucherCode(voucherCode);
+                summary.setDiscountAmount(discountAmount);
+
+            } catch (Exception e) {
+                // Nếu Voucher không còn hợp lệ khi chuyển trang, discount = 0 và bỏ qua mã
+                System.err.println("Voucher " + voucherCode + " không hợp lệ khi tải trang checkout: " + e.getMessage());
+                summary.setVoucherCode(null);
+                summary.setDiscountAmount(0L);
+            }
+        }
+
+        // 4. Tính Final Total
+        summary.setDeliveryFee(summary.getDeliveryFee()); // Giữ nguyên phí cố định
+        long finalTotal = (summary.getSubTotal() + summary.getDeliveryFee()) - summary.getDiscountAmount();
+        summary.setFinalTotal(finalTotal < 0 ? 0L : finalTotal);
 
         return summary;
     }

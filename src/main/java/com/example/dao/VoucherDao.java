@@ -106,7 +106,7 @@ public class VoucherDao {
         }
     }
 
-    public Optional<Voucher> findByCode(String code) {
+    public Voucher findByCodeIgnoreCase(String code) {
         Session session = null;
         Transaction transaction = null;
         Voucher voucher = null;
@@ -130,6 +130,6 @@ public class VoucherDao {
         } finally {
             if (session != null && session.isOpen()) session.close();
         }
-        return Optional.ofNullable(voucher);
+        return voucher;
     }
 }

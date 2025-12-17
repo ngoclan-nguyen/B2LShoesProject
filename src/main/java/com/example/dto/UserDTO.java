@@ -85,4 +85,10 @@ public class UserDTO {
         user.setId(this.id);
         return user;
     }
+
+    public UserDTO(User userEntity) {
+        this.id = userEntity.getId();
+        this.email = userEntity.getEmail();
+        this.name = userEntity.getName();
+    }
 }

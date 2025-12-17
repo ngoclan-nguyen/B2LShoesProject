@@ -1,9 +1,11 @@
 package com.example.dto;
 
+import com.example.model.Consignee;
+
 import java.util.List;
 
 public class OrderRequestDTO {
-    private String consignee;
+    private Consignee consignee;
     private String phoneNumber;
     private String deliveryAddress;
     private String note;
@@ -13,8 +15,14 @@ public class OrderRequestDTO {
 
     public OrderRequestDTO() {}
 
-    public String getConsignee() { return consignee; }
-    public void setConsignee(String consignee) { this.consignee = consignee; }
+    public Consignee getConsignee() {
+        // Hàm này phải trả về kiểu Consignee
+        return consignee;
+    }
+
+    public void setConsignee(Consignee consignee) {
+        this.consignee = consignee;
+    }
 
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }

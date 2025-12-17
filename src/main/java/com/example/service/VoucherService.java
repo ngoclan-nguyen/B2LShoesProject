@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
@@ -65,37 +66,98 @@ public class VoucherService {
                 );
     }
 
-    public VoucherApplyResultDTO applyVoucher(Long userId, String code, List<Long> variantIdsInCart) throws Exception {
+    public VoucherApplyResultDTO applyVoucher(Long userId, String voucherCode, List<Long> productVariantIds) throws Exception {
 
-        if (code.equalsIgnoreCase("GIAY50")) {
-
-            return new VoucherApplyResultDTO(true, 50000L, "Áp dụng mã GIẢY50 thành công.");
+        if (voucherCode == null || voucherCode.trim().isEmpty()) {
+            throw new Exception("Mã khuyến mãi không được để trống.");
         }
 
-        if (code.equalsIgnoreCase("ERROR")) {
-            throw new Exception("Mã ERROR đã hết lượt sử dụng.");
+        Voucher voucher = voucherDao.findByCodeIgnoreCase(voucherCode);
+        if (voucher == null) {
+            throw new Exception("Mã khuyến mãi không tồn tại.");
         }
 
-        return new VoucherApplyResultDTO(false, 0L, "Mã giảm giá không hợp lệ.");
-    }
-    public long calculateDiscount(Long userId, String code, Long subTotal) throws Exception {
-
-        if (code == null || code.isEmpty()) {
-            throw new Exception("Vui lòng nhập mã giảm giá.");
+        // 1. Kiểm tra tính hợp lệ cơ bản
+        if (!voucher.isActive()) {
+            throw new Exception("Mã khuyến mãi không được kích hoạt.");
+        }
+        if (voucher.getQuantity() == null || voucher.getQuantity() <= 0) {
+            throw new Exception("Mã khuyến mãi đã hết lượt sử dụng.");
         }
 
-        if (code.equalsIgnoreCase("GIAY10")) {
-            if (subTotal < 500000L) {
-                throw new Exception("Đơn hàng tối thiểu 500.000đ để áp dụng mã này.");
+        if (voucher.getExpiryDate() != null) {
+            Instant expiryInstant = voucher.getExpiryDate().toInstant(ZoneOffset.UTC);
+            if (expiryInstant.isBefore(Instant.now())) {
+                throw new Exception("Mã khuyến mãi đã hết hạn sử dụng.");
             }
-            long discount = (long) (subTotal * 0.10);
-            return Math.min(discount, 100000L); // Giảm tối đa 100k
         }
 
-        if (code.equalsIgnoreCase("GIAY50K")) {
-            return 50000L;
+        // Tính toán Tổng tiền đơn hàng (CartService đã trả về Long)
+        Long originalAmount = cartService.calculateTotalAmount(userId, productVariantIds);
+
+        // Kiểm tra số tiền âm hoặc bằng 0
+        if (originalAmount <= 0) {
+            throw new Exception("Giỏ hàng chưa có sản phẩm hợp lệ hoặc chưa chọn sản phẩm.");
         }
 
-        throw new Exception("Mã " + code + " không hợp lệ hoặc đã hết hạn.");
+        // Kiểm tra điều kiện đơn hàng tối thiểu
+        // (So sánh Long dùng toán tử < thay vì .compareTo)
+        if (originalAmount < voucher.getMinOrderAmount()) {
+            String requiredAmount = new java.text.DecimalFormat("#,###").format(voucher.getMinOrderAmount()) + "đ";
+            throw new Exception("Đơn hàng chưa đạt giá trị tối thiểu " + requiredAmount + ".");
+        }
+
+        // Lấy giá trị giảm giá
+        Long discount = voucher.getDiscountAmount();
+
+        // Đảm bảo không giảm quá số tiền gốc
+        if (discount > originalAmount) {
+            discount = originalAmount;
+        }
+
+        Long finalAmount = originalAmount - discount;
+
+        return new VoucherApplyResultDTO(originalAmount, discount, finalAmount, voucherCode);
+    }
+
+    public long calculateDiscount(Long userId, String voucherCode, long subTotal) throws Exception {
+        // 1. Tìm voucher trong Database
+        Voucher voucher = voucherDao.findByCodeIgnoreCase(voucherCode);
+
+        if (voucher == null) {
+            System.out.println("VOUCHER FAIL: Mã " + voucherCode + " không tồn tại.");
+            throw new Exception("Mã voucher không tồn tại.");
+        }
+
+        // 2. Kiểm tra các điều kiện hợp lệ cơ bản
+        if (!voucher.isActive()) {
+            throw new Exception("Mã voucher hiện đang bị khóa.");
+        }
+
+        if (voucher.getQuantity() != null && voucher.getQuantity() <= 0) {
+            throw new Exception("Mã voucher đã hết lượt sử dụng.");
+        }
+
+        // Kiểm tra ngày hết hạn
+        if (voucher.getExpiryDate() != null && java.time.LocalDateTime.now().isAfter(voucher.getExpiryDate())) {
+            throw new Exception("Mã voucher đã hết hạn sử dụng.");
+        }
+
+        // 3. Kiểm tra điều kiện giá trị đơn hàng tối thiểu
+        if (subTotal < voucher.getMinOrderAmount()) {
+            throw new Exception("Đơn hàng chưa đạt giá trị tối thiểu để áp dụng mã này.");
+        }
+
+        // 4. Tính toán giảm giá (Dựa trên model Voucher hiện tại của bạn)
+        // Vì model của bạn chỉ có discountAmount (số tiền cố định)
+        long discountAmount = voucher.getDiscountAmount();
+
+        // Đảm bảo số tiền giảm không vượt quá tổng tiền hàng
+        if (discountAmount > subTotal) {
+            discountAmount = subTotal;
+        }
+
+        System.out.println("VOUCHER SUCCESS: Discount calculated: " + discountAmount);
+        return discountAmount;
     }
 }

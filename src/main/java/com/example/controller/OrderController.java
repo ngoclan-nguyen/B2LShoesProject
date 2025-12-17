@@ -25,7 +25,7 @@ public class OrderController {
             HttpServletRequest request) {
 
         if (userDto == null) {
-            return "redirect:/login";
+            return "redirect:/customer/login";
         }
 
         Long customerId = userDto.getId();

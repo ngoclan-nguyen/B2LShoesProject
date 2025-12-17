@@ -1,36 +1,69 @@
 package com.example.dto;
 
-import com.example.model.CartItem;
 import java.util.List;
 
 public class CheckoutSummaryDTO {
+
+    // Thông tin sản phẩm
     private List<UserCartItemDTO> cartItems;
-    private Long subTotal; // Tổng tiền hàng (chưa có phí ship, chưa trừ voucher)
-    private Long finalTotal; // Tổng tiền cuối cùng
-    private Long deliveryFee;
-    private Long discountAmount;
-    private String voucherCode; // Mã voucher đã áp dụng
+
+    // Thông tin tiền tệ
+    private long subTotal;
+    private long deliveryFee = 30000L; // Giả định phí ship cố định
+    private long discountAmount = 0L;
+    private long finalTotal;
+
+    // Thông tin Voucher
+    private String voucherCode; // Mã voucher đã áp dụng thành công
 
     public CheckoutSummaryDTO() {
-        this.deliveryFee = 0L;
-        this.discountAmount = 0L;
     }
 
-    public List<UserCartItemDTO> getCartItems() { return cartItems; }
-    public void setCartItems(List<UserCartItemDTO> cartItems) { this.cartItems = cartItems; }
+    public List<UserCartItemDTO> getCartItems() {
+        return cartItems;
+    }
 
-    public Long getSubTotal() { return subTotal; }
-    public void setSubTotal(Long subTotal) { this.subTotal = subTotal; }
+    public void setCartItems(List<UserCartItemDTO> cartItems) {
+        this.cartItems = cartItems;
+    }
 
-    public Long getFinalTotal() { return finalTotal; }
-    public void setFinalTotal(Long finalTotal) { this.finalTotal = finalTotal; }
+    public long getSubTotal() {
+        return subTotal;
+    }
 
-    public Long getDeliveryFee() { return deliveryFee; }
-    public void setDeliveryFee(Long deliveryFee) { this.deliveryFee = deliveryFee; }
+    public void setSubTotal(long subTotal) {
+        this.subTotal = subTotal;
+    }
 
-    public Long getDiscountAmount() { return discountAmount; }
-    public void setDiscountAmount(Long discountAmount) { this.discountAmount = discountAmount; }
+    public long getDeliveryFee() {
+        return deliveryFee;
+    }
 
-    public String getVoucherCode() { return voucherCode; }
-    public void setVoucherCode(String voucherCode) { this.voucherCode = voucherCode; }
+    public void setDeliveryFee(long deliveryFee) {
+        this.deliveryFee = deliveryFee;
+    }
+
+    public long getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(long discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public long getFinalTotal() {
+        return finalTotal;
+    }
+
+    public void setFinalTotal(long finalTotal) {
+        this.finalTotal = finalTotal;
+    }
+
+    public String getVoucherCode() {
+        return voucherCode;
+    }
+
+    public void setVoucherCode(String voucherCode) {
+        this.voucherCode = voucherCode;
+    }
 }

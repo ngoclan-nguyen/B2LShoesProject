@@ -38,40 +38,38 @@
         <i class="fa-solid fa-credit-card text-primary"></i> XÁC NHẬN THANH TOÁN
     </h1>
 
-    <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-        <strong class="font-bold">Lỗi!</strong>
-        <span class="block sm:inline" th:text="${error}"></span>
-    </div>
-
-    <form id="checkoutForm" th:action="@{/place-order}" th:object="${checkoutFormDTO}" method="POST">
+    <form id="checkoutForm" method="POST" th:action="@{/api/order/place}" th:object="${checkoutForm}">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
             <div class="lg:col-span-2 space-y-8">
-
                 <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                     <h2 class="text-xl font-bold text-primary mb-5 flex items-center gap-2">
                         <i class="fa-solid fa-map-location-dot"></i> Thông tin giao hàng
                     </h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <input type="text" th:field="*{consignee}" placeholder="Họ và tên người nhận" required
+                        <input type="text" th:field="*{consignee.fullName}" placeholder="Họ và tên người nhận" required
                                th:value="${customer.name}"
                                class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-primary transition">
 
-                        <input type="tel" th:field="*{phoneNumber}" placeholder="Số điện thoại" required
+                        <input type="tel" th:field="*{consignee.phone}" placeholder="Số điện thoại" required
                                th:value="${customer.phone}"
                                class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-primary transition">
                     </div>
 
-                    <input type="hidden" id="fullDeliveryAddress" th:field="*{deliveryAddress}" th:value="${customer.address}">
+                    <input type="hidden" id="fullDeliveryAddress" th:field="*{deliveryAddress}">
+                    <input type="hidden" th:field="*{consignee.address}" id="consigneeAddressInput"/>
+                    <input type="hidden" th:field="*{consignee.ward}" id="consigneeWardInput"/>
+                    <input type="hidden" th:field="*{consignee.district}" id="consigneeDistrictInput"/>
+                    <input type="hidden" th:field="*{consignee.province}" id="consigneeProvinceInput"/>
 
                     <div class="space-y-3">
                         <div class="bg-gray-50 p-3 rounded text-sm text-gray-700 border border-gray-200">
-                            <span class="font-bold text-gray-600">Địa chỉ hiện tại:</span>
-                            <span th:text="${customer.address != null ? customer.address : 'Chưa cập nhật địa chỉ mặc định'}"></span>
+                            <span class="font-bold text-gray-600">Địa chỉ mặc định:</span>
+                            <span id="defaultAddrSpan" th:text="${customer.address != null ? customer.address : 'Chưa cập nhật'}"></span>
                         </div>
 
-                        <h4 class="font-bold text-sm text-gray-600 mt-4">Hoặc chọn/nhập địa chỉ mới:</h4>
+                        <h4 class="font-bold text-sm text-gray-600 mt-4">Chọn địa chỉ giao hàng mới:</h4>
                         <div class="grid grid-cols-2 gap-3">
                             <select id="province" class="col-span-2 md:col-span-1 p-3 border border-gray-300 rounded focus:border-primary focus:outline-none text-sm">
                                 <option value="">Chọn Tỉnh/Thành</option>
@@ -86,16 +84,13 @@
                         <input type="text" id="houseNumber" placeholder="Số nhà, tên đường cụ thể..."
                                class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm">
                     </div>
-
                     <small class="text-red-500 mt-3 block" id="addressError" style="display:none">Vui lòng nhập đầy đủ địa chỉ giao hàng.</small>
-
                 </div>
 
                 <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                     <h2 class="text-xl font-bold text-primary mb-5 flex items-center gap-2">
                         <i class="fa-solid fa-wallet"></i> Phương thức thanh toán
                     </h2>
-
                     <div class="space-y-3">
                         <div class="relative">
                             <input type="radio" id="payment_cod" th:field="*{paymentMethod}" value="COD" class="hidden radio-primary" checked>
@@ -104,7 +99,6 @@
                                 <span class="ml-4 font-bold text-gray-700">Thanh toán khi nhận hàng (COD)</span>
                             </label>
                         </div>
-
                         <div class="relative">
                             <input type="radio" id="payment_transfer" th:field="*{paymentMethod}" value="TRANSFER" class="hidden radio-primary">
                             <label for="payment_transfer" class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition">
@@ -116,95 +110,59 @@
                 </div>
 
                 <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                    <h2 class="text-xl font-bold text-primary mb-5 flex items-center gap-2">
-                        <i class="fa-solid fa-ticket-simple"></i> Mã giảm giá
-                    </h2>
-
-                    <div class="flex gap-3">
-                        <input type="text" id="voucherCode" name="voucherCode" placeholder="Nhập mã giảm giá..."
-                               class="flex-1 p-3 border border-gray-300 rounded focus:outline-none focus:border-primary transition uppercase">
-                        <button type="button" id="applyVoucherBtn"
-                                class="bg-gray-300 text-gray-700 font-bold px-5 py-3 rounded hover:bg-gray-400 transition"
-                                disabled>
-                            Áp dụng
-                        </button>
-                    </div>
-                    <small class="text-red-500 mt-2 block" id="voucherMessage"></small>
-                </div>
-
-                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                     <h2 class="text-xl font-bold text-gray-700 mb-5 border-b pb-3">
                         <i class="fa-solid fa-box-open mr-2"></i> Sản phẩm trong đơn hàng (<span th:text="${summary.cartItems.size()}">0</span>)
                     </h2>
-
                     <div class="space-y-4">
                         <div th:each="item : ${summary.cartItems}" class="flex items-start gap-4 pb-4 border-b border-gray-100 last:border-b-0">
 
-                            <div class="w-14 h-14 flex-shrink-0">
-                                <img th:if="${item.productImagePath != null and !item.productImagePath.isEmpty()}"
-                                     th:src="${item.productImagePath}"
-                                     alt="Product" class="w-full h-full object-cover rounded border border-gray-200">
-                                <div th:unless="${item.productImagePath != null and !item.productImagePath.isEmpty()}"
-                                     class="w-full h-full bg-gray-100 rounded flex items-center justify-center text-xs text-gray-400">Ảnh</div>
-                            </div>
+                            <input type="hidden" name="productVariantIds" th:value="${item.productVariantId}">
 
+                            <div class="w-14 h-14 flex-shrink-0">
+                                <img th:if="${item.productImagePath != null}" th:src="${item.productImagePath}" class="w-full h-full object-cover rounded border border-gray-200">
+                            </div>
                             <div class="flex-1 min-w-0 text-sm">
                                 <p class="font-bold text-gray-800 line-clamp-1" th:text="${item.productName}"></p>
-                                <p class="text-xs text-gray-500 mt-1">
-                                    Size: <span th:text="${item.productSizeName}"></span> | SL: <span th:text="${item.quantity}"></span>
-                                </p>
+                                <p class="text-xs text-gray-500 mt-1">Size: [[${item.productSizeName}]] | SL: [[${item.quantity}]]</p>
                             </div>
-
                             <div class="text-right text-sm font-bold text-gray-900">
-                                <span th:text="${#numbers.formatDecimal(item.productPrice * item.quantity, 0, 'POINT', 0, 'COMMA') + 'đ'}">0đ</span>
+                                <span th:text="${#numbers.formatDecimal(item.productPrice * item.quantity, 0, 'POINT', 0, 'COMMA') + 'đ'}"></span>
                             </div>
-
-                            <input type="hidden" name="productVariantIds" th:value="${item.productVariantId}">
                         </div>
                     </div>
                 </div>
-
             </div>
 
             <div class="lg:col-span-1">
                 <div class="sticky top-24 bg-white p-6 rounded-xl shadow-lg border border-primary">
                     <h2 class="text-xl font-bold text-gray-900 mb-5 border-b pb-3">Tóm tắt đơn hàng</h2>
-
                     <div class="space-y-3 text-sm">
                         <div class="flex justify-between text-gray-600">
                             <span>Tổng tiền hàng:</span>
-                            <span id="subTotalDisplay" th:text="${#numbers.formatDecimal(summary.subTotal, 0, 'POINT', 0, 'COMMA') + 'đ'}">0đ</span>
-                            <input type="hidden" id="currentSubTotalValue" th:value="${summary.subTotal}">
+                            <span id="subTotalDisplay">[[${#numbers.formatDecimal(summary.subTotal, 0, 'POINT', 0, 'COMMA')}]]đ</span>
                         </div>
                         <div class="flex justify-between text-gray-600">
                             <span>Phí vận chuyển:</span>
-                            <span id="deliveryFeeDisplay" th:text="${#numbers.formatDecimal(summary.deliveryFee, 0, 'POINT', 0, 'COMMA') + 'đ'}">30.000đ</span>
-                            <input type="hidden" id="currentDeliveryFeeValue" th:value="${summary.deliveryFee}">
+                            <span>[[${#numbers.formatDecimal(summary.deliveryFee, 0, 'POINT', 0, 'COMMA')}]]đ</span>
                         </div>
                         <div class="flex justify-between text-red-600 font-bold">
                             <span>Giảm giá Voucher:</span>
-                            <span id="discountDisplay" th:text="${'- ' + #numbers.formatDecimal(summary.discountAmount, 0, 'POINT', 0, 'COMMA') + 'đ'}">-0đ</span>
-                            <input type="hidden" id="currentDiscountValue" th:value="${summary.discountAmount}">
-                            <input type="hidden" th:field="*{voucherCode}" id="appliedVoucherCode" th:value="${summary.voucherCode}">
+                            <span id="discountDisplay">- [[${#numbers.formatDecimal(summary.discountAmount, 0, 'POINT', 0, 'COMMA')}]]đ</span>
                         </div>
                     </div>
 
+                    <input type="hidden" name="discountAmount" id="discountAmountInput" th:value="${summary.discountAmount}">
+                    <input type="hidden" name="voucherCode" id="appliedVoucherCode" th:value="${summary.voucherCode}">
+                    <input type="hidden" name="finalAmount" id="finalAmountInput" th:value="${summary.finalTotal}">
                     <div class="flex justify-between items-center pt-4 mt-4 border-t border-gray-200">
                         <span class="text-lg font-bold">TỔNG THANH TOÁN:</span>
-                        <span id="finalTotalDisplay" class="text-2xl font-black text-red-600" th:text="${#numbers.formatDecimal(summary.finalTotal, 0, 'POINT', 0, 'COMMA') + 'đ'}">0đ</span>
-
-                        <input type="hidden" th:field="*{finalAmount}" id="finalAmountInput" th:value="${summary.finalTotal}">
+                        <span id="finalTotalDisplay" class="text-2xl font-black text-red-600">0đ</span>
                     </div>
-
-                    <p class="text-xs text-gray-500 mt-3">
-                        Bằng việc đặt hàng, bạn đồng ý với các Điều khoản & Chính sách của B2L Shoes.
-                    </p>
 
                     <button type="submit" id="placeOrderBtn"
                             class="w-full mt-4 bg-primary hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow-md transition transform active:scale-95 flex items-center justify-center gap-2">
                         <i class="fa-solid fa-shield-halved"></i> ĐẶT HÀNG NGAY
                     </button>
-
                 </div>
             </div>
         </div>
@@ -215,175 +173,137 @@
 
 <script th:inline="javascript">
     /*<![CDATA[*/
-
-    // === 1. BIẾN GLOBAL & TIỆN ÍCH ===
-    let currentSubTotal = [[${summary.subTotal}]];
-    let currentDeliveryFee = [[${summary.deliveryFee}]];
-    let currentDiscount = [[${summary.discountAmount}]];
+    let currentSubTotal    = [[${summary.subTotal}]] || 0;
+    let currentDeliveryFee = [[${summary.deliveryFee}]] || 0;
+    let currentDiscount    = [[${summary.discountAmount}]] || 0;
+    const defaultAddress   = [[${customer.address}]] || '';
 
     function formatCurrency(amount) {
-        if (typeof amount !== 'number') return '0đ';
-        // Sử dụng NumberFormat API để định dạng tiền tệ Việt Nam
         return amount.toLocaleString('vi-VN') + 'đ';
     }
 
-    // === 2. HÀM CẬP NHẬT TỔNG TIỀN (Giao diện) ===
     function updateSummaryDisplay(discount = currentDiscount) {
-        currentDiscount = discount;
-        const finalTotal = currentSubTotal + currentDeliveryFee - currentDiscount;
-        const finalTotalSafe = finalTotal < 0 ? 0 : finalTotal;
+        currentDiscount = discount || 0;
+        let finalTotal = currentSubTotal + currentDeliveryFee - currentDiscount;
+        if (finalTotal < 0) finalTotal = 0;
 
-        // Cập nhật DOM
-        $('#currentDiscountValue').val(currentDiscount);
+        // Hiển thị lên giao diện
         $('#discountDisplay').text('- ' + formatCurrency(currentDiscount));
-        $('#finalTotalDisplay').text(formatCurrency(finalTotalSafe));
-        $('#finalAmountInput').val(finalTotalSafe); // Cập nhật trường ẩn gửi lên server
+        $('#finalTotalDisplay').text(formatCurrency(finalTotal));
+
+        // QUAN TRỌNG: Cập nhật vào các ô input để gửi lên server
+        $('#discountAmountInput').val(currentDiscount);
+        $('#finalAmountInput').val(finalTotal); // Đảm bảo ID này khớp với thẻ input bên dưới
     }
 
-    // === 3. XỬ LÝ VOUCHER (AJAX) ===
-    $('#voucherCode').on('input', function() {
-        const code = $(this).val().trim();
-        const btn = $('#applyVoucherBtn');
-
-        if (code.length > 0) {
-            btn.removeClass('bg-gray-300 text-gray-700 hover:bg-gray-400').addClass('bg-primary hover:bg-orange-600').prop('disabled', false);
-        } else {
-            // Reset discount nếu ô nhập trống
-            if (currentDiscount !== 0) {
-                updateSummaryDisplay(0);
-                $('#voucherMessage').text('Đã hủy áp dụng mã.');
-            }
-            $('#appliedVoucherCode').val('');
-            btn.removeClass('bg-primary hover:bg-orange-600').addClass('bg-gray-300 text-gray-700 hover:bg-gray-400').prop('disabled', true);
-        }
-    });
-
-    $('#applyVoucherBtn').on('click', function() {
-        const code = $('#voucherCode').val().trim().toUpperCase();
-        if (!code) return;
-
-        $('#voucherMessage').removeClass('text-green-600 text-red-500').text('Đang kiểm tra...');
-
-        // **LƯU Ý:** Bạn cần phải tạo API này trong Controller
-        $.ajax({
-            url: '/api/vouchers/apply',
-            type: 'POST',
-            contentType: 'application/json',
-            // Dữ liệu giả định cần gửi để xác thực voucher
-            data: JSON.stringify({
-                voucherCode: code,
-                subTotal: currentSubTotal,
-                // Các thông tin khác như user ID, product IDs nếu cần xác thực chi tiết
-            }),
-            success: function(response) {
-                if (response.success) {
-                    const discount = response.discountAmount;
-                    updateSummaryDisplay(discount);
-                    $('#appliedVoucherCode').val(code); // Gán mã voucher đã áp dụng vào form DTO
-                    $('#voucherMessage').removeClass('text-red-500').addClass('text-green-600').text('Áp dụng thành công! Giảm: ' + formatCurrency(discount));
-                } else {
-                    updateSummaryDisplay(0); // Reset nếu lỗi
-                    $('#appliedVoucherCode').val('');
-                    $('#voucherMessage').removeClass('text-green-600').addClass('text-red-500').text(response.message || 'Mã không hợp lệ hoặc hết hạn.');
-                }
-            },
-            error: function() {
-                updateSummaryDisplay(0);
-                $('#appliedVoucherCode').val('');
-                $('#voucherMessage').removeClass('text-green-600').addClass('text-red-500').text('Lỗi kết nối hoặc hệ thống.');
-            }
-        });
-    });
-
-    // === 4. XỬ LÝ ĐỊA CHỈ & SUBMIT CUỐI CÙNG ===
-
-    // *******************************************************************
-    // BỔ SUNG LOGIC LOAD JSON ĐỊA CHỈ TẠI ĐÂY (Giống như trang Profile)
-    // *******************************************************************
-    $(document).ready(function() {
-        var localData = [];
-
-        // 4a. Load JSON Tỉnh/Thành
-        $.getJSON('/data/address_data.json', function(data) {
-            localData = data;
-            $.each(data, function(key, val) {
-                $("#province").append('<option value="' + val.Id + '">' + val.Name + '</option>');
-            });
-        }).fail(function(){
-            console.error("Không tìm thấy file JSON địa chỉ tại /data/address_data.json!");
-        });
-
-        // 4b. Chọn Tỉnh -> Load Huyện
-        $("#province").change(function() {
-            var idTinh = $(this).val();
-            $("#district").html('<option value="">Chọn Quận/Huyện</option>').prop('disabled', true);
-            $("#ward").html('<option value="">Chọn Phường/Xã</option>').prop('disabled', true);
-
-            if(idTinh !== '') {
-                $("#district").prop('disabled', false);
-                var resultTinh = localData.filter(n => n.Id === idTinh);
-                if(resultTinh.length > 0) {
-                    $.each(resultTinh[0].Districts, function(key, val) {
-                        $("#district").append('<option value="' + val.Id + '">' + val.Name + '</option>');
-                    });
-                }
-            }
-        });
-
-        // 4c. Chọn Huyện -> Load Xã
-        $("#district").change(function() {
-            var idTinh = $("#province").val();
-            var idHuyen = $(this).val();
-            $("#ward").html('<option value="">Chọn Phường/Xã</option>').prop('disabled', true);
-
-            if(idHuyen !== '') {
-                $("#ward").prop('disabled', false);
-                var resultTinh = localData.filter(n => n.Id === idTinh);
-                if(resultTinh.length > 0) {
-                    var resultHuyen = resultTinh[0].Districts.filter(n => n.Id === idHuyen);
-                    if(resultHuyen.length > 0) {
-                        $.each(resultHuyen[0].Wards, function(key, val) {
-                            $("#ward").append('<option value="' + val.Id + '">' + val.Name + '</option>');
-                        });
-                    }
-                }
-            }
-        });
-    });
-
-    // 4d. Hàm xác thực và ghép địa chỉ trước khi Submit
-    function prepareAddress(event) {
+    function prepareAddress() {
         const provinceText = $("#province option:selected").text().trim();
         const districtText = $("#district option:selected").text().trim();
-        const wardText = $("#ward option:selected").text().trim();
-        const houseNumber = $("#houseNumber").val().trim();
-        const fullAddressInput = $("#fullDeliveryAddress");
-        const addressError = $("#addressError");
+        const wardText     = $("#ward option:selected").text().trim();
+        const houseNumber  = $("#houseNumber").val().trim();
 
-        const defaultAddress = fullAddressInput.val();
-
-        if (houseNumber && provinceText && districtText && wardText &&
-            provinceText !== 'Chọn Tỉnh/Thành' && districtText !== 'Chọn Quận/Huyện' && wardText !== 'Chọn Phường/Xã') {
-
-            // Nếu người dùng nhập địa chỉ mới
-            const newAddress = houseNumber + ", " + wardText + ", " + districtText + ", " + provinceText;
-            fullAddressInput.val(newAddress);
-            addressError.hide();
+        // 1. Nếu người dùng nhập địa chỉ mới
+        if (houseNumber && provinceText !== 'Chọn Tỉnh/Thành' && districtText !== 'Chọn Quận/Huyện' && wardText !== 'Chọn Phường/Xã') {
+            $("#consigneeProvinceInput").val(provinceText);
+            $("#consigneeDistrictInput").val(districtText);
+            $("#consigneeWardInput").val(wardText);
+            $("#consigneeAddressInput").val(houseNumber);
+            $("#fullDeliveryAddress").val(`${houseNumber}, ${wardText}, ${districtText}, ${provinceText}`);
             return true;
-        } else if (defaultAddress && defaultAddress !== 'Chưa cập nhật địa chỉ mặc định') {
-            // Sử dụng địa chỉ mặc định nếu có
-            addressError.hide();
-            return true;
-        } else {
-            // Lỗi: Không có địa chỉ mặc định và cũng chưa nhập địa chỉ mới
-            addressError.show();
-            event.preventDefault(); // Ngăn submit
-            $('html, body').animate({ scrollTop: $('#addressError').offset().top - 100 }, 500); // Cuộn lên báo lỗi
-            return false;
         }
+
+        // 2. Nếu dùng địa chỉ mặc định (biến defaultAddressString bạn đã có)
+        if (defaultAddressString && defaultAddressString !== 'Chưa cập nhật địa chỉ mặc định') {
+            $("#fullDeliveryAddress").val(defaultAddressString);
+            return true;
+        }
+
+        Swal.fire('Lỗi', 'Vui lòng nhập đầy đủ địa chỉ giao hàng.', 'warning');
+        return false;
     }
 
-    document.getElementById('checkoutForm').addEventListener('submit', prepareAddress);
+    function submitOrderForm() {
+        const form = $('#checkoutForm');
+        const submitBtn = $('#placeOrderBtn');
+
+        // Cập nhật giá trị tổng tiền vào input ẩn trước khi gửi
+        let finalTotalVal = Number(currentSubTotal) + Number(currentDeliveryFee) - Number(currentDiscount);
+        $('#finalAmountInput').val(Math.round(finalTotalVal));
+
+        submitBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin mr-2"></i> Đang xử lý...');
+
+        $.ajax({
+            url: '/api/order/place', // Đường dẫn tới OrderRestController
+            type: 'POST',
+            data: form.serialize(),
+            success: function (response) {
+                if (response.status === 'success') {
+                    // Kiểm tra nếu orderId hợp lệ mới chuyển hướng
+                    if (response.orderId) {
+                        if (response.paymentMethod === 'TRANSFER') {
+                            window.location.href = response.vnpayUrl;
+                        } else {
+                            window.location.href = '/customer/orders/' + response.orderId;
+                        }
+                    } else {
+                        Swal.fire('Lỗi', 'Không nhận được mã đơn hàng từ hệ thống.', 'error');
+                    }
+                } else {
+                    Swal.fire('Lỗi', response.message, 'error');
+                }
+            },
+            error: function (xhr) {
+                const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Lỗi hệ thống';
+                Swal.fire('Lỗi', msg, 'error');
+                submitBtn.prop('disabled', false).html('<i class="fa-solid fa-shield-halved"></i> ĐẶT HÀNG NGAY');
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        updateSummaryDisplay();
+
+        $('#checkoutForm').on('submit', function(e) {
+            e.preventDefault();
+            if (prepareAddress()) {
+                submitOrderForm();
+            }
+        });
+
+        // Tải dữ liệu địa chỉ JSON
+        let localData = [];
+        $.getJSON('/data/address_data.json', function (data) {
+            localData = data;
+            $.each(data, function (_, val) {
+                $('#province').append(`<option value="${val.Id}">${val.Name}</option>`);
+            });
+        });
+
+        $('#province').change(function () {
+            const idTinh = $(this).val();
+            $('#district').html('<option value="">Chọn Quận/Huyện</option>').prop('disabled', !idTinh);
+            $('#ward').html('<option value="">Chọn Phường/Xã</option>').prop('disabled', true);
+            const tinh = localData.find(n => n.Id === idTinh);
+            if (tinh) {
+                $.each(tinh.Districts, function (_, d) {
+                    $('#district').append(`<option value="${d.Id}">${d.Name}</option>`);
+                });
+            }
+        });
+
+        $('#district').change(function () {
+            const idTinh = $('#province').val();
+            const idHuyen = $(this).val();
+            $('#ward').html('<option value="">Chọn Phường/Xã</option>').prop('disabled', !idHuyen);
+            const tinh = localData.find(n => n.Id === idTinh);
+            const huyen = tinh?.Districts.find(n => n.Id === idHuyen);
+            if (huyen) {
+                $.each(huyen.Wards, function (_, w) {
+                    $('#ward').append(`<option value="${w.Id}">${w.Name}</option>`);
+                });
+            }
+        });
+    });
     /*]]>*/
 </script>
 </body>

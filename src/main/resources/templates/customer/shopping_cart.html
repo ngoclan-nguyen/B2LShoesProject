@@ -64,6 +64,7 @@
         </h1>
         <form id="checkoutForm" th:action="@{/checkout/selection}" method="POST">
             <input type="hidden" name="selectedVariantIds" id="selectedVariantIdsInput">
+            <input type="hidden" name="appliedVoucherCode" id="appliedVoucherCodeInput">
         </form>
         <div th:if="${cartItem == null || cartItem.isEmpty()}"
              class="text-center py-16 sm:py-24 bg-gray-50 rounded-lg shadow-inner border border-gray-100">
@@ -278,17 +279,18 @@
     }
 
     function selectVoucher(code) {
+        // Hàm này hoạt động đúng: điền code và click ÁP DỤNG
         $('#voucher').val(code);
         closeVoucherModal();
         $('#btnApplyVoucher').click();
     }
+
     $('#checkoutButton').on('click', function(e) {
         e.preventDefault();
 
         // 1. Thu thập tất cả ProductVariantId đã được chọn
         let selectedIds = [];
         $('.itemCheckbox:checked').each(function() {
-            // Lấy data-id (là productVariantId)
             let variantId = $(this).data('id');
             selectedIds.push(variantId);
         });
@@ -303,10 +305,13 @@
             return;
         }
 
-        // 2. Gán danh sách ID vào form ẩn
-        // Chuyển mảng ID thành chuỗi (ví dụ: "101,105,108")
-        $('#selectedVariantIdsInput').val(selectedIds.join(','));
+        // Lấy mã voucher đã được nhập (có thể đã áp dụng thành công bằng AJAX)
+        const appliedCode = $('#voucher').val().trim();
 
+        // 2. Gán danh sách ID và Mã Voucher vào form ẩn
+        $('#selectedVariantIdsInput').val(selectedIds.join(','));
+        // ✅ Gán mã voucher vào input ẩn để gửi đi
+        $('#appliedVoucherCodeInput').val(appliedCode);
         // 3. Submit form đến Controller
         $('#checkoutForm').submit();
     });

@@ -1,15 +1,28 @@
 package com.example.dto;
 
+import com.example.model.Consignee;
+
+import java.util.List;
+
 public class CheckoutFormDTO {
-    private String consignee;
+    private Consignee consignee;
     private String phoneNumber;
     private String deliveryAddress;
     private String paymentMethod; // COD hoặc TRANSFER
     private String voucherCode;
     private Long finalAmount; // Tổng tiền cuối cùng (để xác thực)
+    private List<Long> productVariantIds; // Thêm trường này
+    private Long discountAmount;
 
-    public String getConsignee() { return consignee; }
-    public void setConsignee(String consignee) { this.consignee = consignee; }
+    public Long getDiscountAmount() { return discountAmount; }
+    public void setDiscountAmount(Long discountAmount) { this.discountAmount = discountAmount; }
+    public List<Long> getProductVariantIds() { return productVariantIds; }
+    public void setProductVariantIds(List<Long> productVariantIds) { this.productVariantIds = productVariantIds; }
+    public Consignee getConsignee() { return consignee; }
+    public void setConsignee(Consignee consignee) {
+        // Dòng này phải chấp nhận đối tượng Consignee
+        this.consignee = consignee;
+    }
 
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
