@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Thông tin tài khoản - B2L Shoes</title>
+	
+	<th:block th:if="${_csrf != null}">
+	    <meta name="_csrf" th:content="${_csrf.token}">
+	    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+	</th:block>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -178,7 +183,19 @@
 
 <footer th:replace="~{customer/fragments/footer}"></footer>
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script th:inline="javascript">
+	const csrfToken  = document.querySelector("meta[name='_csrf']")?.content;
+    const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.content;
+
+    $.ajaxSetup({
+        beforeSend: function (xhr) {
+            if (csrfToken && csrfHeader) {
+                xhr.setRequestHeader(csrfHeader, csrfToken);
+            }
+        }
+    });
+	
     /*<![CDATA[*/
     // 1. Thông báo
     var successMsg = /*[[${success}]]*/ null;

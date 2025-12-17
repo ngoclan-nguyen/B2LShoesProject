@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8" />
     <title th:text="${pageTitle} + ' - B2L Shoes'">Sản phẩm</title>
+	
+	<th:block th:if="${_csrf != null}">
+	    <meta name="_csrf" th:content="${_csrf.token}">
+	    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+	</th:block>
 
     <link rel="stylesheet" href="https://cdn.tailwindcss.com">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -217,6 +222,18 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+	const csrfToken  = document.querySelector("meta[name='_csrf']")?.content;
+	const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.content;
+
+	// Tự động gắn CSRF token cho TẤT CẢ request AJAX
+	$.ajaxSetup({
+	    beforeSend: function (xhr) {
+	        if (csrfToken && csrfHeader) {
+	            xhr.setRequestHeader(csrfHeader, csrfToken);
+	        }
+	    }
+	});
+			
     // Hàm AJAX xử lý lọc không load lại trang
     function submitFilter() {
         const form = document.getElementById('filterForm');
