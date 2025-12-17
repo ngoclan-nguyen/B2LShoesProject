@@ -100,12 +100,13 @@ public class CartDao {
 			transaction = session.beginTransaction();
 			
 			String hql = "SELECT new com.example.dto.UserCartItemDTO("
-					+ "c.id, c.createdAt, c.updatedAt, c.quantity, c.user.id, p.id, pv.id, p.name, p.price, pv.quantity, s.sizeName, img.path) "
+					+ "c.id, c.createdAt, c.updatedAt, c.quantity, c.user.id, p.id, pv.id, p.name, p.price, b.name, pv.quantity, s.sizeName, img.path) "
 					+ "FROM CartItem c "
 					+ "LEFT JOIN c.productVariant pv "
 					+ "LEFT JOIN pv.size s "
 					+ "LEFT JOIN pv.product p "
 					+ "LEFT JOIN p.productImages img "
+					+ "LEFT JOIN p.brand b "
 					+ "WHERE c.user.id = :uid "
 					+ "AND img.isPrimary = true";
 			Query<UserCartItemDTO> query = session.createQuery(hql, UserCartItemDTO.class);
@@ -120,8 +121,8 @@ public class CartDao {
 			if (session != null) session.close();
 		}
 		return userCartItem;
-    }
-    
+	}
+	
     public Long getTotalAmountBySelectedItem(Long userId, List<Long> productVariantIds) {
     	if(productVariantIds == null ||  productVariantIds.isEmpty()) {
     		return 0L;

@@ -27,6 +27,9 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.Locale.Category;
+
+import javax.management.Notification;
 
 @Controller
 @RequestMapping("/admin")
@@ -479,7 +482,44 @@ public class AdminController {
 
     @GetMapping("/customers")
     public String customerListPage(HttpServletRequest request) {
+    	request.setAttribute("customers", userDao.getAllCustomer());
         return "admin/customer_list";
+    }
+    
+    @GetMapping("/customer/{id}")
+    public String customerDetail(@PathVariable("id") Long userId, HttpServletRequest request) {
+    	request.setAttribute("info", userDao.getUserById(userId));
+    	request.setAttribute("wishlist", userWishlistDao.getUserWishlistByUserId(userId));
+    	request.setAttribute("cart", cartDao.getCartItemByUserId(userId));
+    	request.setAttribute("orders", userDao.getAllOrderByUserId(userId));
+    	return "admin/customer_detail";
+    }
+    
+    @PostMapping("/delete/customer/{id}")
+    @ResponseBody
+    public Map<String, Object> deleteCustomer(@PathVariable("id") Long userId) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            Long remainingUsers = userDao.deleteUserById(userId);
+
+            if (remainingUsers > 0) {
+                response.put("success", true);
+                response.put("message", "Xóa khách hàng thành công");
+                response.put("remainingUsers", remainingUsers);
+            } else {
+                response.put("success", false);
+                response.put("message", "Không tìm thấy khách hàng hoặc đã bị xóa");
+            }
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Có lỗi xảy ra khi xóa khách hàng");
+            e.printStackTrace();
+        }
+
+        return response;
     }
 
     @GetMapping("/vouchers")

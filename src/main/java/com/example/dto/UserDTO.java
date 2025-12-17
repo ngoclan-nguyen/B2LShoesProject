@@ -9,6 +9,7 @@ public class UserDTO {
     private String address;
     private String gender;
     private String role;
+    private String title;
 
     public UserDTO() {
     }
@@ -21,7 +22,7 @@ public class UserDTO {
         this.address = address;
     }
 
-    public UserDTO(Long id, String name, String email, String phone, String address, String gender, String role) {
+    public UserDTO(Long id, String name, String email, String phone, String address, String gender, String role, String title) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -29,6 +30,7 @@ public class UserDTO {
         this.address = address;
         this.gender = gender;
         this.role = role;
+        this.title =title;
     }
 
     // 3. Các hàm Getter và Setter
@@ -79,6 +81,10 @@ public class UserDTO {
     public String getRole() {return role;}
 
     public void setRole(String role) {this.role = role;}
+
+    public String getTitle() {return title;}
+
+    public void setTitle(String title) {this.title = title;}
 
     public User toEntity() {
         User user = new User();

@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8" />
     <title th:text="${product.name} + ' - B2L Shoes'">Chi tiết sản phẩm</title>
+	
+	<th:block th:if="${_csrf != null}">
+	    <meta name="_csrf" th:content="${_csrf.token}">
+	    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+	</th:block>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -295,7 +300,19 @@
 
 <script th:src="@{/customer/js/product_detail.js}"></script>
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
+	const csrfToken  = document.querySelector("meta[name='_csrf']")?.content;
+    const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.content;
+
+    $.ajaxSetup({
+        beforeSend: function (xhr) {
+            if (csrfToken && csrfHeader) {
+                xhr.setRequestHeader(csrfHeader, csrfToken);
+            }
+        }
+    });
+		
     function selectSize(btn) {
 
         document.querySelectorAll('.size-btn').forEach(el => {
@@ -311,65 +328,55 @@
         document.getElementById('size-error').classList.add('hidden');
     }
 
-    function addToCartDetail() {
-        // Kiểm tra đã chọn size chưa
-        if (!selectedSize) {
-            document.getElementById('size-error').classList.remove('hidden');
-            document.getElementById('size-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            return;
-        }
+	function addToCartDetail() {
+	    if (!selectedSize) {
+	        $('#size-error').removeClass('hidden');
+	        $('#size-container')[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+	        return;
+	    }
 
-        const quantity = document.getElementById('qty').value;
+	    const quantity = $('#qty').val();
 
-        // Gọi API thêm vào giỏ
-        fetch(`${PageConfig.cartApi}?productId=${PageConfig.productId}&quantity=${quantity}&size=${selectedSize}`, { method: 'POST' })
-            .then(res => res.json())
-            .then(data => {
-
-                // THÀNH CÔNG
-                if (data.status === 'success') {
-                    const cartBadge = document.getElementById('cart-qty');
-                    if(cartBadge) {
-                        cartBadge.innerText = data.totalItems;
-                        cartBadge.classList.remove('hidden');
-                        cartBadge.classList.add('animate-bounce');
-                        setTimeout(() => cartBadge.classList.remove('animate-bounce'), 1000);
-                    }
-                    Swal.fire({ icon: 'success', title: 'Đã thêm vào giỏ!', showConfirmButton: false, timer: 1500, position: 'top-end', toast: true });
-                }
-
-                // CHƯA ĐĂNG NHẬP
-                else if (data.message === 'auth_required') {
-                    Swal.fire({
-                        title: 'Yêu cầu đăng nhập',
-                        text: "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!",
-                        icon: 'info',
-                        showCancelButton: true,
-                        confirmButtonColor: '#FF9900',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Đăng nhập ngay',
-                        cancelButtonText: 'Để sau'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Logic chuyển hướng thần thánh:
-                            // Lấy đường dẫn hiện tại  gán vào biến redirect
-                            const currentUrl = encodeURIComponent(window.location.pathname);
-
-                            // Chuyển sang trang login kèm tham số redirect
-                            window.location.href = `${PageConfig.loginUrl}?redirect=${currentUrl}`;
-                        }
-                    });
-                }
-
-                else {
-                    Swal.fire({ icon: 'warning', title: 'Thông báo', text: data.message, confirmButtonColor: '#FF9900' });
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Có lỗi xảy ra, vui lòng thử lại sau.' });
-            });
-    }
+	    $.ajax({
+	        url: PageConfig.cartApi,
+	        type: 'POST',
+	        data: { productId: PageConfig.productId, quantity: quantity, size: selectedSize },
+	        dataType: 'json',
+	        success: function(data) {
+	            if (data.status === 'success') {
+	                const cartBadge = $('#cart-qty');
+	                if(cartBadge.length) {
+	                    cartBadge.text(data.totalItems).removeClass('hidden').addClass('animate-bounce');
+	                    setTimeout(() => cartBadge.removeClass('animate-bounce'), 1000);
+	                }
+	                Swal.fire({ icon: 'success', title: 'Đã thêm vào giỏ!', showConfirmButton: false, timer: 1500, position: 'top-end', toast: true });
+	            }
+	            else if (data.message === 'auth_required') {
+	                Swal.fire({
+	                    title: 'Yêu cầu đăng nhập',
+	                    text: "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!",
+	                    icon: 'info',
+	                    showCancelButton: true,
+	                    confirmButtonColor: '#FF9900',
+	                    cancelButtonColor: '#d33',
+	                    confirmButtonText: 'Đăng nhập ngay',
+	                    cancelButtonText: 'Để sau'
+	                }).then(result => {
+	                    if (result.isConfirmed) {
+	                        const currentUrl = encodeURIComponent(window.location.pathname);
+	                        window.location.href = `${PageConfig.loginUrl}?redirect=${currentUrl}`;
+	                    }
+	                });
+	            } else {
+	                Swal.fire({ icon: 'warning', title: 'Thông báo', text: data.message, confirmButtonColor: '#FF9900' });
+	            }
+	        },
+	        error: function(xhr) {
+	            console.error(xhr.responseText);
+	            Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Có lỗi xảy ra, vui lòng thử lại sau.' });
+	        }
+	    });
+	}
 
     function toggleReviewForm() {
         if (!PageConfig.isLoggedIn) {
@@ -398,60 +405,65 @@
         }
     }
 
-    function submitReviewReal() {
-        const rating = document.getElementById('ratingValue').value;
-        const title = document.getElementById('reviewTitle').value.trim();
-        const content = document.getElementById('reviewContent').value.trim();
-        const imageInput = document.getElementById('reviewImages');
+	function submitReviewReal() {
+	    const rating = $('#ratingValue').val();
+	    const title = $('#reviewTitle').val().trim();
+	    const content = $('#reviewContent').val().trim();
+	    const imageInput = $('#reviewImages')[0];
 
-        if (!title || !content) {
-            Swal.fire('Thiếu thông tin', 'Vui lòng nhập tiêu đề và nội dung!', 'warning');
-            return;
-        }
+	    if (!title || !content) {
+	        Swal.fire('Thiếu thông tin', 'Vui lòng nhập tiêu đề và nội dung!', 'warning');
+	        return;
+	    }
 
-        const formData = new FormData();
-        formData.append('productId', PageConfig.productId);
-        formData.append('rating', rating);
-        formData.append('title', title);
-        formData.append('content', content);
+	    const formData = new FormData();
+	    formData.append('productId', PageConfig.productId);
+	    formData.append('rating', rating);
+	    formData.append('title', title);
+	    formData.append('content', content);
 
-        if (imageInput && imageInput.files.length > 0) {
-            const maxFiles = Math.min(imageInput.files.length, 5);
-            for (let i = 0; i < maxFiles; i++) {
-                formData.append('images', imageInput.files[i]);
-            }
-        }
+	    if (imageInput && imageInput.files.length > 0) {
+	        const maxFiles = Math.min(imageInput.files.length, 5);
+	        for (let i = 0; i < maxFiles; i++) {
+	            formData.append('images', imageInput.files[i]);
+	        }
+	    }
 
-        const btnSubmit = document.querySelector('#reviewForm button[onclick="submitReviewReal()"]');
-        const originalText = btnSubmit.innerHTML;
-        btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...';
-        btnSubmit.disabled = true;
+	    const btnSubmit = $('#reviewForm button[onclick="submitReviewReal()"]');
+	    const originalText = btnSubmit.html();
+	    btnSubmit.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...').prop('disabled', true);
 
-        fetch(PageConfig.reviewApi, { method: 'POST', body: formData })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    Swal.fire({
-                        icon: 'success', title: 'Thành công', text: 'Đánh giá đã được gửi!', confirmButtonColor: '#FF9900'
-                    }).then(() => {
-                        sessionStorage.setItem('reviewSubmitted', 'true');
-                        window.location.reload();
-                    });
-                } else if (data.message === 'auth_required') {
-                    sessionStorage.setItem('pendingReview', 'true');
-                    window.location.href = PageConfig.loginUrl + '?redirect=' + encodeURIComponent(window.location.pathname);
-                } else {
-                    Swal.fire('Lỗi', data.message, 'error');
-                    btnSubmit.innerHTML = originalText;
-                    btnSubmit.disabled = false;
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                btnSubmit.innerHTML = originalText;
-                btnSubmit.disabled = false;
-            });
-    }
+	    $.ajax({
+	        url: PageConfig.reviewApi,
+	        type: 'POST',
+	        data: formData,
+	        processData: false,   // Bắt buộc khi dùng FormData
+	        contentType: false,   // Bắt buộc khi dùng FormData
+	        dataType: 'json',
+	        success: function(data) {
+	            if (data.status === 'success') {
+	                Swal.fire({
+	                    icon: 'success', title: 'Thành công', text: 'Đánh giá đã được gửi!', confirmButtonColor: '#FF9900'
+	                }).then(() => {
+	                    sessionStorage.setItem('reviewSubmitted', 'true');
+	                    window.location.reload();
+	                });
+	            }
+	            else if (data.message === 'auth_required') {
+	                sessionStorage.setItem('pendingReview', 'true');
+	                window.location.href = PageConfig.loginUrl + '?redirect=' + encodeURIComponent(window.location.pathname);
+	            }
+	            else {
+	                Swal.fire('Lỗi', data.message, 'error');
+	                btnSubmit.html(originalText).prop('disabled', false);
+	            }
+	        },
+	        error: function(xhr) {
+	            console.error(xhr.responseText);
+	            btnSubmit.html(originalText).prop('disabled', false);
+	        }
+	    });
+	}
 
     document.addEventListener("DOMContentLoaded", function() {
         if(typeof rate === "function") rate(5);

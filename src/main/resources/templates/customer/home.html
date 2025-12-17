@@ -6,6 +6,11 @@
     <link rel="icon" type="image/png" th:href="@{/customer/images/logo.png}">
     <title>B2L Shoes - Trang Chủ</title>
 
+	<th:block th:if="${_csrf != null}">
+	    <meta name="_csrf" th:content="${_csrf.token}">
+	    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+	</th:block>
+
     <link rel="stylesheet" href="https://cdn.tailwindcss.com">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -212,6 +217,18 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+	const csrfToken  = document.querySelector("meta[name='_csrf']")?.content;
+	const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.content;
+
+	// Tự động gắn CSRF token cho TẤT CẢ request AJAX
+	$.ajaxSetup({
+	    beforeSend: function (xhr) {
+	        if (csrfToken && csrfHeader) {
+	            xhr.setRequestHeader(csrfHeader, csrfToken);
+	        }
+	    }
+	});
+
     document.addEventListener("DOMContentLoaded", function() {
         // Hiện khi cuộn (Scroll Reveal)
         const observer = new IntersectionObserver((entries) => {
@@ -234,42 +251,53 @@
     });
 
     // Hàm thêm giỏ hàng
-    function addToCart(productId) {
-        fetch(`/api/cart/add?productId=${productId}`, {
-            method: 'POST'
-        })
-        .then(res => {
-            if (res.ok) return res.json();
-            throw new Error('Lỗi mạng');
-        })
-        .then(data => {
-            if (data.status === 'success') {
-                // Cập nhật số lượng
-                const cartBadge = document.getElementById('cart-qty');
-                if(cartBadge) {
-                    cartBadge.innerText = data.totalItems;
-                    cartBadge.parentElement.classList.add('scale-125');
-                    setTimeout(() => cartBadge.parentElement.classList.remove('scale-125'), 200);
-                }
+	function addToCart(productId) {
+	    $.ajax({
+	        url: `/api/cart/add`,
+	        type: 'POST',
+	        data: {
+	            productId: productId
+	        },
+	        success: function (data) {
+	            if (data.status === 'success') {
+	                // Cập nhật số lượng giỏ hàng
+	                const cartBadge = document.getElementById('cart-qty');
+	                if (cartBadge) {
+	                    cartBadge.innerText = data.totalItems;
+	                    cartBadge.parentElement.classList.add('scale-125');
+	                    setTimeout(() => {
+	                        cartBadge.parentElement.classList.remove('scale-125');
+	                    }, 200);
+	                }
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Đã thêm vào giỏ hàng!',
-                    toast: true, position: 'top-end', showConfirmButton: false, timer: 2000
-                });
-            } else {
-                Swal.fire({
-                    icon: 'warning',
-                    title: data.message,
-                    toast: true, position: 'top-end', showConfirmButton: false, timer: 2000
-                });
-            }
-        })
-        .catch(error => {
-            console.error(error);
-            Swal.fire('Lỗi', 'Có lỗi xảy ra, vui lòng thử lại', 'error');
-        });
-    }
+	                Swal.fire({
+	                    icon: 'success',
+	                    title: 'Đã thêm vào giỏ hàng!',
+	                    toast: true,
+	                    position: 'top-end',
+	                    showConfirmButton: false,
+	                    timer: 2000
+	                });
+	            } else {
+	                Swal.fire({
+	                    icon: 'warning',
+	                    title: data.message,
+	                    toast: true,
+	                    position: 'top-end',
+	                    showConfirmButton: false,
+	                    timer: 2000
+	                });
+	            }
+	        },
+	        error: function (xhr) {
+	            console.error(xhr);
+	            Swal.fire('Lỗi', 'Có lỗi xảy ra, vui lòng thử lại', 'error');
+	        }
+	    });
+	}
+	
+	
+	    // ... Các đoạn code scroll reveal / slider giữ nguyên ...
 
     function toggleWishlist(btnElement) {
         const btn = $(btnElement);

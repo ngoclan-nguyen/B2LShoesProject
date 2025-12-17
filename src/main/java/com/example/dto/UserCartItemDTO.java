@@ -12,6 +12,7 @@ public class UserCartItemDTO {
     private Integer productVariantId;
     private String productName;
     private Long productPrice;
+    private String productBrand;
     private Integer totalQuantity;
     private String productSizeName;
     private String productImagePath;
@@ -20,7 +21,7 @@ public class UserCartItemDTO {
     }
 
     public UserCartItemDTO(Long id, LocalDateTime createdAt, LocalDateTime updatedAt, Integer quantity, Long userId, Long productId, Integer productVariantId, String productName, Long productPrice, 
-    					Integer totalQuantity, String productSizeName, String productImagePath) {
+    					String productBrand, Integer totalQuantity, String productSizeName, String productImagePath) {
         this.id = id;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -30,6 +31,7 @@ public class UserCartItemDTO {
         this.productVariantId = productVariantId;
         this.productName = productName;
         this.productPrice = productPrice;
+        this.productBrand = productBrand;
         this.totalQuantity = totalQuantity;
         this.productSizeName = productSizeName;
         
@@ -106,6 +108,14 @@ public class UserCartItemDTO {
 
     public void setProductPrice(Long productPrice) {
         this.productPrice = productPrice;
+    }
+    
+    public String getProductBrand() {
+        return productBrand;
+    }
+
+    public void setProductBrand(String productBrand) {
+        this.productBrand = productBrand;
     }
     
     public Integer getTotalQuantity() {
