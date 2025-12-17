@@ -7,6 +7,7 @@ import com.example.model.*;
 import com.example.service.NotificationService;
 import com.example.service.RememberMeService;
 import com.example.service.UserService;
+import com.example.service.VoucherService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +16,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -27,9 +29,6 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.Locale.Category;
-
-import javax.management.Notification;
 
 @Controller
 @RequestMapping("/admin")
@@ -61,6 +60,12 @@ public class AdminController {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private UserWishlistDao userWishlistDao;
+
+    @Autowired
+    private CartDao cartDao;
 
     private static final String DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm";
 
@@ -545,77 +550,25 @@ public class AdminController {
     }
 
     @PostMapping("/vouchers/save")
-    public String saveVoucher(HttpServletRequest request, RedirectAttributes redirectAttributes) {
+    public String saveVoucher(@ModelAttribute("voucher") Voucher voucher, BindingResult result, RedirectAttributes ra) {
+        try {
+            // Kiểm tra logic nếu id trống (trường hợp thêm mới)
+            // Spring @ModelAttribute thường tự gán null cho ID nếu form không gửi lên,
+            // không nên parse thủ công nếu không cần thiết.
 
-        String idParam = request.getParameter("id");
-        Long id = (idParam != null && !idParam.isEmpty()) ? Long.parseLong(idParam) : null;
-
-        Voucher voucher;
-        if (id != null) {
-            voucher = voucherDao.findById(id);
-            if (voucher == null) {
-                redirectAttributes.addFlashAttribute("error", "Không tìm thấy Voucher cần cập nhật.");
+            if (voucher.getDiscountAmount() == null || voucher.getQuantity() == null) {
+                ra.addFlashAttribute("error", "Lỗi dữ liệu: Giá trị giảm và Số lượng không được để trống.");
                 return "redirect:/admin/vouchers";
             }
-        } else {
-            voucher = new Voucher();
-        }
 
-        try {
-            // --- Lấy các giá trị bắt buộc từ form ---
-            String codeStr = request.getParameter("code");
-            String discountAmountStr = request.getParameter("discountAmount");
-            String minOrderAmountStr = request.getParameter("minOrderAmount");
-            String quantityStr = request.getParameter("quantity");
-            String expiryDateStr = request.getParameter("expiryDate");
-
-            if (codeStr == null || codeStr.isEmpty() ||
-                    discountAmountStr == null || discountAmountStr.isEmpty() ||
-                    minOrderAmountStr == null || minOrderAmountStr.isEmpty() ||
-                    quantityStr == null || quantityStr.isEmpty() ||
-                    expiryDateStr == null || expiryDateStr.isEmpty()) { // KIỂM TRA EXPIRY DATE
-
-                throw new IllegalArgumentException("Vui lòng điền đầy đủ Mã Code, Giá trị, Số lượng và Hạn sử dụng.");
-            }
-
-            voucher.setCode(codeStr);
-
-            Long discountLong = Long.parseLong(request.getParameter("discount"));
-            voucher.setQuantity(Integer.parseInt(quantityStr));
-
-            try {
-                voucher.setExpiryDate(LocalDateTime.parse(expiryDateStr));
-            } catch (DateTimeParseException ex) {
-                throw new IllegalArgumentException("Định dạng Ngày/Giờ không hợp lệ. Vui lòng kiểm tra lại Hạn sử dụng.");
-            }
-
-            String isActiveParam = request.getParameter("isActive");
-            voucher.setActive(isActiveParam != null);
-
+            // Gọi service lưu voucher
             voucherDao.save(voucher);
-            redirectAttributes.addFlashAttribute("success", "Lưu Voucher thành công!");
+            ra.addFlashAttribute("success", "Lưu voucher thành công!");
 
-        } catch (NumberFormatException e) {
-            // Xử lý lỗi khi parse Long/Integer thất bại
-            redirectAttributes.addFlashAttribute("error", "Lỗi dữ liệu: Giá trị giảm, Đơn tối thiểu hoặc Số lượng phải là số nguyên hợp lệ.");
-            e.printStackTrace();
-            return "redirect:/admin/vouchers";
-        } catch (IllegalArgumentException e) {
-            // Xử lý lỗi nếu thiếu trường hoặc lỗi định dạng ngày giờ
-            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
-            e.printStackTrace();
-            return "redirect:/admin/vouchers";
         } catch (Exception e) {
-            String errorMsg = e.getMessage();
-            if (errorMsg != null && errorMsg.contains("Duplicate entry")) {
-                redirectAttributes.addFlashAttribute("error", "Mã Voucher đã tồn tại. Vui lòng chọn Mã Code khác.");
-            } else {
-                redirectAttributes.addFlashAttribute("error", "Lỗi hệ thống khi lưu Voucher.");
-            }
-            e.printStackTrace();
+            ra.addFlashAttribute("error", "Lỗi dữ liệu: Giá trị giảm, Đơn tối thiểu hoặc Số lượng phải là số nguyên hợp lệ.");
             return "redirect:/admin/vouchers";
         }
-
         return "redirect:/admin/vouchers";
     }
 

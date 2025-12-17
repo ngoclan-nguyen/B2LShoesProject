@@ -22,6 +22,16 @@ public class UserDTO {
         this.address = address;
     }
 
+    public UserDTO(Long id, String name, String email, String phone, String address, String gender, String role) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.address = address;
+        this.gender = gender;
+        this.role = role;
+    }
+
     public UserDTO(Long id, String name, String email, String phone, String address, String gender, String role, String title) {
         this.id = id;
         this.name = name;
